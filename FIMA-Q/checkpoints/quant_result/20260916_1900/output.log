@@ -1,0 +1,44 @@
+2026-09-16 19:00:00 - start the process.
+Namespace(model='vit_small', config='./configs/4bit/best.py', dataset='/root/autodl-tmp/imagenet_fimaq', optim_size=1024, val_batch_size=64, num_workers=8, device='cuda:0', calibrate=False, load_calibrate_checkpoint='/root/autodl-tmp/FIMA-Q/checkpoints/quant_result/20260916_1818/vit_small_w4_a4_calibsize_128_mse.pth', test_calibrate_checkpoint=False, optimize=True, load_optimize_checkpoint=None, test_optimize_checkpoint=False, print_freq=10, seed=3407, optim_batch_size=32, optim_metric='fisher_dplr', optim_mode='qdrop')
+Successfully imported Config class!
+optim_size: 1024
+calib_size: 128
+optim_batch_size: 32
+calib_batch_size: 32
+w_bit: 4
+a_bit: 4
+qconv_a_bit: 8
+qhead_a_bit: 4
+calib_metric: mse
+matmul_head_channel_wise: True
+token_channel_wise: True
+eq_n: 128
+search_round: 3
+keep_gpu: True
+optim_metric: fisher_dplr
+temp: 20
+k: 5
+p1: 1.0
+p2: 1.0
+dis_mode: q
+optim_mode: qdrop
+drop_prob: 0.5
+Building model ...
+No checkpoint found at './checkpoints/vit_raw/vit_small_patch16_224.bin'
+Loading pretrained weights from Hugging Face hub (timm/vit_small_patch16_224.augreg_in21k_ft_in1k)
+HTTP Request: HEAD https://hf-mirror.com/timm/vit_small_patch16_224.augreg_in21k_ft_in1k/resolve/main/model.safetensors "HTTP/1.1 302 Found"
+[timm/vit_small_patch16_224.augreg_in21k_ft_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+Building validation dataloader ...
+Wraping quantiztion modules (reparam: False) ...
+Restoring checkpoint from '/root/autodl-tmp/FIMA-Q/checkpoints/quant_result/20260916_1818/vit_small_w4_a4_calibsize_128_mse.pth'
+<All keys matched successfully>
+Building calibrator ...
+2026-09-16 19:00:36 - start fisher_dplr guided block reconstruction
+reconstructing patch_embed ...
+initializing raw input and raw output ...
+adaround training for patch_embed ...
+finished reconstructing patch_embed.
+reconstructing blocks.0 ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for blocks.0 ...

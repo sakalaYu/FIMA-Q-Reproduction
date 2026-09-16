@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.idea/
+.vscode/
+.DS_Store
+.venv/
+venv/
+env/
+imagenet_fimaq/train/*
+imagenet_fimaq/val/*
+!imagenet_fimaq/train/.gitkeep
+!imagenet_fimaq/val/.gitkeep
+*.tmp
+*.swp
