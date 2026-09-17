@@ -1,5 +1,18 @@
 ## FIMA-Q: Post-Training Quantization for Vision Transformers by Fisher Information Matrix Approximation
 
+## Experiment scripts
+
+`scripts/run.sh` contains the commands for the current experiments. The
+original `test_quant.py` automatically creates a timestamped `output.log` under
+`checkpoints/quant_result/`, and that log records the command-line arguments and
+the final configuration.
+
+```bash
+bash scripts/run.sh verify
+bash scripts/run.sh k15
+bash scripts/run.sh mse
+```
+
 This repository contains the official PyTorch implementation for the CVPR 2025 paper "[FIMA-Q: Post-Training Quantization for Vision Transformers by Fisher Information Matrix Approximation](https://arxiv.org/abs/2506.11543)".
 
 ![overview](./assets/main_fig.png)
