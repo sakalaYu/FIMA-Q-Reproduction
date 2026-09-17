@@ -26,12 +26,12 @@ common_args=(
 
 case "${1:-}" in
   verify)
-    python test_quant.py "${common_args[@]}" \
+    FIMAQ_RUN_NAME=verify_vit_small_w4a4_fisher_dplr_k5_seed3407 python test_quant.py "${common_args[@]}" \
       --load-optimize-checkpoint ./checkpoints/quant_result/20260916_1917/vit_small_w4_a4_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop.pth \
       --test-optimize-checkpoint
     ;;
   k15)
-    python test_quant.py "${common_args[@]}" \
+    FIMAQ_RUN_NAME=vit_small_w4a4_fisher_dplr_k15_qdrop_seed3407 python test_quant.py "${common_args[@]}" \
       --load-calibrate-checkpoint ./checkpoints/quant_result/20260916_1818/vit_small_w4_a4_calibsize_128_mse.pth \
       --optimize \
       --optim-metric fisher_dplr \
@@ -40,7 +40,7 @@ case "${1:-}" in
       --k 15
     ;;
   mse)
-    python test_quant.py "${common_args[@]}" \
+    FIMAQ_RUN_NAME=vit_small_w4a4_mse_qdrop_seed3407 python test_quant.py "${common_args[@]}" \
       --load-calibrate-checkpoint ./checkpoints/quant_result/20260916_1818/vit_small_w4_a4_calibsize_128_mse.pth \
       --optimize \
       --optim-metric mse \
@@ -53,4 +53,3 @@ case "${1:-}" in
     exit 2
     ;;
 esac
-

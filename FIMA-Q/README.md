@@ -5,7 +5,9 @@
 `scripts/run.sh` contains the commands for the current experiments. The
 original `test_quant.py` automatically creates a timestamped `output.log` under
 `checkpoints/quant_result/`, and that log records the command-line arguments and
-the final configuration.
+the final configuration. Runs launched by `run.sh` also include the experiment
+name in the result directory. After a run finishes successfully, its log is
+copied to `logs/`; failed and interrupted logs remain only in `quant_result/`.
 
 ```bash
 bash scripts/run.sh verify

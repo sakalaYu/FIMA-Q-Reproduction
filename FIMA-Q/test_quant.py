@@ -9,6 +9,8 @@ import importlib
 import timm
 import copy
 import time
+import re
+import shutil
 
 import utils.datasets as mydatasets
 from utils.calibrator import QuantCalibrator
@@ -21,12 +23,16 @@ import logging
 while True:
     try:
         timestamp = datetime.now()
-        formatted_timestamp = timestamp.strftime("%Y%m%d_%H%M")
-        root_path = './checkpoints/quant_result/{}'.format(formatted_timestamp)
+        formatted_timestamp = timestamp.strftime("%Y%m%d_%H%M%S")
+        run_name = os.environ.get('FIMAQ_RUN_NAME', '').strip()
+        run_name = re.sub(r'[^A-Za-z0-9._-]+', '_', run_name).strip('._-')
+        folder_name = formatted_timestamp if not run_name else '{}_{}'.format(formatted_timestamp, run_name)
+        project_dir = os.path.dirname(os.path.abspath(__file__))
+        root_path = os.path.join(project_dir, 'checkpoints', 'quant_result', folder_name)
         os.makedirs(root_path)
         break
     except FileExistsError:
-        time.sleep(10)
+        time.sleep(1)
 logging.basicConfig(level=logging.INFO,
                     format='%(message)s',
                     handlers=[
@@ -66,7 +72,7 @@ def get_args_parser():
     parser.add_argument("--num-workers", default=8, type=int,
                         help="number of data loading workers (default: 8)")
     parser.add_argument("--device", default="cuda", type=str, help="device")
-    
+
     calibrate_mode_group = parser.add_mutually_exclusive_group()
     calibrate_mode_group.add_argument('--calibrate', action='store_true', help="Calibrate the model")
     calibrate_mode_group.add_argument('--load-calibrate-checkpoint', type=str, default=None, help="Path to the calibrated checkpoint.")
@@ -151,6 +157,7 @@ def load_model(model, args, device, mode='calibrate'):
 
 def main(args):
     logging.info("{} - start the process.".format(get_cur_time()))
+    logging.info("Experiment directory: {}".format(root_path))
     logging.info(str(args))
 
     dir_path = os.path.dirname(os.path.abspath(args.config))
@@ -261,9 +268,16 @@ def main(args):
         logging.info('Validating on test set after block reconstruction ...')
         val_loss, val_prec1, val_prec5 = validate(val_loader, model, criterion, print_freq=args.print_freq, device=device)
     logging.info("{} - finished the process.".format(get_cur_time()))
+    for handler in logging.getLogger().handlers:
+        handler.flush()
+    logs_dir = os.path.join(project_dir, 'logs')
+    os.makedirs(logs_dir, exist_ok=True)
+    shutil.copy2(
+        os.path.join(root_path, 'output.log'),
+        os.path.join(logs_dir, os.path.basename(root_path) + '.log')
+    )
  
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(parents=[get_args_parser()])
     args = parser.parse_args()
     main(args)
-    
