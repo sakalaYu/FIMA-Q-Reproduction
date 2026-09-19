@@ -2,9 +2,9 @@ import os
 import shutil
 from scipy.io import loadmat
 
-VAL_DIR = "/root/autodl-tmp/imagenet_fimaq/val"
-META_PATH = "/root/autodl-tmp/imagenet_devkit/ILSVRC2012_devkit_t12/data/meta.mat"
-GT_PATH = "/root/autodl-tmp/imagenet_devkit/ILSVRC2012_devkit_t12/data/ILSVRC2012_validation_ground_truth.txt"
+VAL_DIR = "/root/autodl-tmp/FIMA-Q-Reproduction/imagenet_fimaq/val"
+META_PATH = "/root/autodl-tmp/FIMA-Q-Reproduction/imagenet_devkit/ILSVRC2012_devkit_t12/data/meta.mat"
+GT_PATH = "/root/autodl-tmp/FIMA-Q-Reproduction/imagenet_devkit/ILSVRC2012_devkit_t12/data/ILSVRC2012_validation_ground_truth.txt"
 
 print("Loading ImageNet metadata...")
 
