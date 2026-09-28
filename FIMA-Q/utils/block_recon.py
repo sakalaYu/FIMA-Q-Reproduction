@@ -12,6 +12,9 @@ from types import MethodType
 import logging
 import random
 import copy
+import time
+import math
+from utils.forward_secant import forward_secant_normalizers, forward_secant_terms
 
 
 def patch_embed_forward(self, x):
@@ -78,7 +81,8 @@ def swin_patchmerging_forward(self, x):
 
 
 class BlockReconstructor(QuantCalibrator):
-    def __init__(self, model, optim_batch_size,calib_loader, metric="mse", temp=20, k=1, dis_mode='q', p1=1., p2=1.):
+    def __init__(self, model, optim_batch_size,calib_loader, metric="mse", temp=20, k=1,
+                 dis_mode='q', p1=1., p2=1., iters=20000):
         super().__init__(model, calib_loader)
         self.batch_size = optim_batch_size
         self.metric = metric
@@ -86,6 +90,10 @@ class BlockReconstructor(QuantCalibrator):
         self.dis_mode = dis_mode
         self.p1 = p1
         self.p2 = p2
+        self.iters = iters
+        self.secant_update_count = 0
+        self.secant_update_seconds = 0.
+        self.secant_update_peak_bytes = 0
         self.blocks = {}
         self.quanted_blocks = []
         self.raw_pred_softmaxs = None
@@ -108,6 +116,7 @@ class BlockReconstructor(QuantCalibrator):
         module.raw_grad = module.tmp_grad = None
         module.quanted_input = module.quanted_out = None
         module.delta_out = module.inverse_B = None
+        module.secant_direction = module.secant_kl = None
         module.r=1e-6
         if isinstance(module, timm.layers.patch_embed.PatchEmbed):
             module.forward = MethodType(patch_embed_forward, module)
@@ -188,7 +197,8 @@ class BlockReconstructor(QuantCalibrator):
         hooks.append(block.register_forward_hook(self.outp_forward_hook))
         hooks.append(block.register_forward_hook(self.single_input_forward_hook))
         need_calculate_raw_softmax = False
-        if self.raw_pred_softmaxs is None and self.metric in ["fisher_brecq", "fisher_lr","fisher_diag","fisher_dplr"]:
+        if self.raw_pred_softmaxs is None and self.metric in ["fisher_brecq", "fisher_lr", "fisher_diag",
+                                                               "fisher_dplr", "forward_secant"]:
             need_calculate_raw_softmax = True
             self.raw_pred_softmaxs = []
         with torch.no_grad():
@@ -273,6 +283,60 @@ class BlockReconstructor(QuantCalibrator):
         # block.inverse_B = torch.eye(block.raw_grad.shape[0]).to(device)
         del raw_grad, delta_out
         torch.cuda.empty_cache()
+
+    def new_forward_secant(self, block, device, training_drop_prob):
+        """Refresh deterministic signed directions and KL anchors without backward.
+
+        The diagnostic evidence uses the complete quantization error.  QDrop is
+        therefore disabled only for this anchor forward pass and restored
+        before local reconstruction resumes.
+        """
+        print('updating forward secant directions ...')
+        if device.type == 'cuda':
+            torch.cuda.synchronize(device)
+            baseline_memory = torch.cuda.memory_allocated(device)
+            torch.cuda.reset_peak_memory_stats(device)
+        else:
+            baseline_memory = 0
+        started = time.perf_counter()
+        hook = block.register_forward_hook(self.outp_forward_hook)
+        sample_kls = []
+        self.set_qdrop(block, 1.0)
+        try:
+            with torch.no_grad():
+                for i, (inp, target) in enumerate(self.calib_loader):
+                    inp = inp.to(device)
+                    pred = self.model(inp) / self.temperature
+                    per_sample_kl = F.kl_div(
+                        F.log_softmax(pred, dim=-1),
+                        self.raw_pred_softmaxs[i],
+                        reduction='none',
+                    ).sum(dim=-1).clamp_min(0)
+                    sample_kls.append(per_sample_kl.detach().cpu())
+        finally:
+            hook.remove()
+            self.set_qdrop(block, training_drop_prob)
+        q_out = torch.cat(block.tmp_out, dim=0).to(block.raw_out.device)
+        block.tmp_out = None
+        block.secant_direction = (q_out - block.raw_out).detach()
+        block.secant_kl = torch.cat(sample_kls, dim=0).to(block.raw_out.device)
+        if len(block.secant_direction) != len(block.raw_out) or len(block.secant_kl) != len(block.raw_out):
+            raise RuntimeError('Forward secant cache does not match the calibration sample count')
+        if not torch.isfinite(block.secant_direction).all() or not torch.isfinite(block.secant_kl).all():
+            raise RuntimeError('Forward secant cache contains non-finite values')
+        if device.type == 'cuda':
+            torch.cuda.synchronize(device)
+            incremental_peak = max(0, torch.cuda.max_memory_allocated(device) - baseline_memory)
+        else:
+            incremental_peak = 0
+        elapsed = time.perf_counter() - started
+        self.secant_update_count += 1
+        self.secant_update_seconds += elapsed
+        self.secant_update_peak_bytes = max(self.secant_update_peak_bytes, incremental_peak)
+        print('forward secant update: {:.3f}s, mean KL: {:.6g}, incremental peak: {:.2f} MiB'.format(
+            elapsed, float(block.secant_kl.mean()), incremental_peak / 2**20))
+        del q_out, sample_kls
+        torch.cuda.empty_cache()
             
     def reconstruct_single_block(self, name, block, device,
                                  batch_size: int = 32, iters: int = 20000, weight: float = 0.01,
@@ -308,7 +372,7 @@ class BlockReconstructor(QuantCalibrator):
         loss_func = LossFunction(block, round_loss='relaxation', weight=weight, max_count=iters, 
                                  rec_loss=self.metric if 'head' not in name else 'kl_div',
                                  b_range=b_range, decay_start=0, warmup=warmup, p1=self.p1, p2=self.p2)
-        i_change = math.floor(iters / self.k)
+        i_change = max(1, math.floor(iters / self.k))
         for it in range(iters):
             idx = torch.randperm(block.raw_input.size(0))[:batch_size]
             if mode == 'qdrop':
@@ -332,6 +396,18 @@ class BlockReconstructor(QuantCalibrator):
                         self.new_fisher_ro(block, device)
                         loss_func.update_fisher = True
                 cur_grad = block.raw_grad.to(device)
+            elif loss_func.rec_loss == "forward_secant":
+                if self.dis_mode == 'q':
+                    if it % i_change == 0:
+                        self.new_forward_secant(block, device, drop_prob)
+                        loss_func.update_fisher = True
+                elif self.dis_mode == 'qf':
+                    if it in range(self.k):
+                        self.new_forward_secant(block, device, drop_prob)
+                        loss_func.update_fisher = True
+                else:
+                    raise ValueError('Unsupported forward secant refresh mode')
+                cur_grad = (block.secant_direction[idx].to(device), block.secant_kl[idx].to(device))
             elif self.metric == "fisher_brecq" :
                 cur_grad = block.raw_grad[idx].to(device)
             else:
@@ -360,6 +436,7 @@ class BlockReconstructor(QuantCalibrator):
                 module.end_training()
         self.set_qdrop(block, 1.0)
         del block.raw_input, block.raw_out, block.raw_grad, block.quanted_input
+        block.secant_direction = block.secant_kl = None
         torch.cuda.empty_cache()
     
 
@@ -373,7 +450,8 @@ class BlockReconstructor(QuantCalibrator):
             logging.info('reconstructing {} ...'.format(name))
             self.init_block_raw_data(block, name, device, qinp=(mode != 'rinp'), keep_gpu=keep_gpu)
             logging.info('adaround training for {} ...'.format(name))
-            self.reconstruct_single_block(name, block, device, quant_act=quant_act, mode=mode, drop_prob=drop_prob)
+            self.reconstruct_single_block(name, block, device, iters=self.iters,
+                                          quant_act=quant_act, mode=mode, drop_prob=drop_prob)
             self.quanted_blocks.append(name)
             logging.info('finished reconstructing {}.'.format(name))
         for name, module in self.model.named_modules():
@@ -383,6 +461,10 @@ class BlockReconstructor(QuantCalibrator):
                 module.weight.data.copy_(module.w_quantizer.get_hard_value(module.weight.data))
                 del module.w_quantizer.alpha
                 module.w_quantizer.round_mode = "nearest"
+        if self.metric == 'forward_secant':
+            print('forward secant refresh summary: count={}, total={:.3f}s, max incremental peak={:.2f} MiB'.format(
+                self.secant_update_count, self.secant_update_seconds,
+                self.secant_update_peak_bytes / 2**20))
 
         
 class LossFunction:
@@ -462,6 +544,12 @@ class LossFunction:
             if self.count == 1 or self.update_fisher:
                 self.init_loss_1 = loss_1.detach()
                 self.init_loss_2 = loss_2.detach()
+            rec_loss = self.p1 * loss_1 / self.init_loss_1 + self.p2 * loss_2 / self.init_loss_2
+        elif self.rec_loss == 'forward_secant':
+            direction, anchor_kl = grad
+            loss_1, loss_2 = forward_secant_terms(pred, tgt, direction, anchor_kl)
+            if self.count == 1 or self.update_fisher:
+                self.init_loss_1, self.init_loss_2 = forward_secant_normalizers(direction, anchor_kl)
             rec_loss = self.p1 * loss_1 / self.init_loss_1 + self.p2 * loss_2 / self.init_loss_2
         elif self.rec_loss == 'fisher_brecq':
             cha = (pred - tgt).abs().reshape(pred.shape[0], -1)

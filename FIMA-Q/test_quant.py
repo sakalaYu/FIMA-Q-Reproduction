@@ -90,7 +90,7 @@ def get_args_parser():
     parser.add_argument('--a_bit', type=int, default=argparse.SUPPRESS, help='bit-precision of activation')
     parser.add_argument("--calib-metric", type=str, default=argparse.SUPPRESS, choices=['mse', 'mae'], 
                         help='calibration metric')
-    parser.add_argument("--optim-metric", type=str, default=argparse.SUPPRESS, choices=['fisher_brecq', 'fisher_lr', 'fisher_diag', 'fisher_dplr', 'mse', 'mae'], 
+    parser.add_argument("--optim-metric", type=str, default=argparse.SUPPRESS, choices=['fisher_brecq', 'fisher_lr', 'fisher_diag', 'fisher_dplr', 'forward_secant', 'mse', 'mae'],
                         help='optimization metric')
     parser.add_argument('--optim-mode', type=str, default=argparse.SUPPRESS, choices=['qinp', 'rinp', 'qdrop'], 
                         help='`qinp`:use quanted input; `rinp`: use raw input; `qdrop` use qdrop input;')
@@ -101,6 +101,10 @@ def get_args_parser():
     parser.add_argument('--p2', type=float, default=argparse.SUPPRESS, help='The proportion of diag')
     parser.add_argument('--dis-mode', type=str, default=argparse.SUPPRESS, choices=['q','qf'],
                         help='the mode of getting gradient. `q`: use quantization; `qf` Take the first k times (default:Uniformly obtain k times);')
+    parser.add_argument('--recon-iters', type=int, default=argparse.SUPPRESS,
+                        help='fixed reconstruction iterations per block')
+    parser.add_argument('--skip-final-validation', action='store_true',
+                        help='skip calibration/test validation for a short integration smoke run')
     return parser
 
 
@@ -124,7 +128,7 @@ def save_model(model, args, cfg, mode='calibrate'):
         auto_name = '{}_w{}_a{}_optimsize_{}_{}{}{}_{}.pth'.format(
             args.model, cfg.w_bit, cfg.a_bit, cfg.optim_size, cfg.optim_metric, 
             '' if cfg.optim_metric in ['mse', 'mae'] else '_dis_mode_' + cfg.dis_mode, 
-            '' if cfg.optim_metric not in['fisher_lr', 'fisher_dplr'] else '_rank_' + str(cfg.k), 
+            '' if cfg.optim_metric not in['fisher_lr', 'fisher_dplr', 'forward_secant'] else '_rank_' + str(cfg.k),
             cfg.optim_mode)
     save_path = os.path.join(root_path, auto_name)
 
@@ -183,6 +187,7 @@ def main(args):
     cfg.p1 = args.p1 if hasattr(args, 'p1') else cfg.p1
     cfg.p2 = args.p2 if hasattr(args, 'p2') else cfg.p2
     cfg.dis_mode = args.dis_mode if hasattr(args, 'dis_mode') else cfg.dis_mode
+    cfg.recon_iters = args.recon_iters if hasattr(args, 'recon_iters') else getattr(cfg, 'recon_iters', 20000)
     for name, value in vars(cfg).items():
         logging.info(f"{name}: {value}")
         
@@ -254,15 +259,22 @@ def main(args):
         logging.info('Building calibrator ...')
         calib_loader = g.calib_loader(num=cfg.optim_size, batch_size=cfg.optim_batch_size, seed=args.seed)
         logging.info("{} - start {} guided block reconstruction".format(get_cur_time(), cfg.optim_metric))
-        block_reconstructor = BlockReconstructor(model, cfg.optim_batch_size, calib_loader, metric=cfg.optim_metric, temp=cfg.temp, k=cfg.k, dis_mode=cfg.dis_mode, p1=cfg.p1, p2=cfg.p2)
+        block_reconstructor = BlockReconstructor(model, cfg.optim_batch_size, calib_loader,
+            metric=cfg.optim_metric, temp=cfg.temp, k=cfg.k, dis_mode=cfg.dis_mode,
+            p1=cfg.p1, p2=cfg.p2, iters=cfg.recon_iters)
+        reconstruction_started = time.perf_counter()
         block_reconstructor.reconstruct_model(quant_act=True, mode=cfg.optim_mode, drop_prob=cfg.drop_prob, keep_gpu=cfg.keep_gpu)
+        if device.type == 'cuda':
+            torch.cuda.synchronize(device)
+        logging.info('Block reconstruction elapsed seconds: {:.3f}'.format(
+            time.perf_counter() - reconstruction_started))
         logging.info("{} - {} guided block reconstruction finished.".format(get_cur_time(), cfg.optim_metric))
         save_model(model, args, cfg, mode='optimize')
     if args.load_optimize_checkpoint:
         logging.info('Building calibrator ...')
         calib_loader = g.calib_loader(num=cfg.optim_size, batch_size=cfg.optim_batch_size, seed=args.seed)
         model = load_model(model, args, device, mode='optimize')
-    if args.optimize or args.test_optimize_checkpoint:
+    if (args.optimize or args.test_optimize_checkpoint) and not args.skip_final_validation:
         logging.info('Validating on calibration set after block reconstruction ...')
         val_loss, val_prec1, val_prec5 = validate(calib_loader, model, criterion, print_freq=args.print_freq, device=device)
         logging.info('Validating on test set after block reconstruction ...')
