@@ -12,3 +12,6 @@ imagenet_fimaq/val/*
 !imagenet_fimaq/val/.gitkeep
 *.tmp
 *.swp
+tmp/probe_test_dependencies/
+tmp/probe_test_data/
+tmp/probe_test_results/

@@ -12,6 +12,11 @@ from types import MethodType
 import logging
 import random
 import copy
+import math
+import json
+import time
+from contextlib import contextmanager
+from utils.fisher_reliability import FisherReliability
 
 
 def patch_embed_forward(self, x):
@@ -78,8 +83,31 @@ def swin_patchmerging_forward(self, x):
 
 
 class BlockReconstructor(QuantCalibrator):
-    def __init__(self, model, optim_batch_size,calib_loader, metric="mse", temp=20, k=1, dis_mode='q', p1=1., p2=1.):
+    def __init__(self, model, optim_batch_size,calib_loader, metric="mse", temp=20, k=1, dis_mode='q', p1=1., p2=1.,
+                 fisher_schedule='fixed', probe_loader=None, probe_interval=500,
+                 fisher_error_threshold=0.25, fisher_trend_threshold=0.02,
+                 fisher_patience=2, fisher_log_path=None, recon_iters=20000):
         super().__init__(model, calib_loader)
+        if fisher_schedule not in ('fixed', 'monitor', 'adaptive'):
+            raise ValueError('Unknown Fisher schedule')
+        if k < 1 or recon_iters < k or probe_interval < 1:
+            raise ValueError('Require 1 <= k <= recon_iters and positive probe_interval')
+        if fisher_schedule != 'fixed' and (metric != 'fisher_dplr' or dis_mode != 'q' or probe_loader is None):
+            raise ValueError('monitor/adaptive require fisher_dplr, dis_mode=q and held-out probes')
+        if fisher_schedule != 'fixed' and (p1 < 0 or p2 < 0 or p1 + p2 <= 0):
+            raise ValueError('Reliability monitoring requires nonnegative, nonzero DPLR weights')
+        self.fisher_schedule = fisher_schedule
+        self.probe_interval = probe_interval
+        self.reliability_options = dict(error_threshold=fisher_error_threshold,
+                                       trend_threshold=fisher_trend_threshold, patience=fisher_patience)
+        FisherReliability(**self.reliability_options)  # Fail before starting reconstruction.
+        self.fisher_log_path = fisher_log_path
+        self.recon_iters = recon_iters
+        # Materialize once: repeated probes must use exactly the same images/crops.
+        # Preserve RNG so monitoring does not change reconstruction minibatches.
+        with torch.random.fork_rng(devices=[]):
+            self.probe_batches = list(probe_loader) if probe_loader is not None else []
+        self.probe_reference = None
         self.batch_size = optim_batch_size
         self.metric = metric
         self.k = k
@@ -118,6 +146,74 @@ class BlockReconstructor(QuantCalibrator):
         elif isinstance(module, timm.models.swin_transformer.PatchMerging):
             module.forward = MethodType(swin_patchmerging_forward, module)
         module.perturb = False
+
+    @contextmanager
+    def probe_state(self, block, quantized):
+        """Isolate this block, disable QDrop, restore all modes even on failure.
+
+        Soft AdaRound targets are deliberately preserved: probes assess the
+        current optimization model, not the final hard-rounded deployment model.
+        """
+        saved = []
+        for module in self.model.modules():
+            for attr in ('mode', 'drop_prob'):
+                if hasattr(module, attr):
+                    saved.append((module, attr, getattr(module, attr)))
+                    setattr(module, attr, 'raw' if attr == 'mode' else 1.0)
+        try:
+            if quantized:
+                self.set_block_mode(block, 'quant_forward')
+            yield
+        finally:
+            for module, attr, value in saved:
+                setattr(module, attr, value)
+
+    def measure_fisher_probe(self, block, device):
+        """Return per-image DPLR components and true KL at matching block states.
+
+        Uses FP prefix/suffix, as the existing Fisher estimator does. This is
+        isolated-block KL, not the fully quantized model's final KL.
+        Never calls LossFunction.__call__ (which changes counters/normalizers).
+        """
+        captured = []
+        hook = block.register_forward_hook(lambda module, inp, out: captured.append(out.detach()))
+        devices = [device.index if device.index is not None else torch.cuda.current_device()] if device.type == 'cuda' else []
+        try:
+            with torch.random.fork_rng(devices=devices), torch.no_grad():
+                if self.probe_reference is None:
+                    self.probe_reference = []
+                    with self.probe_state(block, quantized=False):
+                        for inp, _ in self.probe_batches:
+                            captured.clear()
+                            logits = self.model(inp.to(device))
+                            self.probe_reference.append((captured[-1].cpu(),
+                                F.softmax(logits.double() / self.temperature, dim=-1).cpu()))
+                lows, diags, kls = [], [], []
+                with self.probe_state(block, quantized=True):
+                    for (inp, _), (raw_out, teacher) in zip(self.probe_batches, self.probe_reference):
+                        captured.clear()
+                        logits = self.model(inp.to(device))
+                        delta = (captured[-1] - raw_out.to(device)).abs().reshape(inp.shape[0], -1)
+                        grad = block.raw_grad.to(device).abs()
+                        projection = delta @ grad.T
+                        low = ((projection @ block.inverse_B) * projection).sum(-1)
+                        diag = (delta.square() * grad.mean(0)).mean(-1)
+                        kl = F.kl_div(F.log_softmax(logits.double() / self.temperature, dim=-1),
+                                      teacher.to(device), reduction='none').sum(-1)
+                        if not torch.isfinite(low).all() or (low < -1e-6).any():
+                            raise RuntimeError('Invalid DPLR quadratic form during probe; inspect Fisher conditioning')
+                        lows.extend(low.clamp_min(0).double().cpu().tolist())
+                        diags.extend(diag.double().cpu().tolist())
+                        kls.extend(kl.clamp_min(0).cpu().tolist())
+                return lows, diags, kls
+        finally:
+            hook.remove()
+
+    def log_fisher_event(self, record):
+        logging.info('Fisher diagnostic: %s', json.dumps(record, allow_nan=False))
+        if self.fisher_log_path:
+            with open(self.fisher_log_path, 'a', encoding='utf-8') as handle:
+                handle.write(json.dumps(record, allow_nan=False) + '\n')
                 
     def set_block_mode(self, block, mode='raw'):
         for _, module in block.named_modules():
@@ -309,6 +405,14 @@ class BlockReconstructor(QuantCalibrator):
                                  rec_loss=self.metric if 'head' not in name else 'kl_div',
                                  b_range=b_range, decay_start=0, warmup=warmup, p1=self.p1, p2=self.p2)
         i_change = math.floor(iters / self.k)
+        monitored = self.fisher_schedule != 'fixed' and loss_func.rec_loss == 'fisher_dplr'
+        controller = FisherReliability(**self.reliability_options) if monitored else None
+        self.probe_reference = None
+        updates = 0
+        probe_seconds = 0.0
+        fisher_seconds = 0.0
+        probe_calls = 0
+        probe_norm = None
         for it in range(iters):
             idx = torch.randperm(block.raw_input.size(0))[:batch_size]
             if mode == 'qdrop':
@@ -323,14 +427,35 @@ class BlockReconstructor(QuantCalibrator):
             
             loss_func.update_fisher = False
             if loss_func.rec_loss in ["fisher_lr", "fisher_diag", "fisher_dplr"] :
-                if self.dis_mode in ['q']:
-                    if it % i_change == 0:
-                        self.new_fisher_ro(block, device)
-                        loss_func.update_fisher = True
-                elif self.dis_mode in ['qf']:
-                    if it in range(self.k):
-                        self.new_fisher_ro(block, device)
-                        loss_func.update_fisher = True
+                refresh = ((self.dis_mode == 'q' and it % i_change == 0) or
+                           (self.dis_mode == 'qf' and it < self.k))
+                reason = 'fixed_interval'
+                if self.fisher_schedule == 'adaptive':
+                    refresh = it == 0
+                    reason = 'initial'
+                if monitored and it > 0 and it % self.probe_interval == 0:
+                    started = time.perf_counter()
+                    low, diag, kl = self.measure_fisher_probe(block, device)
+                    proxy = [self.p1 * a / probe_norm[0] + self.p2 * b / probe_norm[1]
+                             for a, b in zip(low, diag)]
+                    stats = controller.observe(proxy, kl)
+                    probe_seconds += time.perf_counter() - started
+                    probe_calls += 1
+                    # Match the legacy fixed schedule's actual call budget,
+                    # including its possible extra call from integer division.
+                    budget = len(range(0, iters, i_change))
+                    if self.fisher_schedule == 'adaptive':
+                        refresh = stats['trigger'] and updates < budget
+                        reason = 'reliability_mismatch'
+                    self.log_fisher_event(dict(event='probe', block=name, step=it,
+                        schedule=self.fisher_schedule, updates=updates, budget=budget,
+                        refresh=refresh, probe_seconds=probe_seconds, **stats))
+                if refresh:
+                    started = time.perf_counter()
+                    self.new_fisher_ro(block, device)
+                    fisher_seconds += time.perf_counter() - started
+                    updates += 1
+                    loss_func.update_fisher = True
                 cur_grad = block.raw_grad.to(device)
             elif self.metric == "fisher_brecq" :
                 cur_grad = block.raw_grad[idx].to(device)
@@ -344,11 +469,32 @@ class BlockReconstructor(QuantCalibrator):
                 err = loss_func(out_quant, cur_out, cur_grad)
             else:
                 err = loss_func(out_quant, cur_out)
+            if monitored and loss_func.update_fisher:
+                # Use the actual training loss normalizers, now initialized by
+                # this step. Probes must not reweight the two DPLR components.
+                started = time.perf_counter()
+                low, diag, kl = self.measure_fisher_probe(block, device)
+                probe_norm = (max(float(loss_func.init_loss_1), 1e-24),
+                              max(float(loss_func.init_loss_2), 1e-24))
+                proxy = [self.p1 * a / probe_norm[0] + self.p2 * b / probe_norm[1]
+                         for a, b in zip(low, diag)]
+                controller.reset(proxy, kl)
+                probe_seconds += time.perf_counter() - started
+                probe_calls += 1
+                self.log_fisher_event(dict(event='refresh', block=name, step=it,
+                    schedule=self.fisher_schedule, reason=reason, updates=updates,
+                    rank=int(block.raw_grad.shape[0]), anchor_error=controller.anchor_error,
+                    scale=controller.scale, kl_mean=sum(kl) / len(kl)))
             err.backward()
             w_optimizer.step()
             if quant_act:
                 a_optimizer.step()
                 a_scheduler.step()
+        if monitored:
+            self.log_fisher_event(dict(event='summary', block=name, steps=iters,
+                schedule=self.fisher_schedule, updates=updates, probe_calls=probe_calls,
+                fisher_seconds=fisher_seconds, probe_seconds=probe_seconds))
+        self.probe_reference = None
         torch.cuda.empty_cache()
         # Finish optimization, use hard rounding.
         for name, module in block.named_modules():
@@ -373,7 +519,8 @@ class BlockReconstructor(QuantCalibrator):
             logging.info('reconstructing {} ...'.format(name))
             self.init_block_raw_data(block, name, device, qinp=(mode != 'rinp'), keep_gpu=keep_gpu)
             logging.info('adaround training for {} ...'.format(name))
-            self.reconstruct_single_block(name, block, device, quant_act=quant_act, mode=mode, drop_prob=drop_prob)
+            self.reconstruct_single_block(name, block, device, batch_size=self.batch_size,
+                iters=self.recon_iters, quant_act=quant_act, mode=mode, drop_prob=drop_prob)
             self.quanted_blocks.append(name)
             logging.info('finished reconstructing {}.'.format(name))
         for name, module in self.model.named_modules():

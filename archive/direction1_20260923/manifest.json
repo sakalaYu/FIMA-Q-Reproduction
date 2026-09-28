@@ -1,0 +1,89 @@
+{
+  "restored_from": "4d5e8ea",
+  "files": [
+    {
+      "path": "FIMA-Q/utils/fisher_reliability.py",
+      "sha256": "ba5ae9fa3d4ed917c09db0d0a3fa91606744f9080d00d9e8b900870bc6caa2cd"
+    },
+    {
+      "path": "FIMA-Q/scripts/run_direction1.sh",
+      "sha256": "3bd050dffd872a5bd3e25831b0a64ee59599c2bc1e4f0202143a8c0605e2241c"
+    },
+    {
+      "path": "FIMA-Q/scripts/summarize_fisher.py",
+      "sha256": "06e24c45ca790e37859e3ff931bfa96b707cbc658fef78648189227cfcb42de7"
+    },
+    {
+      "path": "FIMA-Q/DIRECTION1.md",
+      "sha256": "5795b309a61236b38f8afde050b22fef940839d9b0d3660eeb8714f311e1777f"
+    },
+    {
+      "path": "FIMA-Q/DIRECTION1_RESULTS_20260923.md",
+      "sha256": "a1d2f6b47fb96df3c22990f8484c721041be75b396c6981d6cb8f9a65327898e"
+    },
+    {
+      "path": "tmp/analyze_direction1.py",
+      "sha256": "f5016141ef99144fb993cd74ce7343e6b717c1bb657178b33bcb250f02338875"
+    },
+    {
+      "path": "FIMA-Q/tests/test_fisher_probe.py",
+      "sha256": "ef4cb074b8a40b19ff419ebd324e556dd86c05ef73f2fb410f9158ebcb12c278"
+    },
+    {
+      "path": "FIMA-Q/tests/test_fisher_reliability.py",
+      "sha256": "66a96c73de237221494e693923ac77aabc5e3353927d81d93887cea83e2a2de9"
+    },
+    {
+      "path": "FIMA-Q/tests/test_fisher_schedule.py",
+      "sha256": "0f61a366dff93e78268eab245a13182e5e52cdc926a1411f7fd810b249146699"
+    },
+    {
+      "path": "FIMA-Q/checkpoints/quant_result/20260922_201308_direction1_monitor_seed3407/experiment.json",
+      "sha256": "8defd09f3b0527ff25ca6a2452ab65ce234fc014a646faeb033298aec460cf61"
+    },
+    {
+      "path": "FIMA-Q/checkpoints/quant_result/20260922_201308_direction1_monitor_seed3407/fisher_diagnostics.jsonl",
+      "sha256": "23b7887639713ae346c5582b9a0dcc88c4598da5af5587d6bcd5a852f80f6f2b"
+    },
+    {
+      "path": "FIMA-Q/checkpoints/quant_result/20260922_201308_direction1_monitor_seed3407/output.log",
+      "sha256": "f5ba9b5e615a045cb0339c17c0fd5c603dfe7eea191b9835b2ce41e4902789f7"
+    },
+    {
+      "path": "FIMA-Q/checkpoints/quant_result/20260922_201308_direction1_monitor_seed3407/probe_split.json",
+      "sha256": "3cd982c16b82ad42f541341c2fbd4c294c49532ed6df210bc21a92662de2389e"
+    },
+    {
+      "path": "FIMA-Q/checkpoints/quant_result/20260922_224018_direction1_adaptive_seed3407/experiment.json",
+      "sha256": "10523882523a9d14925efd92c89e1998a0591f84c7007467a176b15c6328b893"
+    },
+    {
+      "path": "FIMA-Q/checkpoints/quant_result/20260922_224018_direction1_adaptive_seed3407/fisher_diagnostics.jsonl",
+      "sha256": "5e2802cfbbf5f9da5b784aac16a4179befb0d0e399632baf77c13166ce094f94"
+    },
+    {
+      "path": "FIMA-Q/checkpoints/quant_result/20260922_224018_direction1_adaptive_seed3407/output.log",
+      "sha256": "cb8115c87e0c616d9451dae32104a2a7223de6a3f7027ed330300f7b206bf09e"
+    },
+    {
+      "path": "FIMA-Q/checkpoints/quant_result/20260922_224018_direction1_adaptive_seed3407/probe_split.json",
+      "sha256": "3cd982c16b82ad42f541341c2fbd4c294c49532ed6df210bc21a92662de2389e"
+    },
+    {
+      "path": "FIMA-Q/logs/20260922_201308_direction1_monitor_seed3407.log",
+      "sha256": "f5ba9b5e615a045cb0339c17c0fd5c603dfe7eea191b9835b2ce41e4902789f7"
+    },
+    {
+      "path": "FIMA-Q/logs/20260922_224018_direction1_adaptive_seed3407.log",
+      "sha256": "cb8115c87e0c616d9451dae32104a2a7223de6a3f7027ed330300f7b206bf09e"
+    },
+    {
+      "path": "FIMA-Q/test_quant.py",
+      "sha256": "819fccf968d6bdd9869381bbca5bee674874de2f0463fe6ed2dafba32405bdfb"
+    },
+    {
+      "path": "FIMA-Q/utils/block_recon.py",
+      "sha256": "3874d2a87b34df937ae0d257df8c0f22908930af05561e42857ce67ddf2c2960"
+    }
+  ]
+}

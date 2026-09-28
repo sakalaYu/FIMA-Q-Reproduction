@@ -11,6 +11,7 @@ import copy
 import time
 import re
 import shutil
+import json
 
 import utils.datasets as mydatasets
 from utils.calibrator import QuantCalibrator
@@ -101,6 +102,17 @@ def get_args_parser():
     parser.add_argument('--p2', type=float, default=argparse.SUPPRESS, help='The proportion of diag')
     parser.add_argument('--dis-mode', type=str, default=argparse.SUPPRESS, choices=['q','qf'],
                         help='the mode of getting gradient. `q`: use quantization; `qf` Take the first k times (default:Uniformly obtain k times);')
+    parser.add_argument('--fisher-schedule', choices=['fixed', 'monitor', 'adaptive'], default='fixed',
+                        help='fixed: legacy; monitor: fixed plus diagnostics; adaptive: mismatch-triggered updates')
+    parser.add_argument('--probe-size', type=int, default=64,
+                        help='held-out images WITHIN optim-size for monitor/adaptive (not validation images)')
+    parser.add_argument('--probe-interval', type=int, default=500, help='steps between reliability checks')
+    parser.add_argument('--fisher-error-threshold', type=float, default=0.25,
+                        help='allowed increase in normalized KL prediction error above refresh anchor')
+    parser.add_argument('--fisher-trend-threshold', type=float, default=0.02,
+                        help='relative change required for opposite proxy/KL trends')
+    parser.add_argument('--fisher-patience', type=int, default=2, help='consecutive bad probes before refresh')
+    parser.add_argument('--recon-iters', type=int, default=20000, help='reconstruction steps per block')
     return parser
 
 
@@ -183,6 +195,15 @@ def main(args):
     cfg.p1 = args.p1 if hasattr(args, 'p1') else cfg.p1
     cfg.p2 = args.p2 if hasattr(args, 'p2') else cfg.p2
     cfg.dis_mode = args.dis_mode if hasattr(args, 'dis_mode') else cfg.dis_mode
+    if args.fisher_schedule != 'fixed':
+        if cfg.optim_metric != 'fisher_dplr' or cfg.dis_mode != 'q':
+            raise ValueError('monitor/adaptive require --optim-metric fisher_dplr --dis-mode q')
+        if not 2 <= args.probe_size < cfg.optim_size:
+            raise ValueError('Require 2 <= probe-size < optim-size')
+        if cfg.optim_size - args.probe_size < cfg.calib_size:
+            raise ValueError('Keep at least calib-size reconstruction images to avoid initial-calibration/probe overlap')
+    with open(os.path.join(root_path, 'experiment.json'), 'w', encoding='utf-8') as handle:
+        json.dump({'args': vars(args), 'config': vars(cfg)}, handle, indent=2)
     for name, value in vars(cfg).items():
         logging.info(f"{name}: {value}")
         
@@ -253,8 +274,32 @@ def main(args):
     if args.optimize:
         logging.info('Building calibrator ...')
         calib_loader = g.calib_loader(num=cfg.optim_size, batch_size=cfg.optim_batch_size, seed=args.seed)
+        probe_loader = None
+        if args.fisher_schedule != 'fixed':
+            if len(calib_loader.dataset) != cfg.optim_size:
+                raise ValueError('Training set contains fewer images than optim-size')
+            pool = calib_loader.dataset
+            split = cfg.optim_size - args.probe_size
+            loader_kwargs = dict(batch_size=cfg.optim_batch_size, shuffle=False,
+                                 num_workers=args.num_workers, pin_memory=True, drop_last=False)
+            calib_loader = torch.utils.data.DataLoader(
+                torch.utils.data.Subset(pool, range(split)), **loader_kwargs)
+            probe_loader = torch.utils.data.DataLoader(
+                torch.utils.data.Subset(pool, range(split, cfg.optim_size)), **loader_kwargs)
+            logging.info('Fisher split: %d reconstruction images, %d held-out probes (total %d)',
+                         split, args.probe_size, cfg.optim_size)
+            # Positions refer to the seed-selected, once-cached calibration pool.
+            with open(os.path.join(root_path, 'probe_split.json'), 'w', encoding='utf-8') as handle:
+                json.dump(dict(seed=args.seed, total=cfg.optim_size,
+                               train_pool_positions=list(range(split)),
+                               probe_pool_positions=list(range(split, cfg.optim_size))), handle)
         logging.info("{} - start {} guided block reconstruction".format(get_cur_time(), cfg.optim_metric))
-        block_reconstructor = BlockReconstructor(model, cfg.optim_batch_size, calib_loader, metric=cfg.optim_metric, temp=cfg.temp, k=cfg.k, dis_mode=cfg.dis_mode, p1=cfg.p1, p2=cfg.p2)
+        block_reconstructor = BlockReconstructor(model, cfg.optim_batch_size, calib_loader,
+            metric=cfg.optim_metric, temp=cfg.temp, k=cfg.k, dis_mode=cfg.dis_mode, p1=cfg.p1, p2=cfg.p2,
+            fisher_schedule=args.fisher_schedule, probe_loader=probe_loader,
+            probe_interval=args.probe_interval, fisher_error_threshold=args.fisher_error_threshold,
+            fisher_trend_threshold=args.fisher_trend_threshold, fisher_patience=args.fisher_patience,
+            fisher_log_path=os.path.join(root_path, 'fisher_diagnostics.jsonl'), recon_iters=args.recon_iters)
         block_reconstructor.reconstruct_model(quant_act=True, mode=cfg.optim_mode, drop_prob=cfg.drop_prob, keep_gpu=cfg.keep_gpu)
         logging.info("{} - {} guided block reconstruction finished.".format(get_cur_time(), cfg.optim_metric))
         save_model(model, args, cfg, mode='optimize')
