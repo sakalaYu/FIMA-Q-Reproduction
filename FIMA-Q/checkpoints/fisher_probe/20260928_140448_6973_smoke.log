@@ -1,0 +1,9 @@
+Shared cache: checkpoints/fisher_probe/smoke_images.pt 2b6bfece2be5002167774401f9d2a11adae55ad81937db420ce67ac53166d782
+Results: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/fisher_probe/results/20260928_140452_876595
+Collecting blocks.0.attn
+blocks.0.attn evaluation 1 / 2
+blocks.0.attn evaluation 2 / 2
+Collecting blocks.0.mlp
+blocks.0.mlp evaluation 1 / 2
+blocks.0.mlp evaluation 2 / 2
+Completed: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/fisher_probe/results/20260928_140452_876595

@@ -1,0 +1,33 @@
+Shared cache: checkpoints/fisher_probe/pilot_images.pt b88929cd68942a31764d07fdbf43afcbc6b02273cab9c3c57a417409cba8f892
+Results: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/fisher_probe/results/20260928_140524_391751
+Collecting blocks.0.attn
+blocks.0.attn evaluation 1 / 4
+blocks.0.attn evaluation 2 / 4
+blocks.0.attn evaluation 3 / 4
+blocks.0.attn evaluation 4 / 4
+Collecting blocks.0.mlp
+blocks.0.mlp evaluation 1 / 4
+blocks.0.mlp evaluation 2 / 4
+blocks.0.mlp evaluation 3 / 4
+blocks.0.mlp evaluation 4 / 4
+Collecting blocks.5.attn
+blocks.5.attn evaluation 1 / 4
+blocks.5.attn evaluation 2 / 4
+blocks.5.attn evaluation 3 / 4
+blocks.5.attn evaluation 4 / 4
+Collecting blocks.5.mlp
+blocks.5.mlp evaluation 1 / 4
+blocks.5.mlp evaluation 2 / 4
+blocks.5.mlp evaluation 3 / 4
+blocks.5.mlp evaluation 4 / 4
+Collecting blocks.11.attn
+blocks.11.attn evaluation 1 / 4
+blocks.11.attn evaluation 2 / 4
+blocks.11.attn evaluation 3 / 4
+blocks.11.attn evaluation 4 / 4
+Collecting blocks.11.mlp
+blocks.11.mlp evaluation 1 / 4
+blocks.11.mlp evaluation 2 / 4
+blocks.11.mlp evaluation 3 / 4
+blocks.11.mlp evaluation 4 / 4
+Completed: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/fisher_probe/results/20260928_140524_391751
