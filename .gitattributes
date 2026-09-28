@@ -1,1 +1,2 @@
-*.pth filter=lfs diff=lfs merge=lfs -text
+# Store model checkpoints as regular Git objects, without Git LFS filters.
+*.pth -filter -diff -merge -text
