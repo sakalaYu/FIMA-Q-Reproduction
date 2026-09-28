@@ -147,7 +147,8 @@ def main(args):
     import torch
     import torch.nn.functional as F
     import timm
-    from utils.fisher_geometry import error_basis, projected_fisher, response_jacobian, matrix_summary, quadratic_predictions
+    from utils.fisher_geometry import (energy_rank, error_basis, projected_fisher,
+        response_jacobian, matrix_summary, quadratic_predictions)
     from utils.fisher_probe_model import capture_branch, make_suffix
     if min(args.basis_size, args.eval_size, args.test_directions, *args.ranks) < 1:
         raise ValueError('Sample sizes, ranks and test direction count must be positive')
@@ -210,7 +211,7 @@ def main(args):
             basis, energies, numerical_rank = error_basis(torch.cat(errors), max(args.ranks))
             record(dict(event='basis', module=name, singular_values=energies.sqrt().tolist(),
                         numerical_rank=numerical_rank, retained_rank=len(basis),
-                        error_rank95=int(torch.searchsorted(energies.cumsum(0),energies.sum()*0.95))+1,
+                        error_rank95=energy_rank(energies, 0.95),
                         error_condition_positive=float((energies[0]/energies[numerical_rank-1]).sqrt()),
                         retained_energy=float(energies[:len(basis)].sum()/energies.sum())))
             basis = basis.to(device)

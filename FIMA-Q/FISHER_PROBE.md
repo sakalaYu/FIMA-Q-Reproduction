@@ -35,6 +35,8 @@
 `projected_offdiag_ratio` 是误差 PCA 坐标系内的非对角占比，不是原始 token/channel 坐标中的非对角占比。基于它不能直接决定原始 DPLR 的 alpha。
 Attention/MLP 在各自的局部 FP 状态下测量，不包含跨分支 Fisher 交叉项，不能据此声称两个模块完全独立。
 
+严格确定性模式下，谱矩阵仍在 GPU 计算；仅将已经得到的特征值复制到 CPU 计算累计能量/rank95。这样避开部分 PyTorch 版本缺失的 deterministic CUDA cumsum kernel，不改变 Fisher 矩阵或特征值。
+
 ### 仅前向估计
 
 令 f(a)=logits(h+U^T a)/T，V 是 f 对低维系数 a 的 Jacobian。

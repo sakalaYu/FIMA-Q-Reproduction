@@ -6,6 +6,28 @@ in this basis, not in the full token/channel coordinate system.
 import torch
 
 
+def energy_rank(values, fraction=0.95):
+    """Smallest leading rank reaching an energy fraction, computed on CPU.
+
+    PyTorch does not provide a deterministic CUDA cumsum kernel on every
+    supported version. This is reporting-only scalar work, so moving the
+    detached eigenvalues to CPU preserves the result without weakening strict
+    determinism for model/Fisher computation.
+    """
+    if not 0 < fraction <= 1:
+        raise ValueError('fraction must be in (0, 1]')
+    values = values.detach().double().cpu().tolist()
+    total = sum(values)
+    if total <= 0:
+        return 0
+    threshold, cumulative = total * fraction, 0.0
+    for index, value in enumerate(values, 1):
+        cumulative += value
+        if cumulative >= threshold:
+            return index
+    return len(values)
+
+
 def error_basis(errors, max_rank, tolerance=1e-8):
     """Uncentered signed error SVD via a small sample Gram matrix."""
     x = errors.reshape(errors.shape[0], -1).double()
@@ -59,7 +81,7 @@ def matrix_summary(matrix):
     matrix = matrix.double()
     values = torch.linalg.eigvalsh(matrix).flip(0).clamp_min(0)
     total = float(values.sum())
-    rank95 = int(torch.searchsorted(values.cumsum(0), values.sum() * 0.95)) + 1 if total > 0 else 0
+    rank95 = energy_rank(values, 0.95)
     positive = values[values > max(float(values[0]) * 1e-8, 1e-30)]
     norm = matrix.norm().clamp_min(1e-30)
     return dict(eigenvalues=values.cpu().tolist(), trace=total, rank95=rank95,

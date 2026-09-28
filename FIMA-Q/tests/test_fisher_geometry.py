@@ -1,7 +1,8 @@
 """Analytic CPU checks: basis geometry, Fisher metric, forward-only derivatives."""
 import unittest
 import torch
-from utils.fisher_geometry import error_basis, projected_fisher, response_jacobian, quadratic_predictions
+from utils.fisher_geometry import (energy_rank, error_basis, matrix_summary,
+    projected_fisher, response_jacobian, quadratic_predictions)
 
 
 class GeometryTests(unittest.TestCase):
@@ -39,6 +40,17 @@ class GeometryTests(unittest.TestCase):
         pred = quadratic_predictions(torch.tensor([[2.,1.],[1.,2.]]),torch.ones(2))
         self.assertAlmostEqual(pred['full'],3.)
         self.assertAlmostEqual(pred['diagonal'],2.)
+
+    def test_reporting_works_with_strict_determinism(self):
+        previous = torch.are_deterministic_algorithms_enabled()
+        try:
+            torch.use_deterministic_algorithms(True)
+            self.assertEqual(energy_rank(torch.tensor([4., 1., 0.]), 0.8), 1)
+            summary = matrix_summary(torch.diag(torch.tensor([4., 1., 0.])))
+            self.assertEqual(summary['rank95'], 2)
+            self.assertEqual(summary['numerical_rank'], 2)
+        finally:
+            torch.use_deterministic_algorithms(previous)
 
 
 if __name__ == '__main__': unittest.main()
