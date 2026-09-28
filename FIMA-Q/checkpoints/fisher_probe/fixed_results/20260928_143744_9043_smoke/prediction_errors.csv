@@ -1,0 +1,17 @@
+module,variant,rank,method,approximation,n,relative_rmse,mean_true_kl
+blocks.0.attn,grouped,4,autograd,diagonal,4,0.322175533949103,8.188429353414117e-05
+blocks.0.attn,grouped,4,autograd,full,4,0.20485735823945672,8.188429353414117e-05
+blocks.0.attn,grouped,4,finite_difference,diagonal,4,0.32230401496415106,8.188429353414117e-05
+blocks.0.attn,grouped,4,finite_difference,full,4,0.2046450335424143,8.188429353414117e-05
+blocks.0.attn,single,1,autograd,diagonal,4,0.20485730763784846,8.188429353414117e-05
+blocks.0.attn,single,1,autograd,full,4,0.20485730763784846,8.188429353414117e-05
+blocks.0.attn,single,1,finite_difference,diagonal,4,0.2044457542197313,8.188429353414117e-05
+blocks.0.attn,single,1,finite_difference,full,4,0.20444575421973127,8.188429353414117e-05
+blocks.0.mlp,grouped,4,autograd,diagonal,4,0.5757969936196693,0.000356564908434746
+blocks.0.mlp,grouped,4,autograd,full,4,0.4168117370146415,0.000356564908434746
+blocks.0.mlp,grouped,4,finite_difference,diagonal,4,0.5758279566348403,0.000356564908434746
+blocks.0.mlp,grouped,4,finite_difference,full,4,0.416746268806448,0.000356564908434746
+blocks.0.mlp,single,1,autograd,diagonal,4,0.4168116637257288,0.000356564908434746
+blocks.0.mlp,single,1,autograd,full,4,0.4168116637257288,0.000356564908434746
+blocks.0.mlp,single,1,finite_difference,diagonal,4,0.41701612319828735,0.000356564908434746
+blocks.0.mlp,single,1,finite_difference,full,4,0.41701612319828735,0.000356564908434746

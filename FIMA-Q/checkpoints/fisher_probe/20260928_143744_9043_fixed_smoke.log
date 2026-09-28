@@ -1,0 +1,13 @@
+Shared cache: checkpoints/fisher_probe/fixed_smoke_images.pt b1ff3b8e797468248d5ed7d3e4d06302d2d2ed39e564328af83ca95c149e6588
+Results: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/fisher_probe/fixed_results/20260928_143744_9043_smoke
+Collecting blocks.0.attn
+blocks.0.attn image 1 / 4
+blocks.0.attn image 2 / 4
+blocks.0.attn image 3 / 4
+blocks.0.attn image 4 / 4
+Collecting blocks.0.mlp
+blocks.0.mlp image 1 / 4
+blocks.0.mlp image 2 / 4
+blocks.0.mlp image 3 / 4
+blocks.0.mlp image 4 / 4
+Completed: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/fisher_probe/fixed_results/20260928_143744_9043_smoke

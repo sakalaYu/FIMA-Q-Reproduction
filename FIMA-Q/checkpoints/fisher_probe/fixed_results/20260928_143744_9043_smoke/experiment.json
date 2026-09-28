@@ -1,0 +1,80 @@
+{
+  "args": {
+    "dataset": "../imagenet_fimaq",
+    "checkpoint": "./checkpoints/quant_result/20260916_1818/vit_small_w4_a4_calibsize_128_mse.pth",
+    "config": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/configs/4bit/best.py",
+    "model": "vit_small_patch16_224",
+    "cache": "checkpoints/fisher_probe/fixed_smoke_images.pt",
+    "images": 4,
+    "blocks": [
+      "0"
+    ],
+    "epsilon": 0.001,
+    "groups": 4,
+    "temperature": 20.0,
+    "seed": 3407,
+    "device": "cuda:0",
+    "output_root": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/fisher_probe/fixed_results",
+    "output_dir": "checkpoints/fisher_probe/fixed_results/20260928_143744_9043_smoke"
+  },
+  "config": {
+    "optim_size": 1024,
+    "calib_size": 128,
+    "optim_batch_size": 32,
+    "calib_batch_size": 32,
+    "w_bit": 4,
+    "a_bit": 4,
+    "qconv_a_bit": 8,
+    "qhead_a_bit": 4,
+    "calib_metric": "mse",
+    "matmul_head_channel_wise": true,
+    "token_channel_wise": true,
+    "eq_n": 128,
+    "search_round": 3,
+    "keep_gpu": true,
+    "optim_metric": "fisher_dplr",
+    "temp": 20,
+    "k": 5,
+    "p1": 1.0,
+    "p2": 1.0,
+    "dis_mode": "q",
+    "optim_mode": "qdrop",
+    "drop_prob": 0.5
+  },
+  "cache": {
+    "spec": {
+      "model": "vit_small_patch16_224",
+      "dataset": "/root/autodl-tmp/FIMA-Q-Reproduction/imagenet_fimaq",
+      "seed": 3407,
+      "basis_size": 0,
+      "eval_size": 4,
+      "transform": "Compose(\n    Resize(size=248, interpolation=bicubic, max_size=None, antialias=True)\n    CenterCrop(size=(224, 224))\n    ToTensor()\n    Normalize(mean=tensor([0.5000, 0.5000, 0.5000]), std=tensor([0.5000, 0.5000, 0.5000]))\n)",
+      "schema": 1
+    },
+    "paths": [
+      "train/n02494079/n02494079_7155.JPEG",
+      "train/n02443114/n02443114_19873.JPEG",
+      "train/n01498041/n01498041_928.JPEG",
+      "train/n01847000/n01847000_9810.JPEG"
+    ],
+    "indices": [
+      765,
+      716,
+      13,
+      195
+    ],
+    "tensor_sha256": "b1ff3b8e797468248d5ed7d3e4d06302d2d2ed39e564328af83ca95c149e6588",
+    "file_sha256": "5a2517583cc608dee9bee2242e6f58d93e64c5c2423ef43d860e30c51965ba2a"
+  },
+  "checkpoint_sha256": "1da0620416db01493b48f6026fa81a3cf95c1ac172d13960e83d7c7094ec69ff",
+  "torch": "2.2.2+cu121",
+  "timm": "0.9.2",
+  "device": "NVIDIA GeForce RTX 4090 D",
+  "method": "fixed epsilon; true quantization-error direction; fixed contiguous output-channel groups",
+  "source_sha256": {
+    "scripts/probe_fixed_forward_fisher.py": "8b82cb67a6136df9269f30c04ba6dc1f1c14a53fb65a327c17d5dfd2110c6534",
+    "scripts/probe_fisher.py": "45f2589a491941c3e14481715255c4b8b414b5f866b89e40ab6892ba38e12607",
+    "utils/fisher_geometry.py": "3c305908bc53cd184e13aabc90c452a980b0001220b2792a53faea03957fe3dd",
+    "utils/fisher_probe_model.py": "abd2ca902fd6cf91de5b75f0dcab2b040cd751e913db22e2139918666eac4944"
+  }
+}
