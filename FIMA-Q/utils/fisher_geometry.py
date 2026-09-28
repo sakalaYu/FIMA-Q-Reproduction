@@ -1,9 +1,38 @@
-"""Low-dimensional Fisher diagnostics, independent of timm and training code.
+"""Directional Fisher diagnostics, independent of timm and training code.
 
-Directions are ROWS of an orthonormal basis. All reported Fisher matrices live
-in this basis, not in the full token/channel coordinate system.
+Directions are rows of an orthonormal basis. Reported Fisher matrices live in
+the supplied direction coordinates, not in the full token/channel space.
 """
 import torch
+
+
+def fixed_error_directions(error, groups=1):
+    """Represent one quantization error by fixed, disjoint channel groups.
+
+    Returns unit-norm directions as rows and coefficients whose linear
+    combination reconstructs ``error`` exactly.  ``groups=1`` is the complete
+    error direction.  Larger values split the final (channel) dimension into a
+    fixed number of contiguous groups; no data-dependent rank selection is
+    performed.
+    """
+    if error.ndim < 1 or error.numel() == 0:
+        raise ValueError('error must be a non-empty tensor')
+    if groups < 1 or groups > error.shape[-1]:
+        raise ValueError('groups must be between 1 and the channel count')
+    directions, coefficients = [], []
+    for indices in torch.tensor_split(torch.arange(error.shape[-1], device=error.device), groups):
+        component = torch.zeros_like(error)
+        component[..., indices] = error[..., indices]
+        coefficient = component.norm()
+        if float(coefficient) > 0:
+            direction = component / coefficient
+        else:
+            # Preserve a fixed group count for the degenerate zero-error case.
+            direction = torch.zeros_like(error)
+            direction[..., indices] = 1 / (component[..., indices].numel() ** 0.5)
+        directions.append(direction.flatten())
+        coefficients.append(coefficient)
+    return torch.stack(directions), torch.stack(coefficients)
 
 
 def energy_rank(values, fraction=0.95):

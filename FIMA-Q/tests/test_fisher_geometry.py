@@ -2,10 +2,30 @@
 import unittest
 import torch
 from utils.fisher_geometry import (energy_rank, error_basis, matrix_summary,
-    projected_fisher, response_jacobian, quadratic_predictions)
+    fixed_error_directions, projected_fisher, response_jacobian, quadratic_predictions)
 
 
 class GeometryTests(unittest.TestCase):
+    def test_fixed_error_directions_reconstruct_the_same_error(self):
+        error = torch.arange(24, dtype=torch.float32).reshape(1, 3, 8) - 7
+        for groups in (1, 4):
+            directions, coefficients = fixed_error_directions(error, groups)
+            reconstructed = (coefficients @ directions).reshape_as(error)
+            torch.testing.assert_close(reconstructed, error)
+            torch.testing.assert_close(directions @ directions.T, torch.eye(groups))
+
+    def test_fixed_error_directions_keep_zero_channel_group(self):
+        error = torch.zeros(1, 2, 4)
+        error[..., :2] = 1
+        directions, coefficients = fixed_error_directions(error, 2)
+        self.assertEqual(tuple(directions.shape), (2, error.numel()))
+        self.assertEqual(float(coefficients[1]), 0.)
+        torch.testing.assert_close((coefficients @ directions).reshape_as(error), error)
+
+    def test_fixed_error_directions_validate_group_count(self):
+        with self.assertRaises(ValueError):
+            fixed_error_directions(torch.ones(1, 2, 3), 4)
+
     def test_signed_basis_reconstructs_rank_two_errors(self):
         errors = torch.tensor([[1.,0.,0.],[-1.,0.,0.],[0.,2.,0.]])
         u, energies, rank = error_basis(errors,3)

@@ -129,6 +129,8 @@ python scripts/summarize_fisher_probe.py checkpoints/fisher_probe/results/RUN
 python scripts/summarize_fisher_probe.py checkpoints/fisher_probe/results/RUN --plot
 ```
 
+`matplotlib` 是可选依赖。环境中没有它时，汇总脚本仍会保留两个 CSV、提示跳过 PNG，并正常退出；无需为了分析 CSV 单独安装。
+
 会生成 `summary.csv` 与 `prediction_errors.csv`。后者分别汇总随机组合方向、真实量化误差投影的预测误差，不能合并当成一个指标。
 
 返回实验结果时先发 experiment.json、diagnostics.jsonl、complete.json、两个 CSV 和入口生成的终端 log。不用传共享图像缓存和模型权重。

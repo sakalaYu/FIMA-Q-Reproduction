@@ -50,7 +50,11 @@ def main():
             error = (sum((p-y)**2 for p,y in pairs)/max(sum(y*y for p,y in pairs),1e-30))**0.5
             writer.writerow([*key,len(pairs),error,mean(y for p,y in pairs)])
     if args.plot:
-        import matplotlib
+        try:
+            import matplotlib
+        except ModuleNotFoundError:
+            print('matplotlib is not installed; CSV summaries were written, skipping optional PNG plots.')
+            return
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
         for (event,module,rank,epsilon),group in groups.items():
