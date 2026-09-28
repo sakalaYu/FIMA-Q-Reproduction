@@ -17,6 +17,15 @@ def optional_mean(values, scale=1):
     return mean(values) if values else ''
 
 
+def pearson(pairs):
+    xs, ys = [x for x, _ in pairs], [y for _, y in pairs]
+    xbar, ybar = mean(xs), mean(ys)
+    numerator = sum((x - xbar) * (y - ybar) for x, y in pairs)
+    denominator = (sum((x - xbar) ** 2 for x in xs) *
+                   sum((y - ybar) ** 2 for y in ys)) ** 0.5
+    return numerator / denominator if denominator else ''
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('run', type=pathlib.Path)
@@ -25,16 +34,25 @@ def main():
     complete = (args.run / 'complete.json').exists()
 
     references, forwards, predictions = defaultdict(list), defaultdict(list), defaultdict(list)
+    amplitudes = defaultdict(list)
     for row in rows:
-        key = (row['module'], row['variant'], row['rank'])
         if row['event'] == 'reference':
+            key = (row['module'], row['variant'], row['rank'])
             references[key].append(row)
         elif row['event'] == 'forward_comparison':
+            key = (row['module'], row['variant'], row['rank'])
             forwards[key].append(row)
         elif row['event'] == 'directional_prediction':
+            key = (row['module'], row['variant'], row['rank'])
             for method, approximations in row['predictions'].items():
                 for approximation, prediction in approximations.items():
                     predictions[key + (method, approximation)].append((prediction, row['actual_kl']))
+        elif row['event'] == 'amplitude_sweep':
+            for method, prediction in row['predictions'].items():
+                pair = (prediction, row['actual_kl'])
+                amplitudes[(row['module'], method, row['scale'])].append(pair)
+                if abs(row['scale'] - 1.) > 1e-12:
+                    amplitudes[(row['module'], method, 'all_non_anchor')].append(pair)
 
     fields = ['module', 'variant', 'rank', 'n', 'epsilon', 'complete',
               'reference_seconds', 'forward_seconds', 'speedup',
@@ -65,8 +83,18 @@ def main():
         for key in sorted(predictions):
             pairs = predictions[key]
             writer.writerow([*key, len(pairs), relative_rmse(pairs), mean(target for _, target in pairs)])
+    if amplitudes:
+        with open(args.run / 'amplitude_errors.csv', 'w', newline='', encoding='utf-8') as stream:
+            writer = csv.writer(stream)
+            writer.writerow(['module', 'method', 'scale', 'n', 'relative_rmse',
+                             'pearson', 'prediction_to_true_sum'])
+            for key in sorted(amplitudes, key=lambda item: (item[0], item[1], str(item[2]))):
+                pairs = amplitudes[key]
+                writer.writerow([*key, len(pairs), relative_rmse(pairs), pearson(pairs),
+                                 sum(prediction for prediction, _ in pairs) /
+                                 max(sum(target for _, target in pairs), 1e-30)])
     print('Complete:', complete)
-    print('Wrote summary.csv and prediction_errors.csv to', args.run)
+    print('Wrote CSV summaries to', args.run)
 
 
 if __name__ == '__main__':

@@ -63,6 +63,27 @@ pilot 使用32张图片，检查第 0、3、5、8、11 块的 Attention 和 MLP�
 同步整个结果目录和终端日志即可分析。`pilot` 不会与旧探针同时占用 GPU，因为两个入口
 共用同一个锁文件。
 
+## 固定幅度割线验证
+
+这项验证只运行单方向，并固定测试 `t=0.5、0.75、1.0、1.25、1.5`。它比较局部
+Fisher 二次型和以 `t=1` 真实前向 KL 为锚点的割线方向因子，不选择幅度或模型。
+
+先运行：
+
+```bash
+bash scripts/run_fixed_forward_fisher.sh secant_smoke
+```
+
+成功后运行：
+
+```bash
+bash scripts/run_fixed_forward_fisher.sh secant_pilot
+```
+
+结果目录会额外生成 `amplitude_errors.csv`。其中 `all_non_anchor` 汇总除 `t=1` 以外
+四个幅度，可以用来判断割线因子是否真正泛化到邻近的量化误差幅度，而不是只报告锚点
+上的零误差。
+
 ## 结果判断
 
 首先检查 `complete.json`。随后比较：

@@ -37,8 +37,20 @@ case "$mode" in
       --cache checkpoints/fisher_probe/fixed_full_images.pt --images 64 --blocks all \
       "$@" --epsilon 0.001 --groups 4 --output-dir "$result" 2>&1 | tee "$log"
     ;;
+  secant_smoke)
+    python -u scripts/probe_fixed_forward_fisher.py "${common[@]}" \
+      --cache checkpoints/fisher_probe/fixed_smoke_images.pt --images 4 --blocks 0 \
+      "$@" --epsilon 0.001 --groups 4 --variants single \
+      --scales 0.5 0.75 1.0 1.25 1.5 --output-dir "$result" 2>&1 | tee "$log"
+    ;;
+  secant_pilot)
+    python -u scripts/probe_fixed_forward_fisher.py "${common[@]}" \
+      --cache checkpoints/fisher_probe/fixed_pilot_images.pt --images 32 --blocks 0 3 5 8 11 \
+      "$@" --epsilon 0.001 --groups 4 --variants single \
+      --scales 0.5 0.75 1.0 1.25 1.5 --output-dir "$result" 2>&1 | tee "$log"
+    ;;
   *)
-    echo 'Usage: bash scripts/run_fixed_forward_fisher.sh [smoke|pilot|full] [extra arguments]' >&2
+    echo 'Usage: bash scripts/run_fixed_forward_fisher.sh [smoke|pilot|full|secant_smoke|secant_pilot] [extra arguments]' >&2
     exit 2
     ;;
 esac

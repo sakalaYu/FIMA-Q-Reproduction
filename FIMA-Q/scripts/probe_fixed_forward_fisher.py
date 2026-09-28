@@ -31,6 +31,9 @@ def parser():
     p.add_argument('--blocks', nargs='+', default=['0', '3', '5', '8', '11'])
     p.add_argument('--epsilon', type=float, default=0.001)
     p.add_argument('--groups', type=int, default=4)
+    p.add_argument('--variants', nargs='+', choices=['single', 'grouped'],
+                   default=['single', 'grouped'])
+    p.add_argument('--scales', type=float, nargs='*', default=[])
     p.add_argument('--temperature', type=float, default=20.)
     p.add_argument('--seed', type=int, default=3407)
     p.add_argument('--device', default='cuda:0')
@@ -55,6 +58,10 @@ def main(args):
         raise ValueError('epsilon must be finite and positive')
     if not np.isfinite(args.temperature) or args.temperature <= 0:
         raise ValueError('temperature must be finite and positive')
+    if any(not np.isfinite(scale) or scale <= 0 for scale in args.scales):
+        raise ValueError('scales must be finite and positive')
+    if args.scales and not any(abs(scale - 1.) < 1e-12 for scale in args.scales):
+        raise ValueError('amplitude sweep must include scale 1.0 for the secant anchor')
 
     random.seed(args.seed)
     np.random.seed(args.seed)
@@ -114,8 +121,8 @@ def main(args):
         for branch in ('attn', 'mlp'):
             name = 'blocks.{}.{}'.format(block_index, branch)
             print('Collecting', name, flush=True)
-            saved = {'single': {'reference': [], 'finite_difference': []},
-                     'grouped': {'reference': [], 'finite_difference': []}}
+            saved = {variant: {'reference': [], 'finite_difference': []}
+                     for variant in args.variants}
             for image_index, image in enumerate(images):
                 x, h, error, logits = capture_branch(model, block_index, branch, image[None].to(device))
                 suffix = make_suffix(model, block_index, branch, x)
@@ -128,9 +135,17 @@ def main(args):
                         probabilities,
                         reduction='sum',
                     ).clamp_min(0)
+                    sweep_actual = {}
+                    for scale in args.scales:
+                        sweep_actual[str(scale)] = float(F.kl_div(
+                            F.log_softmax((suffix(h + scale * error) / args.temperature).double().squeeze(0), dim=-1),
+                            probabilities,
+                            reduction='sum',
+                        ).clamp_min(0))
                 activation_norm = max(float(h.norm()), 1e-12)
 
-                for variant, group_count in (('single', 1), ('grouped', args.groups)):
+                configured = [('single', 1), ('grouped', args.groups)]
+                for variant, group_count in (item for item in configured if item[0] in args.variants):
                     directions, coefficients = fixed_error_directions(error, group_count)
                     directions = directions.to(device)
                     coefficients = coefficients.to(device)
@@ -184,6 +199,18 @@ def main(args):
                         variant=variant, rank=rank, actual_kl=float(actual_kl),
                         predictions={'autograd': reference_predictions, 'finite_difference': forward_predictions},
                     ))
+                    if variant == 'single' and args.scales:
+                        anchor = sweep_actual[next(key for key in sweep_actual if abs(float(key) - 1.) < 1e-12)]
+                        for scale in args.scales:
+                            record(dict(
+                                event='amplitude_sweep', module=name, image_index=image_index,
+                                variant=variant, epsilon=args.epsilon, scale=scale,
+                                actual_kl=sweep_actual[str(scale)],
+                                predictions={
+                                    'local_fisher': scale * scale * forward_predictions['full'],
+                                    'forward_secant': scale * scale * anchor,
+                                },
+                            ))
                 print(name, 'image', image_index + 1, '/', len(images), flush=True)
             torch.save(saved, output / (name + '.pt'))
 
