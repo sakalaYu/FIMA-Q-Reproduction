@@ -90,7 +90,7 @@ def get_args_parser():
     parser.add_argument('--a_bit', type=int, default=argparse.SUPPRESS, help='bit-precision of activation')
     parser.add_argument("--calib-metric", type=str, default=argparse.SUPPRESS, choices=['mse', 'mae'], 
                         help='calibration metric')
-    parser.add_argument("--optim-metric", type=str, default=argparse.SUPPRESS, choices=['fisher_brecq', 'fisher_lr', 'fisher_diag', 'fisher_dplr', 'forward_secant', 'mse', 'mae'],
+    parser.add_argument("--optim-metric", type=str, default=argparse.SUPPRESS, choices=['fisher_brecq', 'fisher_lr', 'fisher_diag', 'fisher_dplr', 'forward_secant', 'robust_fisher', 'mse', 'mae'],
                         help='optimization metric')
     parser.add_argument('--optim-mode', type=str, default=argparse.SUPPRESS, choices=['qinp', 'rinp', 'qdrop'], 
                         help='`qinp`:use quanted input; `rinp`: use raw input; `qdrop` use qdrop input;')
@@ -99,6 +99,10 @@ def get_args_parser():
     parser.add_argument('--k', type=int, default=argparse.SUPPRESS, help='The rank of Fisher')
     parser.add_argument('--p1', type=float, default=argparse.SUPPRESS, help='The proportion of low rank')
     parser.add_argument('--p2', type=float, default=argparse.SUPPRESS, help='The proportion of diag')
+    parser.add_argument('--robust-beta', type=float, default=argparse.SUPPRESS,
+                        help='weight of smooth worst-group loss (0 = balanced ERM)')
+    parser.add_argument('--robust-temperature', type=float, default=argparse.SUPPRESS,
+                        help='temperature of smooth worst-group loss')
     parser.add_argument('--dis-mode', type=str, default=argparse.SUPPRESS, choices=['q','qf'],
                         help='the mode of getting gradient. `q`: use quantization; `qf` Take the first k times (default:Uniformly obtain k times);')
     parser.add_argument('--recon-iters', type=int, default=argparse.SUPPRESS,
@@ -128,7 +132,7 @@ def save_model(model, args, cfg, mode='calibrate'):
         auto_name = '{}_w{}_a{}_optimsize_{}_{}{}{}_{}.pth'.format(
             args.model, cfg.w_bit, cfg.a_bit, cfg.optim_size, cfg.optim_metric, 
             '' if cfg.optim_metric in ['mse', 'mae'] else '_dis_mode_' + cfg.dis_mode, 
-            '' if cfg.optim_metric not in['fisher_lr', 'fisher_dplr', 'forward_secant'] else '_rank_' + str(cfg.k),
+            '' if cfg.optim_metric not in['fisher_lr', 'fisher_dplr', 'forward_secant', 'robust_fisher'] else '_rank_' + str(cfg.k),
             cfg.optim_mode)
     save_path = os.path.join(root_path, auto_name)
 
@@ -186,6 +190,9 @@ def main(args):
     cfg.k = args.k if hasattr(args, 'k') else cfg.k
     cfg.p1 = args.p1 if hasattr(args, 'p1') else cfg.p1
     cfg.p2 = args.p2 if hasattr(args, 'p2') else cfg.p2
+    cfg.robust_beta = args.robust_beta if hasattr(args, 'robust_beta') else getattr(cfg, 'robust_beta', 0.5)
+    cfg.robust_temperature = (args.robust_temperature if hasattr(args, 'robust_temperature')
+                              else getattr(cfg, 'robust_temperature', 0.5))
     cfg.dis_mode = args.dis_mode if hasattr(args, 'dis_mode') else cfg.dis_mode
     cfg.recon_iters = args.recon_iters if hasattr(args, 'recon_iters') else getattr(cfg, 'recon_iters', 20000)
     for name, value in vars(cfg).items():
@@ -261,7 +268,8 @@ def main(args):
         logging.info("{} - start {} guided block reconstruction".format(get_cur_time(), cfg.optim_metric))
         block_reconstructor = BlockReconstructor(model, cfg.optim_batch_size, calib_loader,
             metric=cfg.optim_metric, temp=cfg.temp, k=cfg.k, dis_mode=cfg.dis_mode,
-            p1=cfg.p1, p2=cfg.p2, iters=cfg.recon_iters)
+            p1=cfg.p1, p2=cfg.p2, iters=cfg.recon_iters,
+            robust_beta=cfg.robust_beta, robust_temperature=cfg.robust_temperature)
         reconstruction_started = time.perf_counter()
         block_reconstructor.reconstruct_model(quant_act=True, mode=cfg.optim_mode, drop_prob=cfg.drop_prob, keep_gpu=cfg.keep_gpu)
         if device.type == 'cuda':

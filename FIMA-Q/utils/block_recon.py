@@ -15,6 +15,7 @@ import copy
 import time
 import math
 from utils.forward_secant import forward_secant_normalizers, forward_secant_terms
+from utils.robust_fisher import make_groups, balanced_indices, fisher_sample_terms, group_robust_loss
 
 
 def patch_embed_forward(self, x):
@@ -82,7 +83,8 @@ def swin_patchmerging_forward(self, x):
 
 class BlockReconstructor(QuantCalibrator):
     def __init__(self, model, optim_batch_size,calib_loader, metric="mse", temp=20, k=1,
-                 dis_mode='q', p1=1., p2=1., iters=20000):
+                 dis_mode='q', p1=1., p2=1., iters=20000,
+                 robust_beta=0.5, robust_temperature=0.5):
         super().__init__(model, calib_loader)
         self.batch_size = optim_batch_size
         self.metric = metric
@@ -91,6 +93,8 @@ class BlockReconstructor(QuantCalibrator):
         self.p1 = p1
         self.p2 = p2
         self.iters = iters
+        self.robust_beta = robust_beta
+        self.robust_temperature = robust_temperature
         self.secant_update_count = 0
         self.secant_update_seconds = 0.
         self.secant_update_peak_bytes = 0
@@ -117,6 +121,7 @@ class BlockReconstructor(QuantCalibrator):
         module.quanted_input = module.quanted_out = None
         module.delta_out = module.inverse_B = None
         module.secant_direction = module.secant_kl = None
+        module.robust_groups = None
         module.r=1e-6
         if isinstance(module, timm.layers.patch_embed.PatchEmbed):
             module.forward = MethodType(patch_embed_forward, module)
@@ -198,7 +203,7 @@ class BlockReconstructor(QuantCalibrator):
         hooks.append(block.register_forward_hook(self.single_input_forward_hook))
         need_calculate_raw_softmax = False
         if self.raw_pred_softmaxs is None and self.metric in ["fisher_brecq", "fisher_lr", "fisher_diag",
-                                                               "fisher_dplr", "forward_secant"]:
+                                                               "fisher_dplr", "forward_secant", "robust_fisher"]:
             need_calculate_raw_softmax = True
             self.raw_pred_softmaxs = []
         with torch.no_grad():
@@ -268,6 +273,12 @@ class BlockReconstructor(QuantCalibrator):
         raw_grad = raw_grad.reshape(raw_grad.shape[0], -1).abs()
         raw_grad = raw_grad.mean(dim=0).unsqueeze(0) # (1, N)
         q_out = torch.cat(block.tmp_out, dim=0).to(block.raw_out.device)
+        if self.metric == 'robust_fisher' and block.robust_groups is None:
+            teacher_prob = torch.cat(self.raw_pred_softmaxs, dim=0)
+            sample_error = (q_out - block.raw_out).square().flatten(1).mean(dim=1)
+            block.robust_groups = make_groups(teacher_prob, sample_error)
+            counts = torch.bincount(block.robust_groups, minlength=4).tolist()
+            logging.info('robust Fisher groups (entropy x block error): %s', counts)
         delta_out = (q_out - block.raw_out).abs().mean(dim=0).reshape(1, -1) # (1, N)
         block.tmp_grad = block.tmp_out = None
         for hook in hooks:
@@ -374,10 +385,15 @@ class BlockReconstructor(QuantCalibrator):
         a_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(a_optimizer, T_max=iters, eta_min=0.) if len(a_params) != 0 else None
         loss_func = LossFunction(block, round_loss='relaxation', weight=weight, max_count=iters, 
                                  rec_loss=self.metric if 'head' not in name else 'kl_div',
-                                 b_range=b_range, decay_start=0, warmup=warmup, p1=self.p1, p2=self.p2)
+                                 b_range=b_range, decay_start=0, warmup=warmup, p1=self.p1, p2=self.p2,
+                                 robust_beta=self.robust_beta, robust_temperature=self.robust_temperature)
         i_change = max(1, math.floor(iters / self.k))
+        if loss_func.rec_loss == 'robust_fisher':
+            self.new_fisher_ro(block, device)
         for it in range(iters):
-            idx = torch.randperm(block.raw_input.size(0))[:batch_size]
+            idx = (balanced_indices(block.robust_groups, batch_size)
+                   if loss_func.rec_loss == 'robust_fisher'
+                   else torch.randperm(block.raw_input.size(0))[:batch_size])
             if mode == 'qdrop':
                 cur_quant_inp = block.quanted_input[idx].to(device) if block.quanted_input is not None else block.raw_input[idx].to(device)
                 cur_fp_inp = block.raw_input[idx].to(device)
@@ -389,13 +405,13 @@ class BlockReconstructor(QuantCalibrator):
             cur_out = block.raw_out[idx].to(device)
             
             loss_func.update_fisher = False
-            if loss_func.rec_loss in ["fisher_lr", "fisher_diag", "fisher_dplr"] :
+            if loss_func.rec_loss in ["fisher_lr", "fisher_diag", "fisher_dplr", "robust_fisher"] :
                 if self.dis_mode in ['q']:
-                    if it % i_change == 0:
+                    if it % i_change == 0 and (it > 0 or self.metric != 'robust_fisher'):
                         self.new_fisher_ro(block, device)
                         loss_func.update_fisher = True
                 elif self.dis_mode in ['qf']:
-                    if it in range(self.k):
+                    if it in range(self.k) and (it > 0 or self.metric != 'robust_fisher'):
                         self.new_fisher_ro(block, device)
                         loss_func.update_fisher = True
                 cur_grad = block.raw_grad.to(device)
@@ -420,7 +436,9 @@ class BlockReconstructor(QuantCalibrator):
                 a_optimizer.zero_grad()
             out_quant = block(cur_inp)
             if 'head' not in name:
-                err = loss_func(out_quant, cur_out, cur_grad)
+                err = loss_func(out_quant, cur_out, cur_grad,
+                                groups=block.robust_groups[idx].to(device)
+                                if loss_func.rec_loss == 'robust_fisher' else None)
             else:
                 err = loss_func(out_quant, cur_out)
             err.backward()
@@ -440,6 +458,7 @@ class BlockReconstructor(QuantCalibrator):
         self.set_qdrop(block, 1.0)
         del block.raw_input, block.raw_out, block.raw_grad, block.quanted_input
         block.secant_direction = block.secant_kl = None
+        block.robust_groups = None
         torch.cuda.empty_cache()
     
 
@@ -481,7 +500,9 @@ class LossFunction:
                  decay_start: float = 0.0,
                  warmup: float = 0.0,
                  p1: float = 2.,
-                 p2: float = 2.):
+                 p2: float = 2.,
+                 robust_beta: float = 0.5,
+                 robust_temperature: float = 0.5):
 
         self.block = block
         self.round_loss = round_loss
@@ -490,6 +511,8 @@ class LossFunction:
         self.loss_start = max_count * warmup
         self.p1 = p1
         self.p2 = p2
+        self.robust_beta = robust_beta
+        self.robust_temperature = robust_temperature
         self.temp_decay = LinearTempDecay(max_count, rel_start_decay=warmup + (1 - warmup) * decay_start,
                                           start_b=b_range[0], end_b=b_range[1])
         self.count = 0
@@ -505,7 +528,7 @@ class LossFunction:
         else:
             return (pred-tgt).abs().pow(p).mean()
 
-    def __call__(self, pred, tgt, grad=None):
+    def __call__(self, pred, tgt, grad=None, groups=None):
         """
         Compute the total loss for adaptive rounding:
         rec_loss is the quadratic output reconstruction loss, round_loss is
@@ -548,6 +571,22 @@ class LossFunction:
                 self.init_loss_1 = loss_1.detach()
                 self.init_loss_2 = loss_2.detach()
             rec_loss = self.p1 * loss_1 / self.init_loss_1 + self.p2 * loss_2 / self.init_loss_2
+        elif self.rec_loss == 'robust_fisher':
+            if groups is None:
+                raise ValueError('robust_fisher requires sample group IDs')
+            low_rank, diagonal = fisher_sample_terms(pred, tgt, grad, self.block.inverse_B)
+            if self.count == 1 or self.update_fisher:
+                self.init_loss_1 = low_rank.detach().mean().clamp_min(1e-12)
+                self.init_loss_2 = diagonal.detach().mean().clamp_min(1e-12)
+            sample_loss = self.p1 * low_rank / self.init_loss_1 + self.p2 * diagonal / self.init_loss_2
+            rec_loss = group_robust_loss(sample_loss, groups,
+                                         self.robust_beta, self.robust_temperature)
+            if self.count == 1 or self.count % 500 == 0:
+                group_values = {
+                    int(group): round(float(sample_loss[groups == group].detach().mean()), 4)
+                    for group in torch.unique(groups, sorted=True)
+                }
+                print('robust Fisher group losses: {}'.format(group_values))
         elif self.rec_loss == 'forward_secant':
             direction, anchor_kl = grad
             loss_1, loss_2 = forward_secant_terms(pred, tgt, direction, anchor_kl)
