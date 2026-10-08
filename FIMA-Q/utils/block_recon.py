@@ -285,13 +285,14 @@ class BlockReconstructor(QuantCalibrator):
         torch.cuda.empty_cache()
 
     def new_forward_secant(self, block, device, training_drop_prob):
-        """Refresh deterministic signed directions and KL anchors without backward.
+        """Refresh signed directions and KL anchors without backward.
 
-        The diagnostic evidence uses the complete quantization error.  QDrop is
-        therefore disabled only for this anchor forward pass and restored
-        before local reconstruction resumes.
+        The anchor forward uses the same QDrop distribution as local block
+        reconstruction.  Otherwise the secant direction would describe fully
+        quantized activations while the optimized error is sampled with QDrop.
         """
-        print('updating forward secant directions ...')
+        print('updating forward secant directions (QDrop p={:.3g}) ...'.format(
+            training_drop_prob))
         if device.type == 'cuda':
             torch.cuda.synchronize(device)
             baseline_memory = torch.cuda.memory_allocated(device)
@@ -301,7 +302,7 @@ class BlockReconstructor(QuantCalibrator):
         started = time.perf_counter()
         hook = block.register_forward_hook(self.outp_forward_hook)
         sample_kls = []
-        self.set_qdrop(block, 1.0)
+        self.set_qdrop(block, training_drop_prob)
         try:
             with torch.no_grad():
                 for i, (inp, target) in enumerate(self.calib_loader):
@@ -315,6 +316,8 @@ class BlockReconstructor(QuantCalibrator):
                     sample_kls.append(per_sample_kl.detach().cpu())
         finally:
             hook.remove()
+            # Keep the local reconstruction distribution unchanged after the
+            # full-model anchor pass, including when that pass raises.
             self.set_qdrop(block, training_drop_prob)
         q_out = torch.cat(block.tmp_out, dim=0).to(block.raw_out.device)
         block.tmp_out = None
