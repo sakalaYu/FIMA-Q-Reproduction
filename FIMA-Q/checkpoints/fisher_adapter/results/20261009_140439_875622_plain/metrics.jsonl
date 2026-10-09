@@ -1,0 +1,4 @@
+{"event": "baseline", "teacher": {"images": 16, "top1": 87.5, "top5": 100.0, "teacher_kl": null}, "student": {"images": 16, "top1": 87.5, "top5": 100.0, "teacher_kl": 0.5376546215265989}}
+{"event": "epoch", "epoch": 1, "train_images": 4, "train_loss": 0.37618640065193176, "train_logit_kl": 0.14912722259759903, "train_feature_loss": 0.22705916315317154, "holdout": {"images": 16, "top1": 81.25, "top5": 100.0, "teacher_kl": 0.6222044378519058}}
+{"event": "selection", "best_epoch": 0, "best_holdout_kl": 0.5376546215265989}
+{"event": "complete", "elapsed_seconds": 2.398693472146988}

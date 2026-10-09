@@ -1,0 +1,8 @@
+{"event": "baseline", "teacher": {"images": 64, "top1": 85.9375, "top5": 98.4375, "teacher_kl": null}, "student": {"images": 64, "top1": 78.125, "top5": 96.875, "teacher_kl": 0.4672339856624603}}
+{"event": "imagenet_val_baseline", "student": {"images": 50000, "top1": 76.306, "top5": 93.798, "teacher_kl": null}}
+{"event": "epoch", "epoch": 1, "train_images": 960, "train_loss": 0.7093880372742812, "train_logit_kl": 0.41571499621495606, "train_feature_loss": 0.29367304164916275, "holdout": {"images": 64, "top1": 76.5625, "top5": 95.3125, "teacher_kl": 0.4618293568491936}}
+{"event": "epoch", "epoch": 2, "train_images": 960, "train_loss": 0.6338525621841351, "train_logit_kl": 0.3418654667213559, "train_feature_loss": 0.29198709670454265, "holdout": {"images": 64, "top1": 81.25, "top5": 95.3125, "teacher_kl": 0.37442562356591225}}
+{"event": "epoch", "epoch": 3, "train_images": 960, "train_loss": 0.5739130569001039, "train_logit_kl": 0.28388602621853354, "train_feature_loss": 0.2900270313645403, "holdout": {"images": 64, "top1": 76.5625, "top5": 95.3125, "teacher_kl": 0.44416621048003435}}
+{"event": "selection", "best_epoch": 2, "best_holdout_kl": 0.37442562356591225}
+{"event": "imagenet_val", "best_epoch": 2, "student": {"images": 50000, "top1": 76.214, "top5": 93.806, "teacher_kl": null}}
+{"event": "complete", "elapsed_seconds": 594.1437014266849}
