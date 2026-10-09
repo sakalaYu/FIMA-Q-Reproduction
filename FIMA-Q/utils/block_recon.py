@@ -586,7 +586,7 @@ class LossFunction:
                     int(group): round(float(sample_loss[groups == group].detach().mean()), 4)
                     for group in torch.unique(groups, sorted=True)
                 }
-                print('robust Fisher group losses: {}'.format(group_values))
+                logging.info('robust Fisher group losses: %s', group_values)
         elif self.rec_loss == 'forward_secant':
             direction, anchor_kl = grad
             loss_1, loss_2 = forward_secant_terms(pred, tgt, direction, anchor_kl)

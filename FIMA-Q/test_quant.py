@@ -17,6 +17,7 @@ from utils.calibrator import QuantCalibrator
 from utils.block_recon import BlockReconstructor
 from utils.wrap_net import wrap_modules_in_net, wrap_reparamed_modules_in_net
 from utils.test_utils import *
+from utils.orthogonal_vit import apply_headwise_hadamard
 from datetime import datetime
 import logging
 
@@ -109,6 +110,8 @@ def get_args_parser():
                         help='fixed reconstruction iterations per block')
     parser.add_argument('--skip-final-validation', action='store_true',
                         help='skip calibration/test validation for a short integration smoke run')
+    parser.add_argument('--headwise-hadamard', action='store_true',
+                        help='apply fixed, function-preserving Hadamard rotations before quantization')
     return parser
 
 
@@ -230,6 +233,9 @@ def main(args):
 
     model.to(device)
     model.eval()
+    if args.headwise_hadamard:
+        rotation_info = apply_headwise_hadamard(model, verify=True)
+        logging.info("Applied head-wise Hadamard rotation: {}".format(rotation_info))
     data_path = args.dataset
     g = mydatasets.ViTImageNetLoaderGenerator(data_path, args.val_batch_size, args.num_workers, kwargs={"model":model})
     
@@ -259,8 +265,11 @@ def main(args):
             model.to(device)
             logging.info("{} - {} guided calibration finished.".format(get_cur_time(), cfg.calib_metric))
             save_model(model, args, cfg, mode='calibrate')
-            logging.info('Validating after calibration ...')
-            val_loss, val_prec1, val_prec5 = validate(val_loader, model, criterion, print_freq=args.print_freq, device=device)
+            if not args.skip_final_validation:
+                logging.info('Validating after calibration ...')
+                val_loss, val_prec1, val_prec5 = validate(
+                    val_loader, model, criterion, print_freq=args.print_freq, device=device
+                )
 
     if args.optimize:
         logging.info('Building calibrator ...')
