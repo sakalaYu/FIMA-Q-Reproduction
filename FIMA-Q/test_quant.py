@@ -11,6 +11,7 @@ import copy
 import time
 import re
 import shutil
+import random
 
 import utils.datasets as mydatasets
 from utils.calibrator import QuantCalibrator
@@ -116,6 +117,7 @@ def get_args_parser():
 
 
 def seed_all(seed):
+    random.seed(seed)
     torch.manual_seed(seed)
     np.random.seed(seed)
     torch.cuda.manual_seed(seed)
@@ -224,6 +226,7 @@ def main(args):
     }
 
     seed_all(args.seed)
+    logging.info('Python random seeded: %d', args.seed)
     
     logging.info('Building model ...')
     try:

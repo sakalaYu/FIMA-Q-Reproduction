@@ -13,6 +13,8 @@ import warnings
 from PIL import Image
 from PIL import ImageFile
 import random
+import hashlib
+import logging
 import torch.nn.functional as F
 from torch.utils.data import Dataset
 import timm
@@ -64,6 +66,15 @@ class LoaderGenerator():
         inds = np.random.permutation(len(self.train_set))[:num]
         if in_memory:
             preloaded_data = [self.train_set[i] for i in inds]
+            if os.environ.get('FIMAQ_CAPTURE_CALIBRATION_HASH') == '1':
+                # Fingerprint the actual augmented tensors, not just image indices.
+                sample_hash = hashlib.sha256(np.asarray(inds, dtype='<i8').tobytes())
+                tensor_hash = hashlib.sha256()
+                for tensor, label in preloaded_data:
+                    tensor_hash.update(tensor.detach().cpu().contiguous().numpy().tobytes())
+                    tensor_hash.update(int(label).to_bytes(8, 'little', signed=True))
+                logging.info('Calibration cache: count=%d sample_sha256=%s tensor_sha256=%s',
+                             len(preloaded_data), sample_hash.hexdigest(), tensor_hash.hexdigest())
             self._calib_set = CacheDataset(preloaded_data)
         else:
             self._calib_set = torch.utils.data.Subset(copy.deepcopy(self.train_set),inds)
