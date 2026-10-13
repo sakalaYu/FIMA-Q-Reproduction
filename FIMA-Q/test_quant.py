@@ -113,6 +113,8 @@ def get_args_parser():
                         help='skip calibration/test validation for a short integration smoke run')
     parser.add_argument('--headwise-hadamard', action='store_true',
                         help='apply fixed, function-preserving Hadamard rotations before quantization')
+    parser.add_argument('--headwise-mode', choices=('all', 'qk', 'vo'), default='all',
+                        help='rotation location; requires --headwise-hadamard for qk/vo')
     return parser
 
 
@@ -237,7 +239,7 @@ def main(args):
     model.to(device)
     model.eval()
     if args.headwise_hadamard:
-        rotation_info = apply_headwise_hadamard(model, verify=True)
+        rotation_info = apply_headwise_hadamard(model, verify=True, mode=args.headwise_mode)
         logging.info("Applied head-wise Hadamard rotation: {}".format(rotation_info))
     data_path = args.dataset
     g = mydatasets.ViTImageNetLoaderGenerator(data_path, args.val_batch_size, args.num_workers, kwargs={"model":model})
@@ -312,4 +314,6 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(parents=[get_args_parser()])
     args = parser.parse_args()
+    if args.headwise_mode != 'all' and not args.headwise_hadamard:
+        parser.error('--headwise-mode qk/vo requires --headwise-hadamard')
     main(args)

@@ -2,3 +2,12 @@
 __pycache__/
 .ipynb_checkpoints/
 .ssh/
+
+# Large generated tensors stay on the experiment server (or artifact storage).
+# Logs, JSON/CSV summaries, configs and source remain versionable.
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.onnx
+checkpoints/headwise_experiments/locks/

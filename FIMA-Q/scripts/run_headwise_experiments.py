@@ -43,11 +43,32 @@ def planned_jobs(suite, worker=1, workers=1, include_3407=False):
         jobs.extend((3, 3407, rotation) for rotation in (False, True))
     if suite == "w4-3407":
         jobs.extend((4, 3407, rotation) for rotation in (False, True))
+    if suite in ("w3-followup", "w3-seeds"):
+        jobs.extend((3, seed, rotation) for seed in (3408, 3409) for rotation in (False, True))
+    if suite in ("w3-followup", "w3-ablation"):
+        jobs.extend((3, 3407, mode) for mode in ("qk", "vo"))
+    if suite == "w3-followup" and workers == 3:
+        # Keep each seed pair together, with both location ablations in window 3.
+        # All three windows can run concurrently when --gpu-slots 3 is supplied.
+        return jobs[2 * (worker - 1):2 * worker]
     return jobs[worker - 1::workers]
 
 
+def rotation_mode(rotation):
+    # Keep old boolean callers and old all-rotation run names compatible.
+    if rotation is True:
+        return "all"
+    if rotation is False:
+        return "none"
+    if rotation not in ("none", "all", "qk", "vo"):
+        raise ValueError(f"Unknown rotation setting: {rotation}")
+    return rotation
+
+
 def run_name(bits, seed, rotation):
-    return f"headwise_w{bits}a{bits}_seed{seed}_{'rotation' if rotation else 'baseline'}_seeded_full"
+    mode = rotation_mode(rotation)
+    label = {"all": "rotation", "none": "baseline"}.get(mode, mode)
+    return f"headwise_w{bits}a{bits}_seed{seed}_{label}_seeded_full"
 
 
 def read_run(path):
@@ -89,10 +110,14 @@ def read_run(path):
     hashes = re.findall(r"Calibration cache: count=(\d+) sample_sha256=([a-f0-9]{64}) "
                         r"tensor_sha256=([a-f0-9]{64})", text)
     elapsed = re.search(r"Block reconstruction elapsed seconds: ([\d.]+)", text)
+    mode = args.get("headwise_mode", "all") if args.get("headwise_hadamard", False) else "none"
+    if mode not in ("none", "all", "qk", "vo"):
+        return None
     return dict(path=str(path), args=args, cfg=cfg, bits=bits,
                 run_id=path.parent.name if path.name == "output.log" else path.stem,
                 python_seeded=seeded, calibration_hashes=hashes,
                 seed=args["seed"], rotation=bool(args.get("headwise_hadamard", False)),
+                rotation_mode=mode,
                 top1=float(metrics[-1][0]), top5=float(metrics[-1][1]),
                 loss=float(metrics[-1][2]), calibration_top1=float(metrics[0][0]),
                 reconstruction_seconds=float(elapsed.group(1)) if elapsed else None)
@@ -115,7 +140,7 @@ def dataset_path(value):
 
 def latest_run(runs, bits, seed, rotation, dataset, seeded=True):
     matches = [r for r in runs if r["bits"] == bits and r["seed"] == seed
-               and r["rotation"] == rotation
+               and r["rotation_mode"] == rotation_mode(rotation)
                and r["python_seeded"] == seeded
                and dataset_path(r["args"]["dataset"]) == dataset_path(dataset)]
     if seeded:
@@ -127,7 +152,7 @@ def summary(dataset, write=True):
     runs = available_runs()
     report = {}
     print("\nPaired results (percentage points; latest completed run per setting):")
-    for bits, seeds in ((4, (3407, 3408, 3409)), (3, (3407,))):
+    for bits, seeds in ((4, (3407, 3408, 3409)), (3, (3407, 3408, 3409))):
         pairs = []
         for seed in seeds:
             baseline = latest_run(runs, bits, seed, False, dataset)
@@ -158,6 +183,23 @@ def summary(dataset, write=True):
             std = f"{group['sample_std_delta_pp']:.3f}" if len(deltas) > 1 else "N/A (one pair)"
             print(f"  {len(deltas)}/{len(seeds)} pairs: mean delta "
                   f"{group['mean_delta_pp']:+.3f} pp; sample std {std} pp")
+    baseline = latest_run(runs, 3, 3407, False, dataset)
+    ablations = []
+    print("\nW3A3 seed 3407 rotation locations (relative to the same baseline):")
+    for mode in ("none", "qk", "vo", "all"):
+        run = latest_run(runs, 3, 3407, mode, dataset)
+        if run is None or baseline is None:
+            print(f"  {mode}: incomplete")
+            continue
+        if (run["cfg"] != baseline["cfg"] or
+                run["args"].get("num_workers") != baseline["args"].get("num_workers") or
+                run["calibration_hashes"] != baseline["calibration_hashes"]):
+            print(f"  {mode}: config/worker/calibration mismatch; excluded")
+            continue
+        delta = run["top1"] - baseline["top1"]
+        ablations.append(dict(mode=mode, run=run, delta_top1_pp=delta))
+        print(f"  {mode}: {run['top1']:.3f}; delta {delta:+.3f} pp")
+    report["w3a3_seed3407_ablation"] = dict(rows=ablations, count=len(ablations), expected_count=4)
     legacy = [r for r in runs if not r["python_seeded"]]
     report["legacy_reference"] = legacy
     if legacy:
@@ -185,8 +227,11 @@ def command(bits, seed, rotation, dataset, workers):
               "--p1", "1", "--p2", "1", "--dis-mode", "q"]
     for key, value in RECIPE.items():
         result.extend(["--" + key.replace("_", "-"), str(value)])
-    if rotation:
+    mode = rotation_mode(rotation)
+    if mode != "none":
         result.append("--headwise-hadamard")
+        if mode != "all":
+            result.extend(["--headwise-mode", mode])
     return result
 
 
@@ -247,7 +292,8 @@ def job_lock(name):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--suite", required=True,
-                        choices=("all", "w4-seeds", "w3-pair", "w4-3407", "summary"))
+                        choices=("all", "w4-seeds", "w3-pair", "w4-3407", "w3-followup",
+                                 "w3-seeds", "w3-ablation", "summary"))
     parser.add_argument("--worker", type=int, default=1, help="1-based tmux window number")
     parser.add_argument("--workers", type=int, default=1, help="Total windows, at most 4")
     parser.add_argument("--include-3407", action="store_true",
@@ -280,6 +326,10 @@ def main():
     data_source = (ROOT / "utils/datasets.py").read_text(encoding="utf-8")
     if "Python random seeded:" not in entry_source or "FIMAQ_CAPTURE_CALIBRATION_HASH" not in data_source:
         parser.error("Sync test_quant.py and utils/datasets.py before starting this launcher")
+    if any(rotation_mode(job[2]) in ("qk", "vo") for job in jobs):
+        rotation_source = (ROOT / "utils/orthogonal_vit.py").read_text(encoding="utf-8")
+        if "--headwise-mode" not in entry_source or 'mode: str = "all"' not in rotation_source:
+            parser.error("Sync test_quant.py and utils/orthogonal_vit.py for rotation ablations")
     dataset = dataset_path(args.dataset)
     if not all((dataset / split).is_dir() for split in ("train", "val")):
         parser.error(f"Missing train/val directories under {dataset}")

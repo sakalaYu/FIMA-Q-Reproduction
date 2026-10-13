@@ -19,14 +19,21 @@ def _normalized_hadamard(size: int, *, device, dtype) -> torch.Tensor:
     return matrix / math.sqrt(size)
 
 
-def apply_headwise_hadamard(model: nn.Module, verify: bool = True) -> dict:
+def apply_headwise_hadamard(model: nn.Module, verify: bool = True,
+                           mode: str = "all") -> dict:
     """Fold a fixed normalized Hadamard basis into every ViT attention head.
 
     Q and K are rotated by the same orthogonal matrix, preserving their dot
     products. V uses the same rotation and the inverse is folded into the
     matching input columns of the output projection. No runtime layers or
     trainable parameters are added.
+
+    mode='qk' rotates only queries and keys; mode='vo' rotates only values
+    and the matching output-projection columns. 'all' preserves the original
+    experiment's behavior. Every mode preserves the full-precision function.
     """
+    if mode not in ("all", "qk", "vo"):
+        raise ValueError(f"Unknown headwise rotation mode: {mode}")
     blocks = getattr(model, "blocks", None)
     if blocks is None or not len(blocks):
         raise TypeError("Expected a timm ViT-like model with non-empty model.blocks")
@@ -73,7 +80,8 @@ def apply_headwise_hadamard(model: nn.Module, verify: bool = True) -> dict:
             )
             old_weight = qkv.weight.detach().clone()
             old_bias = qkv.bias.detach().clone() if qkv.bias is not None else None
-            for branch in range(3):
+            branches = (0, 1, 2) if mode == "all" else ((0, 1) if mode == "qk" else (2,))
+            for branch in branches:
                 for head in range(heads):
                     start = branch * qkv.in_features + head * head_dim
                     stop = start + head_dim
@@ -81,11 +89,12 @@ def apply_headwise_hadamard(model: nn.Module, verify: bool = True) -> dict:
                     if old_bias is not None:
                         qkv.bias[start:stop].copy_(rotation.T @ old_bias[start:stop])
 
-            old_proj_weight = proj.weight.detach().clone()
-            for head in range(heads):
-                start = head * head_dim
-                stop = start + head_dim
-                proj.weight[:, start:stop].copy_(old_proj_weight[:, start:stop] @ rotation)
+            if mode in ("all", "vo"):
+                old_proj_weight = proj.weight.detach().clone()
+                for head in range(heads):
+                    start = head * head_dim
+                    stop = start + head_dim
+                    proj.weight[:, start:stop].copy_(old_proj_weight[:, start:stop] @ rotation)
 
             total_heads += heads
             head_dim_seen.add(head_dim)
@@ -103,6 +112,7 @@ def apply_headwise_hadamard(model: nn.Module, verify: bool = True) -> dict:
         model.train(was_training)
 
     return {
+        "mode": mode,
         "blocks": len(blocks),
         "heads": total_heads,
         "head_dims": sorted(head_dim_seen),

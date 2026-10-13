@@ -1,7 +1,9 @@
 # 四窗口逐头旋转配对实验
 
 服务器目录：`~/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q`。
-本次按一张 GPU、四个任务共享运行。计算逻辑在 Python 文件中，下面仅为启动命令。
+服务器实测只有 23.52 GiB 显存，四任务共享已在校准阶段触发 OOM。
+现在保留四个任务窗口，但同一时间仅运行一个 GPU 任务，其余窗口等待锁。
+计算逻辑在 Python 文件中，下面仅为启动命令。
 
 ## 同步文件
 
@@ -39,31 +41,36 @@ cd ~/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q
 窗口 1：
 
 ```bash
-python -u scripts/run_headwise_experiments.py --suite all --worker 1 --workers 4 --gpu 0 --gpu-slots 4 --resume
+python -u scripts/run_headwise_experiments.py --suite all --worker 1 --workers 4 --gpu 0 --gpu-slots 1 --resume
 ```
 
 窗口 2：
 
 ```bash
-python -u scripts/run_headwise_experiments.py --suite all --worker 2 --workers 4 --gpu 0 --gpu-slots 4 --resume
+python -u scripts/run_headwise_experiments.py --suite all --worker 2 --workers 4 --gpu 0 --gpu-slots 1 --resume
 ```
 
 窗口 3：
 
 ```bash
-python -u scripts/run_headwise_experiments.py --suite all --worker 3 --workers 4 --gpu 0 --gpu-slots 4 --resume
+python -u scripts/run_headwise_experiments.py --suite all --worker 3 --workers 4 --gpu 0 --gpu-slots 1 --resume
 ```
 
 窗口 4：
 
 ```bash
-python -u scripts/run_headwise_experiments.py --suite all --worker 4 --workers 4 --gpu 0 --gpu-slots 4 --resume
+python -u scripts/run_headwise_experiments.py --suite all --worker 4 --workers 4 --gpu 0 --gpu-slots 1 --resume
 ```
 
-所有窗口的 `--workers 4` 和 `--gpu-slots 4` 必须一致，只有 `--worker` 不同。
+所有新启动窗口的 `--workers 4` 和 `--gpu-slots 1` 保持一致，只有 `--worker` 不同。
 启动器会固定物理 GPU 的 UUID，子进程使用 `--device cuda`，以保留设备映射。
-四个窗口使用同一套进程槽位锁，不调用旧的单 GPU 独占 Bash 启动器。
+四个窗口使用同一套进程锁排队，不调用旧的 Bash 启动器。
 槽位限制只覆盖这个 Python 启动器启动的任务，不管理用户手动启动的其他 GPU 程序。
+
+已经失败的窗口可直接用上述对应命令重启，无须删除日志或 checkpoint。
+`--gpu-slots 1` 使用独占锁，会等待先前以 `--gpu-slots 4` 启动的共享任务释放 GPU 锁，
+不会再挤入这些任务。等待期间未启动模型子进程，不占用 GPU 显存。
+先前仍正常运行的窗口可继续；如果也 OOM，则改用 `--gpu-slots 1` 重启。
 
 `--resume` 跳过已完成、配置匹配、带种子标记和输入指纹的任务。中断或失败的任务从头重跑，
 不支持恢复未完成的 block 重建。默认数据路径是 `../imagenet_fimaq`。
@@ -101,11 +108,11 @@ W4A4 默认将显示 3408/3409 两个新配对；旧 3407 在历史记录中单�
 如果已经启动了六任务安排，不要中途更改分片参数。全部结束后，在两个窗口分别补跑：
 
 ```bash
-python -u scripts/run_headwise_experiments.py --suite w4-3407 --worker 1 --workers 2 --gpu 0 --gpu-slots 4 --resume
+python -u scripts/run_headwise_experiments.py --suite w4-3407 --worker 1 --workers 2 --gpu 0 --gpu-slots 1 --resume
 ```
 
 ```bash
-python -u scripts/run_headwise_experiments.py --suite w4-3407 --worker 2 --workers 2 --gpu 0 --gpu-slots 4 --resume
+python -u scripts/run_headwise_experiments.py --suite w4-3407 --worker 2 --workers 2 --gpu 0 --gpu-slots 1 --resume
 ```
 
 然后重新汇总。
@@ -113,8 +120,8 @@ python -u scripts/run_headwise_experiments.py --suite w4-3407 --worker 2 --worke
 ## 时间预算与验证范围
 
 已完成的 W4A4 单任务独占 GPU 耗时约 2 小时 8 分钟。六任务对应约 13 小时的单任务
-累计耗时；W3A3 的时间尚未实测。四个任务共享同一 GPU 时，不应按四倍提速估计。
-可暂按整批 12–16 小时预留，实际会受显存、GPU 利用率、CPU 和数据读取竞争影响。
+累计耗时；W3A3 的时间尚未实测。改为 GPU 任务顺序执行后，可暂按从头运行整批
+12–16 小时预留，实际时间受硬件负载及 W3A3 实测耗时影响。
 若启用额外 3407 配对，累计工作量约增三分之一。
 
 本地已检查任务分配、汇总统计、历史实验隔离、输入指纹不一致的排除，以及命令生成。
