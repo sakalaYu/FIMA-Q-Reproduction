@@ -84,7 +84,7 @@ def swin_patchmerging_forward(self, x):
 class BlockReconstructor(QuantCalibrator):
     def __init__(self, model, optim_batch_size,calib_loader, metric="mse", temp=20, k=1,
                  dis_mode='q', p1=1., p2=1., iters=20000,
-                 robust_beta=0.5, robust_temperature=0.5):
+                 robust_beta=0.5, robust_temperature=0.5, qk_joint_options=None):
         super().__init__(model, calib_loader)
         self.batch_size = optim_batch_size
         self.metric = metric
@@ -95,6 +95,8 @@ class BlockReconstructor(QuantCalibrator):
         self.iters = iters
         self.robust_beta = robust_beta
         self.robust_temperature = robust_temperature
+        self.qk_joint_options = qk_joint_options
+        self.qk_joint_results = []
         self.secant_update_count = 0
         self.secant_update_seconds = 0.
         self.secant_update_peak_bytes = 0
@@ -471,6 +473,10 @@ class BlockReconstructor(QuantCalibrator):
             block = self.blocks[name]
             logging.info('reconstructing {} ...'.format(name))
             self.init_block_raw_data(block, name, device, qinp=(mode != 'rinp'), keep_gpu=keep_gpu)
+            if self.qk_joint_options and name.startswith('blocks.') and hasattr(block, 'attn'):
+                from utils.qk_joint import calibrate_qk_block
+                self.qk_joint_results.append(calibrate_qk_block(
+                    self, name, block, device, self.qk_joint_options))
             logging.info('adaround training for {} ...'.format(name))
             self.reconstruct_single_block(name, block, device, iters=self.iters,
                                           quant_act=quant_act, mode=mode, drop_prob=drop_prob)

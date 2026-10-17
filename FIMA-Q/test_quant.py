@@ -12,6 +12,7 @@ import time
 import re
 import shutil
 import random
+import json
 
 import utils.datasets as mydatasets
 from utils.calibrator import QuantCalibrator
@@ -115,6 +116,12 @@ def get_args_parser():
                         help='apply fixed, function-preserving Hadamard rotations before quantization')
     parser.add_argument('--headwise-mode', choices=('all', 'qk', 'vo'), default='all',
                         help='rotation location; requires --headwise-hadamard for qk/vo')
+    parser.add_argument('--qk-joint-variant', choices=('none', 'A', 'B', 'C'), default='none')
+    parser.add_argument('--qk-joint-steps', type=int, default=300)
+    parser.add_argument('--qk-joint-batch-size', type=int, default=8)
+    parser.add_argument('--qk-joint-holdout', type=int, default=128)
+    parser.add_argument('--qk-joint-lr', type=float, default=0.003)
+    parser.add_argument('--qk-joint-eval-every', type=int, default=50)
     return parser
 
 
@@ -280,10 +287,20 @@ def main(args):
         logging.info('Building calibrator ...')
         calib_loader = g.calib_loader(num=cfg.optim_size, batch_size=cfg.optim_batch_size, seed=args.seed)
         logging.info("{} - start {} guided block reconstruction".format(get_cur_time(), cfg.optim_metric))
+        qk_options = None
+        if args.qk_joint_variant != 'none':
+            if cfg.optim_metric != 'fisher_dplr':
+                raise ValueError('QK joint calibration requires fisher_dplr reconstruction')
+            if not 0 < args.qk_joint_holdout < cfg.optim_size:
+                raise ValueError('QK joint holdout must be between 1 and optim_size - 1')
+            qk_options = dict(variant=args.qk_joint_variant, steps=args.qk_joint_steps,
+                              batch_size=args.qk_joint_batch_size, holdout=args.qk_joint_holdout,
+                              lr=args.qk_joint_lr, eval_every=args.qk_joint_eval_every, seed=args.seed)
         block_reconstructor = BlockReconstructor(model, cfg.optim_batch_size, calib_loader,
             metric=cfg.optim_metric, temp=cfg.temp, k=cfg.k, dis_mode=cfg.dis_mode,
             p1=cfg.p1, p2=cfg.p2, iters=cfg.recon_iters,
-            robust_beta=cfg.robust_beta, robust_temperature=cfg.robust_temperature)
+            robust_beta=cfg.robust_beta, robust_temperature=cfg.robust_temperature,
+            qk_joint_options=qk_options)
         reconstruction_started = time.perf_counter()
         block_reconstructor.reconstruct_model(quant_act=True, mode=cfg.optim_mode, drop_prob=cfg.drop_prob, keep_gpu=cfg.keep_gpu)
         if device.type == 'cuda':
@@ -291,6 +308,9 @@ def main(args):
         logging.info('Block reconstruction elapsed seconds: {:.3f}'.format(
             time.perf_counter() - reconstruction_started))
         logging.info("{} - {} guided block reconstruction finished.".format(get_cur_time(), cfg.optim_metric))
+        if qk_options:
+            with open(os.path.join(root_path, 'qk_joint.json'), 'w', encoding='utf-8') as handle:
+                json.dump(dict(options=qk_options, blocks=block_reconstructor.qk_joint_results), handle, indent=2)
         save_model(model, args, cfg, mode='optimize')
     if args.load_optimize_checkpoint:
         logging.info('Building calibrator ...')
@@ -316,4 +336,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.headwise_mode != 'all' and not args.headwise_hadamard:
         parser.error('--headwise-mode qk/vo requires --headwise-hadamard')
+    if args.qk_joint_variant != 'none':
+        if not args.headwise_hadamard or args.headwise_mode != 'all' or not args.optimize:
+            parser.error('QK joint A/B/C requires --headwise-hadamard --headwise-mode all --optimize')
+        if args.load_calibrate_checkpoint or args.load_optimize_checkpoint:
+            parser.error('QK joint A/B/C starts from a fresh floating-point model')
+        if args.model not in ('vit_small', 'vit_base', 'deit_small', 'deit_base', 'deit_tiny', 'vit_tiny'):
+            parser.error('QK joint A/B/C currently supports timm ViT/DeiT models')
+        if min(args.qk_joint_steps, args.qk_joint_batch_size, args.qk_joint_holdout,
+               args.qk_joint_eval_every) < 1 or args.qk_joint_lr <= 0:
+            parser.error('QK joint sizes, steps, interval and learning rate must be positive')
     main(args)
