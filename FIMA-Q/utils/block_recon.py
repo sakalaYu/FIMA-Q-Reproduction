@@ -14,6 +14,8 @@ import random
 import copy
 import time
 import math
+import json
+from contextlib import nullcontext
 from utils.forward_secant import forward_secant_normalizers, forward_secant_terms
 from utils.robust_fisher import make_groups, balanced_indices, fisher_sample_terms, group_robust_loss
 
@@ -84,7 +86,8 @@ def swin_patchmerging_forward(self, x):
 class BlockReconstructor(QuantCalibrator):
     def __init__(self, model, optim_batch_size,calib_loader, metric="mse", temp=20, k=1,
                  dis_mode='q', p1=1., p2=1., iters=20000,
-                 robust_beta=0.5, robust_temperature=0.5, qk_joint_options=None):
+                 robust_beta=0.5, robust_temperature=0.5, qk_joint_options=None,
+                 attention_relation_options=None):
         super().__init__(model, calib_loader)
         self.batch_size = optim_batch_size
         self.metric = metric
@@ -97,6 +100,13 @@ class BlockReconstructor(QuantCalibrator):
         self.robust_temperature = robust_temperature
         self.qk_joint_options = qk_joint_options
         self.qk_joint_results = []
+        if qk_joint_options and attention_relation_options:
+            raise ValueError('Run attention relations separately from QK pre-calibration')
+        if attention_relation_options and metric != 'fisher_dplr':
+            raise ValueError('Attention relations require fisher_dplr reconstruction')
+        self.attention_relation_options = attention_relation_options
+        self.attention_relation_results = []
+        self.current_relation = None
         self.secant_update_count = 0
         self.secant_update_seconds = 0.
         self.secant_update_peak_bytes = 0
@@ -177,7 +187,13 @@ class BlockReconstructor(QuantCalibrator):
                         module.B_quantizer.drop_prob = prob
 
     def init_block_raw_data(self, block, name, device, qinp=False, keep_gpu=True):
+        self.current_relation = None
+        if self.attention_relation_options and name.startswith('blocks.') and hasattr(block, 'attn'):
+            from utils.attention_relation import AttentionRelation
+            self.current_relation = AttentionRelation(block, name, self.attention_relation_options)
         self.init_block_raw_inp_outp(block, device)
+        if self.current_relation is not None:
+            self.current_relation.finish_cache(len(block.raw_input), device, keep_gpu)
         if qinp and 'patch_embed' not in name:
             self.init_block_quanted_input(block, device)
         
@@ -203,6 +219,8 @@ class BlockReconstructor(QuantCalibrator):
         hooks = []
         hooks.append(block.register_forward_hook(self.outp_forward_hook))
         hooks.append(block.register_forward_hook(self.single_input_forward_hook))
+        if self.current_relation is not None:
+            hooks.append(block.attn.matmul1.register_forward_hook(self.current_relation.cache_teacher))
         need_calculate_raw_softmax = False
         if self.raw_pred_softmaxs is None and self.metric in ["fisher_brecq", "fisher_lr", "fisher_diag",
                                                                "fisher_dplr", "forward_secant", "robust_fisher"]:
@@ -264,6 +282,10 @@ class BlockReconstructor(QuantCalibrator):
         hooks = []
         hooks.append(block.register_forward_hook(self.outp_forward_hook))
         hooks.append(block.register_full_backward_hook(self.grad_hook))
+        if self.current_relation is not None:
+            self.current_relation.begin_refresh()
+            if self.current_relation.options['mode'] == 'fisher':
+                hooks.append(block.attn.matmul1.register_full_backward_hook(self.current_relation.score_gradient))
         for i, (inp, target) in enumerate(self.calib_loader):
             self.model.zero_grad()
             inp = inp.to(device)
@@ -285,6 +307,8 @@ class BlockReconstructor(QuantCalibrator):
         block.tmp_grad = block.tmp_out = None
         for hook in hooks:
             hook.remove()
+        if self.current_relation is not None:
+            self.current_relation.end_refresh()
         
         if block.raw_grad is None:
             block.raw_grad = raw_grad
@@ -436,14 +460,20 @@ class BlockReconstructor(QuantCalibrator):
             w_optimizer.zero_grad()
             if quant_act:
                 a_optimizer.zero_grad()
-            out_quant = block(cur_inp)
-            if 'head' not in name:
-                err = loss_func(out_quant, cur_out, cur_grad,
-                                groups=block.robust_groups[idx].to(device)
-                                if loss_func.rec_loss == 'robust_fisher' else None)
-            else:
-                err = loss_func(out_quant, cur_out)
-            err.backward()
+            relation = self.current_relation
+            coefficient = relation.coefficient(it + 1, iters) if relation is not None else 0.0
+            capture = relation.capture_student(coefficient > 0) if relation is not None else nullcontext()
+            with capture:
+                out_quant = block(cur_inp)
+                if 'head' not in name:
+                    err = loss_func(out_quant, cur_out, cur_grad,
+                                    groups=block.robust_groups[idx].to(device)
+                                    if loss_func.rec_loss == 'robust_fisher' else None)
+                else:
+                    err = loss_func(out_quant, cur_out)
+                if coefficient > 0:
+                    err = err + relation.loss(idx, loss_func.last_rec_loss, coefficient, it + 1)
+                err.backward()
             w_optimizer.step()
             if quant_act:
                 a_optimizer.step()
@@ -458,6 +488,12 @@ class BlockReconstructor(QuantCalibrator):
             if hasattr(module, 'training_mode'):
                 module.end_training()
         self.set_qdrop(block, 1.0)
+        if self.current_relation is not None:
+            report = self.current_relation.report()
+            self.attention_relation_results.append(report)
+            logging.info('Attention relation result: %s', json.dumps(report, sort_keys=True))
+            self.current_relation.close()
+            self.current_relation = None
         del block.raw_input, block.raw_out, block.raw_grad, block.quanted_input
         block.secant_direction = block.secant_kl = None
         block.robust_groups = None
@@ -622,6 +658,7 @@ class LossFunction:
         else:
             raise NotImplementedError
 
+        self.last_rec_loss = rec_loss.detach()
         total_loss = rec_loss + round_loss
         if self.count == 1 or self.count % 500 == 0:
             print('Total loss:\t{:.3f} (rec:{:.3f}, round:{:.3f})\tb={:.2f}\tcount={}'.format(

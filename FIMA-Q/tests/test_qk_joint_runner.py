@@ -72,6 +72,12 @@ class RunnerTests(unittest.TestCase):
         self.add("001_headwise_qkjoint_A.log", variant="A")
         self.assertEqual(runner.base.available_runs(), [])
 
+    def test_corrected_protocol_does_not_resume_an_old_completed_run(self):
+        self.add("001_qkjoint_C.log", variant="C")
+        runs = runner.available_runs()
+        self.assertIsNotNone(runner.latest(runs, "C", self.args))
+        self.assertIsNone(runner.latest(runs, "C", self.args, protocol=runner.PROTOCOL))
+
     def test_commands_use_the_full_recipe_and_variants_do_not_alias(self):
         for variant in ("A", "B", "C"):
             cmd = runner.command(variant, self.args)

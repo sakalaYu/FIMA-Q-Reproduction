@@ -15,18 +15,19 @@ import run_headwise_experiments as base
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULTS = dict(qk_joint_steps=300, qk_joint_batch_size=8, qk_joint_holdout=128,
                 qk_joint_lr=0.003, qk_joint_eval_every=50)
+PROTOCOL = "v2_integer_zp"
 
 
 def command(variant, args):
     result = base.command(3, args.seed, True, args.dataset, args.num_workers)
-    result.extend(["--qk-joint-variant", variant])
+    result.extend(["--qk-joint-variant", variant, "--qk-joint-protocol", PROTOCOL])
     for key in DEFAULTS:
         result.extend(["--" + key.replace("_", "-"), str(getattr(args, key))])
     return result
 
 
 def name(variant, seed):
-    return f"qkjoint_w3a3_seed{seed}_{variant}_seeded_full"
+    return f"qkjoint_w3a3_seed{seed}_{variant}_seeded_full_{PROTOCOL}"
 
 
 def available_runs():
@@ -52,12 +53,13 @@ def available_runs():
     return sorted(result.values(), key=lambda run: run["run_id"])
 
 
-def latest(runs, variant, args):
+def latest(runs, variant, args, protocol=None):
     matches = [run for run in runs if run["seed"] == args.seed
                and run["args"].get("qk_joint_variant") == variant
                and run["args"].get("num_workers") == args.num_workers
                and base.dataset_path(run["args"]["dataset"]) == base.dataset_path(args.dataset)
-               and all(run["args"].get(key) == getattr(args, key) for key in DEFAULTS)]
+               and all(run["args"].get(key) == getattr(args, key) for key in DEFAULTS)
+               and (protocol is None or run["args"].get("qk_joint_protocol") == protocol)]
     return matches[-1] if matches else None
 
 
@@ -78,7 +80,8 @@ def summarize(args, write=True):
         valid = reference is not None and all(
             run[key] == reference[key] for key in ("cfg", "calibration_hashes"))
         valid = valid and run["args"].get("num_workers") == reference["args"].get("num_workers")
-        row = dict(variant=variant, run=run, matched_reference=bool(valid),
+        row = dict(variant=variant, protocol=run["args"].get("qk_joint_protocol", "v1"),
+                   run=run, matched_reference=bool(valid),
                    accepted_blocks=sum(block["accepted"] for block in run["qk_blocks"]),
                    calibration_seconds=sum(block["elapsed_seconds"] for block in run["qk_blocks"]),
                    delta_fixed_pp=run["top1"] - fixed["top1"] if valid and fixed else None,
@@ -88,7 +91,7 @@ def summarize(args, write=True):
         rows.append(row)
         delta = f"{row['delta_fixed_pp']:+.3f} pp" if row["delta_fixed_pp"] is not None else "N/A (reference mismatch/missing)"
         print(f"{variant}: Top-1 {run['top1']:.3f}; versus fixed all: {delta}; "
-              f"accepted blocks {row['accepted_blocks']}/12")
+              f"accepted blocks {row['accepted_blocks']}/12; protocol {row['protocol']}")
     report = dict(seed=args.seed, fixed_rotation=fixed, baseline=baseline, rows=rows,
                   count=len(rows), expected_count=3)
     if write:
@@ -138,15 +141,15 @@ def main():
     dataset = base.dataset_path(args.dataset)
     if not all((dataset / split).is_dir() for split in ("train", "val")):
         parser.error(f"Missing train/val directories under {dataset}")
-    for path, marker in (("test_quant.py", "--qk-joint-variant"),
+    for path, marker in (("test_quant.py", "--qk-joint-protocol"),
                          ("utils/block_recon.py", "calibrate_qk_block"),
                          ("utils/datasets.py", "FIMAQ_CAPTURE_CALIBRATION_HASH"),
-                         ("utils/qk_joint.py", "def calibrate_qk_block")):
+                         ("utils/qk_joint.py", PROTOCOL)):
         source = ROOT / path
         if not source.is_file() or marker not in source.read_text(encoding="utf-8"):
             parser.error(f"Sync {path} before launching")
     with base.job_lock(run_name):
-        existing = latest(available_runs(), args.variant, args)
+        existing = latest(available_runs(), args.variant, args, protocol=PROTOCOL)
         if args.resume and existing:
             print(f"Skipping completed run: {existing['path']}")
             summarize(args)
@@ -177,7 +180,7 @@ def main():
                 if code:
                     raise subprocess.CalledProcessError(code, cmd)
         new = [run for run in available_runs() if run["run_id"] not in before]
-        if latest(new, args.variant, args) is None:
+        if latest(new, args.variant, args, protocol=PROTOCOL) is None:
             raise RuntimeError("No newly completed run with 12 QK block reports and calibration hashes")
     summarize(args)
 

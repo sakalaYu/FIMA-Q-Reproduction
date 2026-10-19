@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from quant_layers.linear import AsymmetricallyBatchingQuantLinear
 from quant_layers.matmul import AsymmetricallyBatchingQuantMatMul
+from quantizers.adaround import AdaRoundQuantizer
 from utils.qk_joint import (QKParameters, make_work_block, calibrate_qk_block,
                             attention_kl, teacher_attention, dplr_terms)
 
@@ -149,6 +150,23 @@ class QKJointTests(unittest.TestCase):
         shifts = torch.randn(*scores.shape[:-1], 1)
         self.assertAlmostEqual(float(attention_kl(scores, target)), 0, places=6)
         self.assertAlmostEqual(float(attention_kl(scores + shifts, target)), 0, places=6)
+
+    def test_c_fold_preserves_the_quantization_grid_when_entering_adaround(self):
+        with torch.no_grad():
+            self.block.attn.qkv.w_quantizer.zero_point.round_()
+        fit = QKParameters(self.block.attn, "C")
+        with torch.no_grad():
+            fit.skew.normal_(0, 0.08)
+            fit.log_diag.uniform_(-0.2, 0.2)
+            fit.fold_into(self.block.attn)
+            layer = self.block.attn.qkv
+            weight = layer.weight.view(3, 8, 8)
+            before = layer.w_quantizer(weight)
+            adaround = AdaRoundQuantizer(layer.w_quantizer, weight)
+            adaround.soft_targets = False
+            after = adaround(weight)
+        self.assertTrue(torch.allclose(before, after, atol=1e-7, rtol=1e-7),
+                        "Uniform -> AdaRound changed the transformed Q/K quantization grid")
 
     def test_prepare_runs_all_variants_and_preserves_rng_and_model_modes(self):
         for variant in ("A", "B", "C"):

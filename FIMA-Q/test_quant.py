@@ -13,6 +13,7 @@ import re
 import shutil
 import random
 import json
+import math
 
 import utils.datasets as mydatasets
 from utils.calibrator import QuantCalibrator
@@ -117,11 +118,18 @@ def get_args_parser():
     parser.add_argument('--headwise-mode', choices=('all', 'qk', 'vo'), default='all',
                         help='rotation location; requires --headwise-hadamard for qk/vo')
     parser.add_argument('--qk-joint-variant', choices=('none', 'A', 'B', 'C'), default='none')
+    parser.add_argument('--qk-joint-protocol', choices=('v2_integer_zp',), default='v2_integer_zp')
     parser.add_argument('--qk-joint-steps', type=int, default=300)
     parser.add_argument('--qk-joint-batch-size', type=int, default=8)
     parser.add_argument('--qk-joint-holdout', type=int, default=128)
     parser.add_argument('--qk-joint-lr', type=float, default=0.003)
     parser.add_argument('--qk-joint-eval-every', type=int, default=50)
+    parser.add_argument('--attention-relation', choices=('none', 'uniform', 'fisher'), default='none')
+    parser.add_argument('--relation-protocol', choices=('relation_v1',), default='relation_v1')
+    parser.add_argument('--relation-weight', type=float, default=0.1)
+    parser.add_argument('--relation-queries', type=int, default=16)
+    parser.add_argument('--relation-start', type=float, default=0.2)
+    parser.add_argument('--relation-full', type=float, default=0.6)
     return parser
 
 
@@ -296,11 +304,18 @@ def main(args):
             qk_options = dict(variant=args.qk_joint_variant, steps=args.qk_joint_steps,
                               batch_size=args.qk_joint_batch_size, holdout=args.qk_joint_holdout,
                               lr=args.qk_joint_lr, eval_every=args.qk_joint_eval_every, seed=args.seed)
+        relation_options = None
+        if args.attention_relation != 'none':
+            if cfg.optim_metric != 'fisher_dplr':
+                raise ValueError('Attention relations require fisher_dplr reconstruction')
+            relation_options = dict(mode=args.attention_relation, weight=args.relation_weight,
+                                    rows=args.relation_queries, start=args.relation_start,
+                                    full=args.relation_full, protocol=args.relation_protocol)
         block_reconstructor = BlockReconstructor(model, cfg.optim_batch_size, calib_loader,
             metric=cfg.optim_metric, temp=cfg.temp, k=cfg.k, dis_mode=cfg.dis_mode,
             p1=cfg.p1, p2=cfg.p2, iters=cfg.recon_iters,
             robust_beta=cfg.robust_beta, robust_temperature=cfg.robust_temperature,
-            qk_joint_options=qk_options)
+            qk_joint_options=qk_options, attention_relation_options=relation_options)
         reconstruction_started = time.perf_counter()
         block_reconstructor.reconstruct_model(quant_act=True, mode=cfg.optim_mode, drop_prob=cfg.drop_prob, keep_gpu=cfg.keep_gpu)
         if device.type == 'cuda':
@@ -311,6 +326,9 @@ def main(args):
         if qk_options:
             with open(os.path.join(root_path, 'qk_joint.json'), 'w', encoding='utf-8') as handle:
                 json.dump(dict(options=qk_options, blocks=block_reconstructor.qk_joint_results), handle, indent=2)
+        if relation_options:
+            with open(os.path.join(root_path, 'attention_relation.json'), 'w', encoding='utf-8') as handle:
+                json.dump(dict(options=relation_options, blocks=block_reconstructor.attention_relation_results), handle, indent=2)
         save_model(model, args, cfg, mode='optimize')
     if args.load_optimize_checkpoint:
         logging.info('Building calibrator ...')
@@ -346,4 +364,17 @@ if __name__ == "__main__":
         if min(args.qk_joint_steps, args.qk_joint_batch_size, args.qk_joint_holdout,
                args.qk_joint_eval_every) < 1 or args.qk_joint_lr <= 0:
             parser.error('QK joint sizes, steps, interval and learning rate must be positive')
+    if args.attention_relation != 'none':
+        if args.qk_joint_variant != 'none':
+            parser.error('Run attention relations separately from QK pre-calibration')
+        if not args.optimize or not args.headwise_hadamard or args.headwise_mode != 'all':
+            parser.error('Attention relations require --optimize --headwise-hadamard --headwise-mode all')
+        if args.load_calibrate_checkpoint or args.load_optimize_checkpoint:
+            parser.error('This attention-relation protocol starts from fresh FP calibration')
+        if args.model not in ('vit_small', 'vit_base', 'deit_small', 'deit_base', 'deit_tiny', 'vit_tiny'):
+            parser.error('Attention relations currently support timm ViT/DeiT models')
+        if args.relation_queries < 1 or not math.isfinite(args.relation_weight) or args.relation_weight <= 0:
+            parser.error('Relation query count and finite weight must be positive')
+        if not 0 <= args.relation_start < args.relation_full <= 1:
+            parser.error('Require 0 <= --relation-start < --relation-full <= 1')
     main(args)

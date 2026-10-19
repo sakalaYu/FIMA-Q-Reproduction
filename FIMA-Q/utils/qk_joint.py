@@ -20,6 +20,9 @@ from torch import nn
 from torch.nn import functional as F
 
 
+QK_JOINT_PROTOCOL = "v2_integer_zp"
+
+
 def round_ste(x):
     return x + (x.round() - x).detach()
 
@@ -122,6 +125,12 @@ class QKParameters(nn.Module):
             if bias is not None:
                 attention.qkv.bias.copy_(bias)
             attention.qkv.w_quantizer.scale.copy_(scale)
+            if self.variant != "A":
+                # UniformQuantizer rounds zero points in forward; AdaRound uses
+                # the stored value directly. Commit the integer zero point used
+                # by calibration so entering AdaRound cannot change its grid.
+                zero = zero.clone()
+                zero[:2].round_()
             attention.qkv.w_quantizer.zero_point.copy_(zero)
             attention.matmul1.A_quantizer.scale.copy_(self.q_scale * self.log_q_scale.exp())
             attention.matmul1.B_quantizer.scale.copy_(self.k_scale * self.log_k_scale.exp())
@@ -412,7 +421,8 @@ def _calibrate(reconstructor, name, block, device, options):
             raise
         finally:
             _restore_state(original_modes)
-        return dict(block=name, variant=variant, train_samples=train_count, holdout_samples=holdout,
+        return dict(block=name, variant=variant, protocol=QK_JOINT_PROTOCOL,
+                    train_samples=train_count, holdout_samples=holdout,
                     steps=options["steps"], trainable_parameters=sum(p.numel() for p in train_parameters),
                     fisher_rank=reconstructor.k if variant == "C" else 0,
                     initial_local_objective=initial_local, best_local_objective=best_score,

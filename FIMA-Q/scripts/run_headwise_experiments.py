@@ -128,7 +128,8 @@ def available_runs():
     paths = list((ROOT / "logs").glob("*headwise*.log"))
     paths += list((ROOT / "checkpoints/quant_result").glob("*headwise*/output.log"))
     runs = [run for path in paths if (run := read_run(path)) is not None
-            and run["args"].get("qk_joint_variant", "none") == "none"]
+            and run["args"].get("qk_joint_variant", "none") == "none"
+            and run["args"].get("attention_relation", "none") == "none"]
     # logs/ and output.log can be two copies of the same run.
     unique = {run["run_id"]: run for run in runs}
     return sorted(unique.values(), key=lambda run: run["run_id"])
