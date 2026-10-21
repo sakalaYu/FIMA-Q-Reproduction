@@ -96,7 +96,8 @@ def summarize(args, write=True):
     runs = runs_for_seed(args)
     control = latest(runs, "control", args)
     with redirect_stdout(io.StringIO()):
-        references = base.available_runs()
+        references = [run for run in base.available_runs()
+                      if "headwise_relation" not in run["run_id"]]
     fixed = base.latest_run(references, 3, args.seed, True, args.dataset)
     rows = []
     for variant in VARIANTS:

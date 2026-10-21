@@ -2,7 +2,7 @@
   "protocol": "relation_v1",
   "seed": 3407,
   "control": {
-    "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261021_134203_headwise_relation_w3a3_seed3407_control_seeded_full_relation_v1/output.log",
+    "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261021_134203_headwise_relation_w3a3_seed3407_control_seeded_full_relation_v1\\output.log",
     "args": {
       "model": "vit_small",
       "config": "./configs/3bit/best.py",
@@ -101,7 +101,7 @@
     "relation_blocks": []
   },
   "prior_fixed_rotation": {
-    "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261021_134203_headwise_relation_w3a3_seed3407_control_seeded_full_relation_v1/output.log",
+    "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261012_180903_headwise_w3a3_seed3407_rotation_seeded_full\\output.log",
     "args": {
       "model": "vit_small",
       "config": "./configs/3bit/best.py",
@@ -120,20 +120,6 @@
       "seed": 3407,
       "skip_final_validation": false,
       "headwise_hadamard": true,
-      "headwise_mode": "all",
-      "qk_joint_variant": "none",
-      "qk_joint_protocol": "v2_integer_zp",
-      "qk_joint_steps": 300,
-      "qk_joint_batch_size": 8,
-      "qk_joint_holdout": 128,
-      "qk_joint_lr": 0.003,
-      "qk_joint_eval_every": 50,
-      "attention_relation": "none",
-      "relation_protocol": "relation_v1",
-      "relation_weight": 0.1,
-      "relation_queries": 16,
-      "relation_start": 0.2,
-      "relation_full": 0.6,
       "optim_metric": "fisher_dplr",
       "optim_mode": "qdrop",
       "drop_prob": 0.5,
@@ -174,7 +160,7 @@
       "recon_iters": 20000
     },
     "bits": 3,
-    "run_id": "20261021_134203_headwise_relation_w3a3_seed3407_control_seeded_full_relation_v1",
+    "run_id": "20261012_180903_headwise_w3a3_seed3407_rotation_seeded_full",
     "python_seeded": true,
     "calibration_hashes": [
       [
@@ -191,17 +177,17 @@
     "seed": 3407,
     "rotation": true,
     "rotation_mode": "all",
-    "top1": 64.524,
-    "top5": 87.336,
-    "loss": 1.428,
+    "top1": 64.65,
+    "top5": 87.174,
+    "loss": 1.438,
     "calibration_top1": 3.858,
-    "reconstruction_seconds": 8485.69
+    "reconstruction_seconds": 8292.385
   },
   "rows": [
     {
       "variant": "control",
       "run": {
-        "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261021_134203_headwise_relation_w3a3_seed3407_control_seeded_full_relation_v1/output.log",
+        "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261021_134203_headwise_relation_w3a3_seed3407_control_seeded_full_relation_v1\\output.log",
         "args": {
           "model": "vit_small",
           "config": "./configs/3bit/best.py",
@@ -300,14 +286,14 @@
         "relation_blocks": []
       },
       "delta_control_pp": 0.0,
-      "delta_fixed_rotation_pp": 0.0,
+      "delta_fixed_rotation_pp": -0.12600000000000477,
       "matched_control": true,
       "matched_fixed": true
     },
     {
       "variant": "uniform",
       "run": {
-        "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261021_134253_headwise_relation_w3a3_seed3407_uniform_seeded_full_relation_v1/output.log",
+        "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261021_134253_headwise_relation_w3a3_seed3407_uniform_seeded_full_relation_v1\\output.log",
         "args": {
           "model": "vit_small",
           "config": "./configs/3bit/best.py",
@@ -815,7 +801,7 @@
         ]
       },
       "delta_control_pp": -0.036000000000001364,
-      "delta_fixed_rotation_pp": -0.036000000000001364,
+      "delta_fixed_rotation_pp": -0.16200000000000614,
       "matched_control": true,
       "matched_fixed": true,
       "active_blocks": 12,
@@ -825,7 +811,7 @@
     {
       "variant": "fisher",
       "run": {
-        "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261021_134306_headwise_relation_w3a3_seed3407_fisher_seeded_full_relation_v1/output.log",
+        "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261021_134306_headwise_relation_w3a3_seed3407_fisher_seeded_full_relation_v1\\output.log",
         "args": {
           "model": "vit_small",
           "config": "./configs/3bit/best.py",
@@ -1333,7 +1319,7 @@
         ]
       },
       "delta_control_pp": -0.4680000000000035,
-      "delta_fixed_rotation_pp": -0.4680000000000035,
+      "delta_fixed_rotation_pp": -0.5940000000000083,
       "matched_control": true,
       "matched_fixed": true,
       "active_blocks": 12,

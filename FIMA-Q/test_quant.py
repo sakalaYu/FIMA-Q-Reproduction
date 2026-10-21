@@ -124,8 +124,8 @@ def get_args_parser():
     parser.add_argument('--qk-joint-holdout', type=int, default=128)
     parser.add_argument('--qk-joint-lr', type=float, default=0.003)
     parser.add_argument('--qk-joint-eval-every', type=int, default=50)
-    parser.add_argument('--attention-relation', choices=('none', 'uniform', 'fisher'), default='none')
-    parser.add_argument('--relation-protocol', choices=('relation_v1',), default='relation_v1')
+    parser.add_argument('--attention-relation', choices=('none', 'uniform', 'fisher', 'aligned'), default='none')
+    parser.add_argument('--relation-protocol', choices=('relation_v1', 'relation_v2_alignment'), default='relation_v1')
     parser.add_argument('--relation-weight', type=float, default=0.1)
     parser.add_argument('--relation-queries', type=int, default=16)
     parser.add_argument('--relation-start', type=float, default=0.2)
@@ -365,6 +365,10 @@ if __name__ == "__main__":
                args.qk_joint_eval_every) < 1 or args.qk_joint_lr <= 0:
             parser.error('QK joint sizes, steps, interval and learning rate must be positive')
     if args.attention_relation != 'none':
+        expected_protocol = ('relation_v2_alignment' if args.attention_relation == 'aligned'
+                             else 'relation_v1')
+        if args.relation_protocol != expected_protocol:
+            parser.error('Attention relation mode and --relation-protocol do not match')
         if args.qk_joint_variant != 'none':
             parser.error('Run attention relations separately from QK pre-calibration')
         if not args.optimize or not args.headwise_hadamard or args.headwise_mode != 'all':

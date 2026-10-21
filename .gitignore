@@ -15,3 +15,4 @@ imagenet_fimaq/val/*
 tmp/probe_test_dependencies/
 tmp/probe_test_data/
 tmp/probe_test_results/
+/开题/

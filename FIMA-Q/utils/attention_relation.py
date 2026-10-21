@@ -15,6 +15,7 @@ from torch.nn import functional as F
 
 
 PROTOCOL = "relation_v1"
+ALIGNMENT_PROTOCOL = "relation_v2_alignment"
 
 
 def query_indices(tokens, rows):
@@ -55,8 +56,12 @@ class AttentionRelation:
         if not hasattr(self.attention, "matmul1"):
             raise ValueError("Attention relations require wrapped timm ViT attention")
         self.options = dict(options)
-        if options["mode"] not in ("uniform", "fisher"):
-            raise ValueError("Attention relation mode must be uniform or fisher")
+        if options["mode"] not in ("uniform", "fisher", "aligned"):
+            raise ValueError("Attention relation mode must be uniform, fisher or aligned")
+        self.protocol = options.get("protocol", PROTOCOL)
+        expected = ALIGNMENT_PROTOCOL if options["mode"] == "aligned" else PROTOCOL
+        if self.protocol != expected:
+            raise ValueError("Attention relation mode and protocol do not match")
         if options["rows"] < 1 or options["weight"] <= 0:
             raise ValueError("Attention rows and weight must be positive")
         if not 0 <= options["start"] < options["full"] <= 1:
@@ -69,6 +74,10 @@ class AttentionRelation:
         self._student = None
         self._gradient_sum = None
         self._gradient_count = 0
+        self._refresh_cursor = 0
+        self._refresh_relation_gradient = None
+        self.alignment_positive_fraction = None
+        self.alignment_mean = None
         self.refreshes = 0
         self.gradient_refreshes = 0
         self.active_steps = 0
@@ -96,22 +105,48 @@ class AttentionRelation:
             self.teacher = self.teacher.to(device)
         self.weights = torch.ones(self.teacher.shape[1:3], device=device, dtype=torch.float32)
         logging.info("Attention relation cache: %s", json.dumps(dict(
-            block=self.name, protocol=PROTOCOL, samples=count,
+            block=self.name, protocol=self.protocol, samples=count,
             query_indices=self.indices.tolist(), cache_bytes=self.teacher.numel() * self.teacher.element_size(),
             mode=self.options["mode"], weight=self.options["weight"])))
 
     def begin_refresh(self):
         self._gradient_sum = None
         self._gradient_count = 0
+        self._refresh_cursor = 0
+        self._refresh_relation_gradient = None
+
+    def refresh_score_forward(self, module, inputs, output):
+        """Pair this refresh batch with cached teacher relations in loader order."""
+        batch = output.shape[0]
+        target = self.teacher[self._refresh_cursor:self._refresh_cursor + batch]
+        if target.shape[0] != batch:
+            raise RuntimeError("Fisher refresh exceeded the attention teacher cache")
+        selected = output.detach().index_select(-2, self.indices.to(output.device)).float()
+        student_probability = F.softmax(selected * self.attention.scale, dim=-1)
+        teacher_probability = F.softmax(target.to(output.device).float(), dim=-1)
+        self._refresh_relation_gradient = student_probability - teacher_probability
+        self._refresh_cursor += batch
 
     def score_gradient(self, module, grad_input, grad_output):
         gradient = grad_output[0]
         if gradient is None:
             return
-        # Undo batchmean scaling before forming a gradient-squared proxy.
         chosen = gradient.detach().index_select(-2, self.indices.to(gradient.device)).float()
-        chosen = chosen * gradient.shape[0]
-        contribution = chosen.square().sum(dim=(0, 3))
+        if self.options["mode"] == "aligned":
+            relation_gradient = self._refresh_relation_gradient
+            if relation_gradient is None or relation_gradient.shape != chosen.shape:
+                raise RuntimeError("Missing matched attention relation during Fisher refresh")
+            numerator = (chosen * relation_gradient).sum(dim=-1)
+            denominator = chosen.norm(dim=-1) * relation_gradient.norm(dim=-1)
+            cosine = torch.where(denominator > 1e-12,
+                                 numerator / denominator.clamp_min(1e-12),
+                                 torch.zeros_like(numerator)).clamp(-1, 1)
+            contribution = cosine.sum(dim=0)
+            self._refresh_relation_gradient = None
+        else:
+            # Undo batchmean scaling before forming a gradient-squared proxy.
+            chosen = chosen * gradient.shape[0]
+            contribution = chosen.square().sum(dim=(0, 3))
         self._gradient_sum = contribution if self._gradient_sum is None else self._gradient_sum + contribution
         self._gradient_count += gradient.shape[0]
 
@@ -125,7 +160,17 @@ class AttentionRelation:
         importance = self._gradient_sum / self._gradient_count
         if not torch.isfinite(importance).all():
             raise RuntimeError("Non-finite attention task-importance weights")
-        if float(importance.mean()) > 0:
+        if self.options["mode"] == "aligned":
+            if self._refresh_cursor != len(self.teacher) or self._refresh_relation_gradient is not None:
+                raise RuntimeError("Fisher refresh and attention target order differ")
+            # Positive cosine means descending relation KL also descends the
+            # classification KL in score space. Keep the mask bounded by 2.
+            mask = (importance > 0).float()
+            fraction = float(mask.mean())
+            self.weights = (mask / max(0.5, fraction)).detach()
+            self.alignment_positive_fraction = fraction
+            self.alignment_mean = float(importance.mean())
+        elif float(importance.mean()) > 0:
             relative = (importance / importance.mean()).clamp(max=4)
             weight = 0.5 + 0.5 * relative
             self.weights = (weight / weight.mean()).detach()
@@ -135,7 +180,9 @@ class AttentionRelation:
         self._gradient_sum = None
         logging.info("Attention relation weights: %s", json.dumps(dict(
             block=self.name, refresh=self.refreshes, min=float(self.weights.min()),
-            max=float(self.weights.max()), mean=float(self.weights.mean()))))
+            max=float(self.weights.max()), mean=float(self.weights.mean()),
+            alignment_positive_fraction=self.alignment_positive_fraction,
+            alignment_mean=self.alignment_mean)))
 
     def coefficient(self, iteration, iterations):
         progress = iteration / max(1, iterations)
@@ -181,13 +228,15 @@ class AttentionRelation:
         return auxiliary
 
     def report(self):
-        return dict(block=self.name, protocol=PROTOCOL, mode=self.options["mode"],
+        return dict(block=self.name, protocol=self.protocol, mode=self.options["mode"],
                     weight=self.options["weight"], query_indices=self.indices.tolist(),
                     teacher_samples=len(self.teacher), cache_bytes=self.teacher.numel() * self.teacher.element_size(),
                     refreshes=self.refreshes, gradient_refreshes=self.gradient_refreshes,
                     active_steps=self.active_steps, first_training_kl=self.first_kl,
                     last_training_kl=self.last_kl, last_auxiliary=self.last_aux,
-                    weight_min=float(self.weights.min()), weight_max=float(self.weights.max()))
+                    weight_min=float(self.weights.min()), weight_max=float(self.weights.max()),
+                    alignment_positive_fraction=self.alignment_positive_fraction,
+                    alignment_mean=self.alignment_mean)
 
     def close(self):
         self._student = self.teacher = self.weights = self.reference = None

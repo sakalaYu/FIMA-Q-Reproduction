@@ -284,7 +284,10 @@ class BlockReconstructor(QuantCalibrator):
         hooks.append(block.register_full_backward_hook(self.grad_hook))
         if self.current_relation is not None:
             self.current_relation.begin_refresh()
-            if self.current_relation.options['mode'] == 'fisher':
+            if self.current_relation.options['mode'] == 'aligned':
+                hooks.append(block.attn.matmul1.register_forward_hook(
+                    self.current_relation.refresh_score_forward))
+            if self.current_relation.options['mode'] in ('fisher', 'aligned'):
                 hooks.append(block.attn.matmul1.register_full_backward_hook(self.current_relation.score_gradient))
         for i, (inp, target) in enumerate(self.calib_loader):
             self.model.zero_grad()
