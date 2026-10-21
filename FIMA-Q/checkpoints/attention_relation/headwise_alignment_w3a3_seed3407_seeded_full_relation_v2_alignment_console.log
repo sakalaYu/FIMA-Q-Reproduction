@@ -1,0 +1,1581 @@
+2026-10-21 17:25:36 - start the process.
+Experiment directory: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261021_172536_headwise_alignment_w3a3_seed3407_seeded_full_relation_v2_alignment
+Namespace(model='vit_small', config='./configs/3bit/best.py', dataset='../imagenet_fimaq', optim_size=1024, val_batch_size=64, num_workers=8, device='cuda', calibrate=True, load_calibrate_checkpoint=None, test_calibrate_checkpoint=False, optimize=True, load_optimize_checkpoint=None, test_optimize_checkpoint=False, print_freq=10, seed=3407, skip_final_validation=False, headwise_hadamard=True, headwise_mode='all', qk_joint_variant='none', qk_joint_protocol='v2_integer_zp', qk_joint_steps=300, qk_joint_batch_size=8, qk_joint_holdout=128, qk_joint_lr=0.003, qk_joint_eval_every=50, attention_relation='aligned', relation_protocol='relation_v2_alignment', relation_weight=0.1, relation_queries=16, relation_start=0.2, relation_full=0.6, optim_metric='fisher_dplr', optim_mode='qdrop', drop_prob=0.5, p1=1.0, p2=1.0, dis_mode='q', calib_size=128, calib_batch_size=32, optim_batch_size=32, recon_iters=20000, k=5)
+Successfully imported Config class!
+optim_size: 1024
+calib_size: 128
+optim_batch_size: 32
+calib_batch_size: 32
+w_bit: 3
+a_bit: 3
+qconv_a_bit: 8
+qhead_a_bit: 3
+calib_metric: mse
+matmul_head_channel_wise: True
+token_channel_wise: True
+eq_n: 128
+search_round: 3
+keep_gpu: True
+optim_metric: fisher_dplr
+temp: 20
+k: 5
+p1: 1.0
+p2: 1.0
+dis_mode: q
+optim_mode: qdrop
+drop_prob: 0.5
+robust_beta: 0.5
+robust_temperature: 0.5
+recon_iters: 20000
+Python random seeded: 3407
+Building model ...
+No checkpoint found at './checkpoints/vit_raw/vit_small_patch16_224.bin'
+Loading pretrained weights from Hugging Face hub (timm/vit_small_patch16_224.augreg_in21k_ft_in1k)
+[timm/vit_small_patch16_224.augreg_in21k_ft_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+Applied head-wise Hadamard rotation: {'mode': 'all', 'blocks': 12, 'heads': 72, 'head_dims': [64], 'max_logit_abs_error': 2.9206275939941406e-06}
+Building validation dataloader ...
+Wraping quantiztion modules (reparam: True) ...
+2026-10-21 17:25:51 - start mse guided calibration
+Calibration cache: count=128 sample_sha256=05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6 tensor_sha256=4d822ba3ffa61432a9b41f34ff74ddabdb4733ec3f496b4c689a9b7f4c18cb8c
+
+  0%|          | 0/74 [00:00<?, ?it/s]
+calibrating patch_embed.proj:   0%|          | 0/74 [00:00<?, ?it/s]
+calibrating patch_embed.proj:   1%|▏         | 1/74 [00:01<01:28,  1.22s/it]
+calibrating blocks.0.attn.qkv:   1%|▏         | 1/74 [00:01<01:28,  1.22s/it]
+reparaming blocks.0.attn.qkv:   1%|▏         | 1/74 [00:02<01:28,  1.22s/it] 
+reparaming blocks.0.attn.qkv:   3%|▎         | 2/74 [00:05<03:18,  2.75s/it]
+calibrating blocks.0.attn.proj:   3%|▎         | 2/74 [00:05<03:18,  2.75s/it]
+calibrating blocks.0.attn.proj:   4%|▍         | 3/74 [00:06<02:44,  2.32s/it]
+calibrating blocks.0.attn.matmul1:   4%|▍         | 3/74 [00:06<02:44,  2.32s/it]
+calibrating blocks.0.attn.matmul1:   5%|▌         | 4/74 [00:11<03:55,  3.36s/it]
+calibrating blocks.0.attn.matmul2:   5%|▌         | 4/74 [00:11<03:55,  3.36s/it]
+calibrating blocks.0.attn.matmul2:   7%|▋         | 5/74 [00:16<04:28,  3.90s/it]
+calibrating blocks.0.mlp.fc1:   7%|▋         | 5/74 [00:16<04:28,  3.90s/it]     
+reparaming blocks.0.mlp.fc1:   7%|▋         | 5/74 [00:17<04:28,  3.90s/it] 
+reparaming blocks.0.mlp.fc1:   8%|▊         | 6/74 [00:21<04:51,  4.29s/it]
+calibrating blocks.0.mlp.fc2:   8%|▊         | 6/74 [00:21<04:51,  4.29s/it]
+calibrating blocks.0.mlp.fc2:   9%|▉         | 7/74 [00:26<05:03,  4.53s/it]
+calibrating blocks.1.attn.qkv:   9%|▉         | 7/74 [00:26<05:03,  4.53s/it]
+reparaming blocks.1.attn.qkv:   9%|▉         | 7/74 [00:27<05:03,  4.53s/it] 
+reparaming blocks.1.attn.qkv:  11%|█         | 8/74 [00:30<04:43,  4.30s/it]
+calibrating blocks.1.attn.proj:  11%|█         | 8/74 [00:30<04:43,  4.30s/it]
+calibrating blocks.1.attn.proj:  12%|█▏        | 9/74 [00:32<03:48,  3.52s/it]
+calibrating blocks.1.attn.matmul1:  12%|█▏        | 9/74 [00:32<03:48,  3.52s/it]
+calibrating blocks.1.attn.matmul1:  14%|█▎        | 10/74 [00:37<04:16,  4.01s/it]
+calibrating blocks.1.attn.matmul2:  14%|█▎        | 10/74 [00:37<04:16,  4.01s/it]
+calibrating blocks.1.attn.matmul2:  15%|█▍        | 11/74 [00:42<04:28,  4.26s/it]
+calibrating blocks.1.mlp.fc1:  15%|█▍        | 11/74 [00:42<04:28,  4.26s/it]     
+reparaming blocks.1.mlp.fc1:  15%|█▍        | 11/74 [00:43<04:28,  4.26s/it] 
+reparaming blocks.1.mlp.fc1:  16%|█▌        | 12/74 [00:47<04:37,  4.48s/it]
+calibrating blocks.1.mlp.fc2:  16%|█▌        | 12/74 [00:47<04:37,  4.48s/it]
+calibrating blocks.1.mlp.fc2:  18%|█▊        | 13/74 [00:52<04:39,  4.58s/it]
+calibrating blocks.2.attn.qkv:  18%|█▊        | 13/74 [00:52<04:39,  4.58s/it]
+reparaming blocks.2.attn.qkv:  18%|█▊        | 13/74 [00:52<04:39,  4.58s/it] 
+reparaming blocks.2.attn.qkv:  19%|█▉        | 14/74 [00:55<04:20,  4.35s/it]
+calibrating blocks.2.attn.proj:  19%|█▉        | 14/74 [00:55<04:20,  4.35s/it]
+calibrating blocks.2.attn.proj:  20%|██        | 15/74 [00:57<03:32,  3.60s/it]
+calibrating blocks.2.attn.matmul1:  20%|██        | 15/74 [00:57<03:32,  3.60s/it]
+calibrating blocks.2.attn.matmul1:  22%|██▏       | 16/74 [01:02<03:53,  4.02s/it]
+calibrating blocks.2.attn.matmul2:  22%|██▏       | 16/74 [01:02<03:53,  4.02s/it]
+calibrating blocks.2.attn.matmul2:  23%|██▎       | 17/74 [01:07<04:00,  4.23s/it]
+calibrating blocks.2.mlp.fc1:  23%|██▎       | 17/74 [01:07<04:00,  4.23s/it]     
+reparaming blocks.2.mlp.fc1:  23%|██▎       | 17/74 [01:08<04:00,  4.23s/it] 
+reparaming blocks.2.mlp.fc1:  24%|██▍       | 18/74 [01:12<04:09,  4.46s/it]
+calibrating blocks.2.mlp.fc2:  24%|██▍       | 18/74 [01:12<04:09,  4.46s/it]
+calibrating blocks.2.mlp.fc2:  26%|██▌       | 19/74 [01:17<04:12,  4.59s/it]
+calibrating blocks.3.attn.qkv:  26%|██▌       | 19/74 [01:17<04:12,  4.59s/it]
+reparaming blocks.3.attn.qkv:  26%|██▌       | 19/74 [01:18<04:12,  4.59s/it] 
+reparaming blocks.3.attn.qkv:  27%|██▋       | 20/74 [01:21<03:54,  4.35s/it]
+calibrating blocks.3.attn.proj:  27%|██▋       | 20/74 [01:21<03:54,  4.35s/it]
+calibrating blocks.3.attn.proj:  28%|██▊       | 21/74 [01:22<03:10,  3.60s/it]
+calibrating blocks.3.attn.matmul1:  28%|██▊       | 21/74 [01:22<03:10,  3.60s/it]
+calibrating blocks.3.attn.matmul1:  30%|██▉       | 22/74 [01:28<03:30,  4.04s/it]
+calibrating blocks.3.attn.matmul2:  30%|██▉       | 22/74 [01:28<03:30,  4.04s/it]
+calibrating blocks.3.attn.matmul2:  31%|███       | 23/74 [01:33<03:41,  4.34s/it]
+calibrating blocks.3.mlp.fc1:  31%|███       | 23/74 [01:33<03:41,  4.34s/it]     
+reparaming blocks.3.mlp.fc1:  31%|███       | 23/74 [01:33<03:41,  4.34s/it] 
+reparaming blocks.3.mlp.fc1:  32%|███▏      | 24/74 [01:37<03:45,  4.51s/it]
+calibrating blocks.3.mlp.fc2:  32%|███▏      | 24/74 [01:37<03:45,  4.51s/it]
+calibrating blocks.3.mlp.fc2:  34%|███▍      | 25/74 [01:42<03:45,  4.61s/it]
+calibrating blocks.4.attn.qkv:  34%|███▍      | 25/74 [01:42<03:45,  4.61s/it]
+reparaming blocks.4.attn.qkv:  34%|███▍      | 25/74 [01:43<03:45,  4.61s/it] 
+reparaming blocks.4.attn.qkv:  35%|███▌      | 26/74 [01:46<03:30,  4.38s/it]
+calibrating blocks.4.attn.proj:  35%|███▌      | 26/74 [01:46<03:30,  4.38s/it]
+calibrating blocks.4.attn.proj:  36%|███▋      | 27/74 [01:48<02:49,  3.60s/it]
+calibrating blocks.4.attn.matmul1:  36%|███▋      | 27/74 [01:48<02:49,  3.60s/it]
+calibrating blocks.4.attn.matmul1:  38%|███▊      | 28/74 [01:53<03:05,  4.02s/it]
+calibrating blocks.4.attn.matmul2:  38%|███▊      | 28/74 [01:53<03:05,  4.02s/it]
+calibrating blocks.4.attn.matmul2:  39%|███▉      | 29/74 [01:58<03:12,  4.27s/it]
+calibrating blocks.4.mlp.fc1:  39%|███▉      | 29/74 [01:58<03:12,  4.27s/it]     
+reparaming blocks.4.mlp.fc1:  39%|███▉      | 29/74 [01:59<03:12,  4.27s/it] 
+reparaming blocks.4.mlp.fc1:  41%|████      | 30/74 [02:03<03:17,  4.50s/it]
+calibrating blocks.4.mlp.fc2:  41%|████      | 30/74 [02:03<03:17,  4.50s/it]
+calibrating blocks.4.mlp.fc2:  42%|████▏     | 31/74 [02:08<03:18,  4.61s/it]
+calibrating blocks.5.attn.qkv:  42%|████▏     | 31/74 [02:08<03:18,  4.61s/it]
+reparaming blocks.5.attn.qkv:  42%|████▏     | 31/74 [02:09<03:18,  4.61s/it] 
+reparaming blocks.5.attn.qkv:  43%|████▎     | 32/74 [02:12<03:04,  4.39s/it]
+calibrating blocks.5.attn.proj:  43%|████▎     | 32/74 [02:12<03:04,  4.39s/it]
+calibrating blocks.5.attn.proj:  45%|████▍     | 33/74 [02:13<02:28,  3.61s/it]
+calibrating blocks.5.attn.matmul1:  45%|████▍     | 33/74 [02:13<02:28,  3.61s/it]
+calibrating blocks.5.attn.matmul1:  46%|████▌     | 34/74 [02:19<02:43,  4.09s/it]
+calibrating blocks.5.attn.matmul2:  46%|████▌     | 34/74 [02:19<02:43,  4.09s/it]
+calibrating blocks.5.attn.matmul2:  47%|████▋     | 35/74 [02:24<02:49,  4.35s/it]
+calibrating blocks.5.mlp.fc1:  47%|████▋     | 35/74 [02:24<02:49,  4.35s/it]     
+reparaming blocks.5.mlp.fc1:  47%|████▋     | 35/74 [02:25<02:49,  4.35s/it] 
+reparaming blocks.5.mlp.fc1:  49%|████▊     | 36/74 [02:29<02:54,  4.58s/it]
+calibrating blocks.5.mlp.fc2:  49%|████▊     | 36/74 [02:29<02:54,  4.58s/it]
+calibrating blocks.5.mlp.fc2:  50%|█████     | 37/74 [02:34<02:54,  4.72s/it]
+calibrating blocks.6.attn.qkv:  50%|█████     | 37/74 [02:34<02:54,  4.72s/it]
+reparaming blocks.6.attn.qkv:  50%|█████     | 37/74 [02:35<02:54,  4.72s/it] 
+reparaming blocks.6.attn.qkv:  51%|█████▏    | 38/74 [02:38<02:41,  4.49s/it]
+calibrating blocks.6.attn.proj:  51%|█████▏    | 38/74 [02:38<02:41,  4.49s/it]
+calibrating blocks.6.attn.proj:  53%|█████▎    | 39/74 [02:39<02:08,  3.68s/it]
+calibrating blocks.6.attn.matmul1:  53%|█████▎    | 39/74 [02:39<02:08,  3.68s/it]
+calibrating blocks.6.attn.matmul1:  54%|█████▍    | 40/74 [02:45<02:20,  4.13s/it]
+calibrating blocks.6.attn.matmul2:  54%|█████▍    | 40/74 [02:45<02:20,  4.13s/it]
+calibrating blocks.6.attn.matmul2:  55%|█████▌    | 41/74 [02:50<02:23,  4.36s/it]
+calibrating blocks.6.mlp.fc1:  55%|█████▌    | 41/74 [02:50<02:23,  4.36s/it]     
+reparaming blocks.6.mlp.fc1:  55%|█████▌    | 41/74 [02:50<02:23,  4.36s/it] 
+reparaming blocks.6.mlp.fc1:  57%|█████▋    | 42/74 [02:55<02:26,  4.56s/it]
+calibrating blocks.6.mlp.fc2:  57%|█████▋    | 42/74 [02:55<02:26,  4.56s/it]
+calibrating blocks.6.mlp.fc2:  58%|█████▊    | 43/74 [03:00<02:25,  4.68s/it]
+calibrating blocks.7.attn.qkv:  58%|█████▊    | 43/74 [03:00<02:25,  4.68s/it]
+reparaming blocks.7.attn.qkv:  58%|█████▊    | 43/74 [03:00<02:25,  4.68s/it] 
+reparaming blocks.7.attn.qkv:  59%|█████▉    | 44/74 [03:03<02:12,  4.43s/it]
+calibrating blocks.7.attn.proj:  59%|█████▉    | 44/74 [03:03<02:12,  4.43s/it]
+calibrating blocks.7.attn.proj:  61%|██████    | 45/74 [03:05<01:46,  3.66s/it]
+calibrating blocks.7.attn.matmul1:  61%|██████    | 45/74 [03:05<01:46,  3.66s/it]
+calibrating blocks.7.attn.matmul1:  62%|██████▏   | 46/74 [03:10<01:54,  4.08s/it]
+calibrating blocks.7.attn.matmul2:  62%|██████▏   | 46/74 [03:10<01:54,  4.08s/it]
+calibrating blocks.7.attn.matmul2:  64%|██████▎   | 47/74 [03:15<01:56,  4.33s/it]
+calibrating blocks.7.mlp.fc1:  64%|██████▎   | 47/74 [03:15<01:56,  4.33s/it]     
+reparaming blocks.7.mlp.fc1:  64%|██████▎   | 47/74 [03:16<01:56,  4.33s/it] 
+reparaming blocks.7.mlp.fc1:  65%|██████▍   | 48/74 [03:20<01:58,  4.56s/it]
+calibrating blocks.7.mlp.fc2:  65%|██████▍   | 48/74 [03:20<01:58,  4.56s/it]
+calibrating blocks.7.mlp.fc2:  66%|██████▌   | 49/74 [03:25<01:56,  4.67s/it]
+calibrating blocks.8.attn.qkv:  66%|██████▌   | 49/74 [03:25<01:56,  4.67s/it]
+reparaming blocks.8.attn.qkv:  66%|██████▌   | 49/74 [03:26<01:56,  4.67s/it] 
+reparaming blocks.8.attn.qkv:  68%|██████▊   | 50/74 [03:29<01:47,  4.46s/it]
+calibrating blocks.8.attn.proj:  68%|██████▊   | 50/74 [03:29<01:47,  4.46s/it]
+calibrating blocks.8.attn.proj:  69%|██████▉   | 51/74 [03:31<01:24,  3.66s/it]
+calibrating blocks.8.attn.matmul1:  69%|██████▉   | 51/74 [03:31<01:24,  3.66s/it]
+calibrating blocks.8.attn.matmul1:  70%|███████   | 52/74 [03:36<01:29,  4.07s/it]
+calibrating blocks.8.attn.matmul2:  70%|███████   | 52/74 [03:36<01:29,  4.07s/it]
+calibrating blocks.8.attn.matmul2:  72%|███████▏  | 53/74 [03:41<01:30,  4.30s/it]
+calibrating blocks.8.mlp.fc1:  72%|███████▏  | 53/74 [03:41<01:30,  4.30s/it]     
+reparaming blocks.8.mlp.fc1:  72%|███████▏  | 53/74 [03:42<01:30,  4.30s/it] 
+reparaming blocks.8.mlp.fc1:  73%|███████▎  | 54/74 [03:46<01:30,  4.51s/it]
+calibrating blocks.8.mlp.fc2:  73%|███████▎  | 54/74 [03:46<01:30,  4.51s/it]
+calibrating blocks.8.mlp.fc2:  74%|███████▍  | 55/74 [03:51<01:28,  4.66s/it]
+calibrating blocks.9.attn.qkv:  74%|███████▍  | 55/74 [03:51<01:28,  4.66s/it]
+reparaming blocks.9.attn.qkv:  74%|███████▍  | 55/74 [03:52<01:28,  4.66s/it] 
+reparaming blocks.9.attn.qkv:  76%|███████▌  | 56/74 [03:55<01:20,  4.50s/it]
+calibrating blocks.9.attn.proj:  76%|███████▌  | 56/74 [03:55<01:20,  4.50s/it]
+calibrating blocks.9.attn.proj:  77%|███████▋  | 57/74 [03:57<01:03,  3.76s/it]
+calibrating blocks.9.attn.matmul1:  77%|███████▋  | 57/74 [03:57<01:03,  3.76s/it]
+calibrating blocks.9.attn.matmul1:  78%|███████▊  | 58/74 [04:02<01:07,  4.19s/it]
+calibrating blocks.9.attn.matmul2:  78%|███████▊  | 58/74 [04:02<01:07,  4.19s/it]
+calibrating blocks.9.attn.matmul2:  80%|███████▉  | 59/74 [04:07<01:06,  4.43s/it]
+calibrating blocks.9.mlp.fc1:  80%|███████▉  | 59/74 [04:07<01:06,  4.43s/it]     
+reparaming blocks.9.mlp.fc1:  80%|███████▉  | 59/74 [04:08<01:06,  4.43s/it] 
+reparaming blocks.9.mlp.fc1:  81%|████████  | 60/74 [04:12<01:04,  4.62s/it]
+calibrating blocks.9.mlp.fc2:  81%|████████  | 60/74 [04:12<01:04,  4.62s/it]
+calibrating blocks.9.mlp.fc2:  82%|████████▏ | 61/74 [04:17<01:01,  4.71s/it]
+calibrating blocks.10.attn.qkv:  82%|████████▏ | 61/74 [04:17<01:01,  4.71s/it]
+reparaming blocks.10.attn.qkv:  82%|████████▏ | 61/74 [04:18<01:01,  4.71s/it] 
+reparaming blocks.10.attn.qkv:  84%|████████▍ | 62/74 [04:21<00:53,  4.45s/it]
+calibrating blocks.10.attn.proj:  84%|████████▍ | 62/74 [04:21<00:53,  4.45s/it]
+calibrating blocks.10.attn.proj:  85%|████████▌ | 63/74 [04:23<00:40,  3.67s/it]
+calibrating blocks.10.attn.matmul1:  85%|████████▌ | 63/74 [04:23<00:40,  3.67s/it]
+calibrating blocks.10.attn.matmul1:  86%|████████▋ | 64/74 [04:28<00:41,  4.12s/it]
+calibrating blocks.10.attn.matmul2:  86%|████████▋ | 64/74 [04:28<00:41,  4.12s/it]
+calibrating blocks.10.attn.matmul2:  88%|████████▊ | 65/74 [04:33<00:39,  4.35s/it]
+calibrating blocks.10.mlp.fc1:  88%|████████▊ | 65/74 [04:33<00:39,  4.35s/it]     
+reparaming blocks.10.mlp.fc1:  88%|████████▊ | 65/74 [04:34<00:39,  4.35s/it] 
+reparaming blocks.10.mlp.fc1:  89%|████████▉ | 66/74 [04:38<00:36,  4.55s/it]
+calibrating blocks.10.mlp.fc2:  89%|████████▉ | 66/74 [04:38<00:36,  4.55s/it]
+calibrating blocks.10.mlp.fc2:  91%|█████████ | 67/74 [04:43<00:32,  4.67s/it]
+calibrating blocks.11.attn.qkv:  91%|█████████ | 67/74 [04:43<00:32,  4.67s/it]
+reparaming blocks.11.attn.qkv:  91%|█████████ | 67/74 [04:44<00:32,  4.67s/it] 
+reparaming blocks.11.attn.qkv:  92%|█████████▏| 68/74 [04:47<00:26,  4.43s/it]
+calibrating blocks.11.attn.proj:  92%|█████████▏| 68/74 [04:47<00:26,  4.43s/it]
+calibrating blocks.11.attn.proj:  93%|█████████▎| 69/74 [04:49<00:18,  3.64s/it]
+calibrating blocks.11.attn.matmul1:  93%|█████████▎| 69/74 [04:49<00:18,  3.64s/it]
+calibrating blocks.11.attn.matmul1:  95%|█████████▍| 70/74 [04:54<00:16,  4.11s/it]
+calibrating blocks.11.attn.matmul2:  95%|█████████▍| 70/74 [04:54<00:16,  4.11s/it]
+calibrating blocks.11.attn.matmul2:  96%|█████████▌| 71/74 [04:59<00:13,  4.36s/it]
+calibrating blocks.11.mlp.fc1:  96%|█████████▌| 71/74 [04:59<00:13,  4.36s/it]     
+reparaming blocks.11.mlp.fc1:  96%|█████████▌| 71/74 [05:00<00:13,  4.36s/it] 
+reparaming blocks.11.mlp.fc1:  97%|█████████▋| 72/74 [05:04<00:09,  4.56s/it]
+calibrating blocks.11.mlp.fc2:  97%|█████████▋| 72/74 [05:04<00:09,  4.56s/it]
+calibrating blocks.11.mlp.fc2:  99%|█████████▊| 73/74 [05:09<00:04,  4.68s/it]
+calibrating head:  99%|█████████▊| 73/74 [05:09<00:04,  4.68s/it]             
+calibrating head: 100%|██████████| 74/74 [05:09<00:00,  3.48s/it]
+calibrating head: 100%|██████████| 74/74 [05:09<00:00,  4.19s/it]
+2026-10-21 17:31:08 - mse guided calibration finished.
+Saving checkpoint to /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261021_172536_headwise_alignment_w3a3_seed3407_seeded_full_relation_v2_alignment/vit_small_w3_a3_calibsize_128_mse.pth
+Validating after calibration ...
+Test: [0/782]	Time 1.070 (1.070)	Loss 4.6286 (4.6286)	Prec@1 15.625 (15.625)	Prec@5 26.562 (26.562)
+Test: [10/782]	Time 0.073 (0.165)	Loss 6.3640 (5.8695)	Prec@1 0.000 (5.682)	Prec@5 1.562 (13.920)
+Test: [20/782]	Time 0.077 (0.122)	Loss 4.7714 (5.9842)	Prec@1 10.938 (4.390)	Prec@5 28.125 (10.789)
+Test: [30/782]	Time 0.073 (0.107)	Loss 5.2350 (5.8104)	Prec@1 9.375 (5.696)	Prec@5 26.562 (13.810)
+Test: [40/782]	Time 0.073 (0.099)	Loss 7.5340 (5.7007)	Prec@1 1.562 (6.250)	Prec@5 1.562 (16.159)
+Test: [50/782]	Time 0.074 (0.094)	Loss 4.0290 (5.5969)	Prec@1 12.500 (6.281)	Prec@5 43.750 (17.402)
+Test: [60/782]	Time 0.080 (0.091)	Loss 4.9131 (5.6411)	Prec@1 10.938 (5.712)	Prec@5 23.438 (16.265)
+Test: [70/782]	Time 0.076 (0.089)	Loss 5.5284 (5.7884)	Prec@1 9.375 (5.216)	Prec@5 18.750 (14.789)
+Test: [80/782]	Time 0.069 (0.087)	Loss 6.7840 (5.8139)	Prec@1 0.000 (5.093)	Prec@5 1.562 (14.198)
+Test: [90/782]	Time 0.069 (0.085)	Loss 4.8346 (5.7625)	Prec@1 10.938 (5.048)	Prec@5 25.000 (14.475)
+Test: [100/782]	Time 0.071 (0.084)	Loss 5.2037 (5.7407)	Prec@1 4.688 (5.090)	Prec@5 17.188 (14.403)
+Test: [110/782]	Time 0.070 (0.083)	Loss 5.8241 (5.7035)	Prec@1 1.562 (5.180)	Prec@5 9.375 (14.682)
+Test: [120/782]	Time 0.070 (0.082)	Loss 6.5789 (5.7165)	Prec@1 0.000 (5.191)	Prec@5 1.562 (14.411)
+Test: [130/782]	Time 0.071 (0.081)	Loss 8.8572 (5.8366)	Prec@1 0.000 (4.854)	Prec@5 0.000 (13.430)
+Test: [140/782]	Time 0.071 (0.080)	Loss 6.2749 (5.9110)	Prec@1 0.000 (4.566)	Prec@5 3.125 (12.688)
+Test: [150/782]	Time 0.069 (0.079)	Loss 7.6262 (5.9804)	Prec@1 0.000 (4.284)	Prec@5 0.000 (12.014)
+Test: [160/782]	Time 0.072 (0.079)	Loss 7.1998 (6.0470)	Prec@1 0.000 (4.028)	Prec@5 1.562 (11.355)
+Test: [170/782]	Time 0.069 (0.078)	Loss 5.0654 (6.0862)	Prec@1 9.375 (3.874)	Prec@5 23.438 (10.956)
+Test: [180/782]	Time 0.071 (0.078)	Loss 5.5431 (6.1098)	Prec@1 0.000 (3.738)	Prec@5 7.812 (10.679)
+Test: [190/782]	Time 0.071 (0.078)	Loss 7.9294 (6.1565)	Prec@1 0.000 (3.616)	Prec@5 0.000 (10.308)
+Test: [200/782]	Time 0.072 (0.077)	Loss 7.0207 (6.1843)	Prec@1 0.000 (3.483)	Prec@5 0.000 (9.966)
+Test: [210/782]	Time 0.069 (0.077)	Loss 5.2723 (6.1943)	Prec@1 6.250 (3.399)	Prec@5 18.750 (9.775)
+Test: [220/782]	Time 0.073 (0.077)	Loss 6.7291 (6.1873)	Prec@1 0.000 (3.457)	Prec@5 0.000 (9.884)
+Test: [230/782]	Time 0.074 (0.076)	Loss 5.8288 (6.1564)	Prec@1 1.562 (3.598)	Prec@5 7.812 (10.268)
+Test: [240/782]	Time 0.077 (0.076)	Loss 6.7500 (6.1715)	Prec@1 0.000 (3.501)	Prec@5 0.000 (10.023)
+Test: [250/782]	Time 0.073 (0.076)	Loss 4.5586 (6.1281)	Prec@1 7.812 (3.629)	Prec@5 25.000 (10.464)
+Test: [260/782]	Time 0.073 (0.076)	Loss 6.1428 (6.1027)	Prec@1 0.000 (3.658)	Prec@5 0.000 (10.572)
+Test: [270/782]	Time 0.076 (0.076)	Loss 5.6891 (6.1019)	Prec@1 3.125 (3.690)	Prec@5 12.500 (10.672)
+Test: [280/782]	Time 0.080 (0.076)	Loss 6.4957 (6.1140)	Prec@1 0.000 (3.598)	Prec@5 0.000 (10.504)
+Test: [290/782]	Time 0.073 (0.076)	Loss 5.8577 (6.1108)	Prec@1 0.000 (3.598)	Prec@5 6.250 (10.454)
+Test: [300/782]	Time 0.069 (0.076)	Loss 6.2700 (6.1060)	Prec@1 1.562 (3.587)	Prec@5 3.125 (10.398)
+Test: [310/782]	Time 0.074 (0.076)	Loss 6.3970 (6.0819)	Prec@1 1.562 (3.668)	Prec@5 9.375 (10.747)
+Test: [320/782]	Time 0.076 (0.076)	Loss 6.0136 (6.0882)	Prec@1 6.250 (3.699)	Prec@5 17.188 (10.850)
+Test: [330/782]	Time 0.069 (0.076)	Loss 7.8333 (6.1161)	Prec@1 0.000 (3.611)	Prec@5 0.000 (10.617)
+Test: [340/782]	Time 0.069 (0.075)	Loss 6.4411 (6.1312)	Prec@1 1.562 (3.579)	Prec@5 6.250 (10.557)
+Test: [350/782]	Time 0.073 (0.075)	Loss 6.9818 (6.1380)	Prec@1 1.562 (3.597)	Prec@5 6.250 (10.541)
+Test: [360/782]	Time 0.069 (0.075)	Loss 6.5423 (6.1436)	Prec@1 4.688 (3.601)	Prec@5 10.938 (10.557)
+Test: [370/782]	Time 0.068 (0.075)	Loss 7.4333 (6.1650)	Prec@1 0.000 (3.525)	Prec@5 0.000 (10.373)
+Test: [380/782]	Time 0.069 (0.075)	Loss 6.7609 (6.1740)	Prec@1 0.000 (3.531)	Prec@5 0.000 (10.351)
+Test: [390/782]	Time 0.070 (0.075)	Loss 5.6461 (6.1852)	Prec@1 9.375 (3.589)	Prec@5 15.625 (10.378)
+Test: [400/782]	Time 0.069 (0.075)	Loss 7.1377 (6.2036)	Prec@1 0.000 (3.585)	Prec@5 0.000 (10.302)
+Test: [410/782]	Time 0.069 (0.074)	Loss 5.3796 (6.2287)	Prec@1 4.688 (3.528)	Prec@5 20.312 (10.143)
+Test: [420/782]	Time 0.069 (0.074)	Loss 5.4195 (6.2359)	Prec@1 3.125 (3.522)	Prec@5 14.062 (10.147)
+Test: [430/782]	Time 0.068 (0.074)	Loss 6.9493 (6.2569)	Prec@1 0.000 (3.473)	Prec@5 0.000 (10.006)
+Test: [440/782]	Time 0.070 (0.074)	Loss 6.7986 (6.2623)	Prec@1 1.562 (3.447)	Prec@5 1.562 (9.963)
+Test: [450/782]	Time 0.070 (0.074)	Loss 6.4242 (6.2706)	Prec@1 0.000 (3.492)	Prec@5 4.688 (10.037)
+Test: [460/782]	Time 0.070 (0.074)	Loss 8.8312 (6.2903)	Prec@1 0.000 (3.501)	Prec@5 0.000 (10.012)
+Test: [470/782]	Time 0.070 (0.074)	Loss 8.3881 (6.3112)	Prec@1 0.000 (3.470)	Prec@5 0.000 (9.889)
+Test: [480/782]	Time 0.072 (0.074)	Loss 7.0964 (6.3210)	Prec@1 1.562 (3.456)	Prec@5 1.562 (9.778)
+Test: [490/782]	Time 0.071 (0.074)	Loss 5.8734 (6.3381)	Prec@1 0.000 (3.392)	Prec@5 3.125 (9.642)
+Test: [500/782]	Time 0.070 (0.074)	Loss 6.7804 (6.3470)	Prec@1 0.000 (3.343)	Prec@5 1.562 (9.565)
+Test: [510/782]	Time 0.071 (0.074)	Loss 6.0587 (6.3536)	Prec@1 3.125 (3.345)	Prec@5 7.812 (9.549)
+Test: [520/782]	Time 0.072 (0.074)	Loss 6.4605 (6.3500)	Prec@1 0.000 (3.314)	Prec@5 1.562 (9.507)
+Test: [530/782]	Time 0.075 (0.074)	Loss 7.5782 (6.3619)	Prec@1 0.000 (3.293)	Prec@5 0.000 (9.443)
+Test: [540/782]	Time 0.070 (0.074)	Loss 8.1271 (6.3740)	Prec@1 0.000 (3.319)	Prec@5 3.125 (9.467)
+Test: [550/782]	Time 0.070 (0.074)	Loss 6.2799 (6.3808)	Prec@1 3.125 (3.287)	Prec@5 6.250 (9.386)
+Test: [560/782]	Time 0.071 (0.074)	Loss 4.5616 (6.3776)	Prec@1 14.062 (3.326)	Prec@5 34.375 (9.428)
+Test: [570/782]	Time 0.070 (0.074)	Loss 7.0178 (6.3839)	Prec@1 0.000 (3.306)	Prec@5 1.562 (9.372)
+Test: [580/782]	Time 0.072 (0.073)	Loss 5.5041 (6.3955)	Prec@1 6.250 (3.262)	Prec@5 21.875 (9.289)
+Test: [590/782]	Time 0.071 (0.073)	Loss 6.5780 (6.4075)	Prec@1 4.688 (3.236)	Prec@5 10.938 (9.198)
+Test: [600/782]	Time 0.071 (0.073)	Loss 7.8841 (6.4134)	Prec@1 0.000 (3.234)	Prec@5 0.000 (9.164)
+Test: [610/782]	Time 0.071 (0.073)	Loss 5.4592 (6.4159)	Prec@1 10.938 (3.268)	Prec@5 15.625 (9.183)
+Test: [620/782]	Time 0.072 (0.073)	Loss 6.8337 (6.4283)	Prec@1 0.000 (3.238)	Prec@5 1.562 (9.081)
+Test: [630/782]	Time 0.072 (0.073)	Loss 6.6761 (6.4274)	Prec@1 4.688 (3.298)	Prec@5 4.688 (9.194)
+Test: [640/782]	Time 0.071 (0.073)	Loss 6.8940 (6.4374)	Prec@1 3.125 (3.313)	Prec@5 4.688 (9.175)
+Test: [650/782]	Time 0.071 (0.073)	Loss 3.7269 (6.4455)	Prec@1 31.250 (3.331)	Prec@5 51.562 (9.202)
+Test: [660/782]	Time 0.072 (0.073)	Loss 7.4463 (6.4523)	Prec@1 0.000 (3.321)	Prec@5 0.000 (9.202)
+Test: [670/782]	Time 0.070 (0.073)	Loss 6.4693 (6.4562)	Prec@1 3.125 (3.302)	Prec@5 9.375 (9.193)
+Test: [680/782]	Time 0.073 (0.073)	Loss 4.8771 (6.4514)	Prec@1 12.500 (3.309)	Prec@5 34.375 (9.221)
+Test: [690/782]	Time 0.072 (0.073)	Loss 5.0776 (6.4475)	Prec@1 12.500 (3.362)	Prec@5 29.688 (9.303)
+Test: [700/782]	Time 0.072 (0.073)	Loss 6.8309 (6.4526)	Prec@1 1.562 (3.341)	Prec@5 3.125 (9.241)
+Test: [710/782]	Time 0.072 (0.073)	Loss 6.7411 (6.4578)	Prec@1 0.000 (3.332)	Prec@5 1.562 (9.212)
+Test: [720/782]	Time 0.071 (0.073)	Loss 5.4216 (6.4466)	Prec@1 4.688 (3.392)	Prec@5 20.312 (9.327)
+Test: [730/782]	Time 0.072 (0.073)	Loss 6.2293 (6.4423)	Prec@1 1.562 (3.373)	Prec@5 3.125 (9.279)
+Test: [740/782]	Time 0.071 (0.073)	Loss 4.7611 (6.4174)	Prec@1 10.938 (3.528)	Prec@5 29.688 (9.609)
+Test: [750/782]	Time 0.074 (0.073)	Loss 7.8841 (6.4100)	Prec@1 0.000 (3.539)	Prec@5 0.000 (9.629)
+Test: [760/782]	Time 0.071 (0.073)	Loss 3.3248 (6.4031)	Prec@1 46.875 (3.647)	Prec@5 70.312 (9.806)
+Test: [770/782]	Time 0.071 (0.073)	Loss 4.6521 (6.3778)	Prec@1 14.062 (3.851)	Prec@5 23.438 (10.190)
+Test: [780/782]	Time 0.072 (0.073)	Loss 6.8067 (6.3754)	Prec@1 1.562 (3.859)	Prec@5 1.562 (10.165)
+ * Prec@1 3.858 Prec@5 10.162 Loss 6.376 Time 57.133
+Building calibrator ...
+Calibration cache: count=1024 sample_sha256=51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b tensor_sha256=65a35d17aee6c729c0ac21d93b467f9fba2c3b14e80425926b91270caf5a25c5
+2026-10-21 17:32:30 - start fisher_dplr guided block reconstruction
+reconstructing patch_embed ...
+initializing raw input and raw output ...
+adaround training for patch_embed ...
+wraping quantizers in patch_embed ...
+updating fisher information matrix ...
+Total loss:	2.000 (rec:2.000, round:0.000)	b=0.00	count=1
+Total loss:	0.074 (rec:0.074, round:0.000)	b=0.00	count=500
+Total loss:	0.072 (rec:0.072, round:0.000)	b=0.00	count=1000
+Total loss:	0.039 (rec:0.039, round:0.000)	b=0.00	count=1500
+Total loss:	0.033 (rec:0.033, round:0.000)	b=0.00	count=2000
+Total loss:	0.023 (rec:0.023, round:0.000)	b=0.00	count=2500
+Total loss:	0.033 (rec:0.033, round:0.000)	b=0.00	count=3000
+Total loss:	0.017 (rec:0.017, round:0.000)	b=0.00	count=3500
+Total loss:	2798.070 (rec:0.019, round:2798.051)	b=20.00	count=4000
+updating fisher information matrix ...
+Total loss:	2014.309 (rec:2.025, round:2012.284)	b=19.44	count=4500
+Total loss:	1904.287 (rec:2.216, round:1902.070)	b=18.88	count=5000
+Total loss:	1835.856 (rec:1.295, round:1834.561)	b=18.31	count=5500
+Total loss:	1783.642 (rec:2.057, round:1781.585)	b=17.75	count=6000
+Total loss:	1738.300 (rec:1.821, round:1736.480)	b=17.19	count=6500
+Total loss:	1697.046 (rec:1.488, round:1695.558)	b=16.62	count=7000
+Total loss:	1657.080 (rec:1.897, round:1655.183)	b=16.06	count=7500
+Total loss:	1618.315 (rec:2.685, round:1615.631)	b=15.50	count=8000
+updating fisher information matrix ...
+Total loss:	1577.755 (rec:1.922, round:1575.833)	b=14.94	count=8500
+Total loss:	1534.733 (rec:1.697, round:1533.036)	b=14.38	count=9000
+Total loss:	1491.144 (rec:1.278, round:1489.866)	b=13.81	count=9500
+Total loss:	1446.994 (rec:1.366, round:1445.629)	b=13.25	count=10000
+Total loss:	1401.546 (rec:1.526, round:1400.020)	b=12.69	count=10500
+Total loss:	1355.079 (rec:1.316, round:1353.763)	b=12.12	count=11000
+Total loss:	1308.798 (rec:1.828, round:1306.970)	b=11.56	count=11500
+Total loss:	1260.661 (rec:1.615, round:1259.046)	b=11.00	count=12000
+updating fisher information matrix ...
+Total loss:	1211.555 (rec:2.011, round:1209.544)	b=10.44	count=12500
+Total loss:	1160.398 (rec:1.565, round:1158.833)	b=9.88	count=13000
+Total loss:	1109.338 (rec:2.644, round:1106.694)	b=9.31	count=13500
+Total loss:	1053.658 (rec:2.362, round:1051.296)	b=8.75	count=14000
+Total loss:	995.328 (rec:3.305, round:992.023)	b=8.19	count=14500
+Total loss:	931.480 (rec:2.743, round:928.737)	b=7.62	count=15000
+Total loss:	863.487 (rec:3.272, round:860.215)	b=7.06	count=15500
+Total loss:	792.131 (rec:4.288, round:787.843)	b=6.50	count=16000
+updating fisher information matrix ...
+Total loss:	708.309 (rec:2.383, round:705.925)	b=5.94	count=16500
+Total loss:	617.925 (rec:3.634, round:614.291)	b=5.38	count=17000
+Total loss:	517.711 (rec:4.310, round:513.401)	b=4.81	count=17500
+Total loss:	410.044 (rec:3.897, round:406.147)	b=4.25	count=18000
+Total loss:	306.967 (rec:5.619, round:301.347)	b=3.69	count=18500
+Total loss:	215.070 (rec:7.560, round:207.510)	b=3.12	count=19000
+Total loss:	139.639 (rec:9.732, round:129.907)	b=2.56	count=19500
+Total loss:	81.064 (rec:10.936, round:70.128)	b=2.00	count=20000
+finished reconstructing patch_embed.
+reconstructing blocks.0 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.0", "protocol": "relation_v2_alignment", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "aligned", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.0 ...
+wraping quantizers in blocks.0 ...
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.0", "refresh": 1, "min": 0.0, "max": 1.4769229888916016, "mean": 0.9999999403953552, "alignment_positive_fraction": 0.6770833730697632, "alignment_mean": 0.010498094372451305}
+Total loss:	2.000 (rec:2.000, round:0.000)	b=0.00	count=1
+Total loss:	0.912 (rec:0.912, round:0.000)	b=0.00	count=500
+Total loss:	0.725 (rec:0.725, round:0.000)	b=0.00	count=1000
+Total loss:	0.629 (rec:0.629, round:0.000)	b=0.00	count=1500
+Total loss:	0.602 (rec:0.602, round:0.000)	b=0.00	count=2000
+Total loss:	0.605 (rec:0.605, round:0.000)	b=0.00	count=2500
+Total loss:	0.553 (rec:0.553, round:0.000)	b=0.00	count=3000
+Total loss:	0.522 (rec:0.522, round:0.000)	b=0.00	count=3500
+Total loss:	15387.368 (rec:0.513, round:15386.855)	b=20.00	count=4000
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.0", "refresh": 2, "min": 0.0, "max": 1.6842105388641357, "mean": 1.0, "alignment_positive_fraction": 0.59375, "alignment_mean": -0.00040101277409121394}
+Total loss:	7493.022 (rec:2.078, round:7490.944)	b=19.44	count=4500
+Attention relation loss: {"block": "blocks.0", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.17250549793243408, "auxiliary": 0.006024406291544437, "rec_loss": 2.0783233642578125}
+Total loss:	6887.406 (rec:2.029, round:6885.377)	b=18.88	count=5000
+Attention relation loss: {"block": "blocks.0", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.14554642140865326, "auxiliary": 0.010165829211473465, "rec_loss": 2.029099464416504}
+Total loss:	6489.296 (rec:1.866, round:6487.431)	b=18.31	count=5500
+Attention relation loss: {"block": "blocks.0", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.12777626514434814, "auxiliary": 0.0133869843557477, "rec_loss": 1.8655381202697754}
+Total loss:	6151.134 (rec:1.978, round:6149.157)	b=17.75	count=6000
+Attention relation loss: {"block": "blocks.0", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.1161508783698082, "auxiliary": 0.016225339844822884, "rec_loss": 1.977548599243164}
+Total loss:	5844.089 (rec:2.016, round:5842.073)	b=17.19	count=6500
+Attention relation loss: {"block": "blocks.0", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.10433199256658554, "auxiliary": 0.018217919394373894, "rec_loss": 2.016111373901367}
+Total loss:	5556.455 (rec:1.888, round:5554.567)	b=16.62	count=7000
+Attention relation loss: {"block": "blocks.0", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.09424405544996262, "auxiliary": 0.019747700542211533, "rec_loss": 1.8875274658203125}
+Total loss:	5282.007 (rec:2.175, round:5279.833)	b=16.06	count=7500
+Attention relation loss: {"block": "blocks.0", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.08292493224143982, "auxiliary": 0.020271899178624153, "rec_loss": 2.174564838409424}
+Total loss:	5014.748 (rec:1.877, round:5012.871)	b=15.50	count=8000
+Attention relation loss: {"block": "blocks.0", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.0819217637181282, "auxiliary": 0.022887617349624634, "rec_loss": 1.8767902851104736}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.0", "refresh": 3, "min": 0.0, "max": 1.846153736114502, "mean": 0.9999999403953552, "alignment_positive_fraction": 0.5416666865348816, "alignment_mean": -0.0010937219485640526}
+Total loss:	4753.592 (rec:1.928, round:4751.664)	b=14.94	count=8500
+Attention relation loss: {"block": "blocks.0", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.06547743082046509, "auxiliary": 0.04463230073451996, "rec_loss": 1.9277122020721436}
+Total loss:	4492.474 (rec:1.961, round:4490.513)	b=14.38	count=9000
+Attention relation loss: {"block": "blocks.0", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.0546082966029644, "auxiliary": 0.04135935753583908, "rec_loss": 1.9613431692123413}
+Total loss:	4234.513 (rec:1.965, round:4232.548)	b=13.81	count=9500
+Attention relation loss: {"block": "blocks.0", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.05698935687541962, "auxiliary": 0.04747900366783142, "rec_loss": 1.9653929471969604}
+Total loss:	3980.424 (rec:1.833, round:3978.591)	b=13.25	count=10000
+Attention relation loss: {"block": "blocks.0", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.05317310243844986, "auxiliary": 0.04832684248685837, "rec_loss": 1.8326462507247925}
+Total loss:	3727.777 (rec:2.161, round:3725.616)	b=12.69	count=10500
+Attention relation loss: {"block": "blocks.0", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.04500050097703934, "auxiliary": 0.04430735856294632, "rec_loss": 2.1611878871917725}
+Total loss:	3478.133 (rec:2.092, round:3476.041)	b=12.12	count=11000
+Attention relation loss: {"block": "blocks.0", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.04522373527288437, "auxiliary": 0.0479523167014122, "rec_loss": 2.09240460395813}
+Total loss:	3231.508 (rec:2.069, round:3229.438)	b=11.56	count=11500
+Attention relation loss: {"block": "blocks.0", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.04480373114347458, "auxiliary": 0.050900332629680634, "rec_loss": 2.069450855255127}
+Total loss:	2980.250 (rec:2.065, round:2978.184)	b=11.00	count=12000
+Attention relation loss: {"block": "blocks.0", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.041795000433921814, "auxiliary": 0.05064767226576805, "rec_loss": 2.0653703212738037}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.0", "refresh": 4, "min": 0.0, "max": 2.0, "mean": 0.9375, "alignment_positive_fraction": 0.46875, "alignment_mean": -0.00477528665214777}
+Total loss:	2725.807 (rec:2.120, round:2723.688)	b=10.44	count=12500
+Attention relation loss: {"block": "blocks.0", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.03651640564203262, "auxiliary": 0.08477190881967545, "rec_loss": 2.119877815246582}
+Total loss:	2465.066 (rec:1.795, round:2463.271)	b=9.88	count=13000
+Attention relation loss: {"block": "blocks.0", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.03434310853481293, "auxiliary": 0.07972665876150131, "rec_loss": 1.7949758768081665}
+Total loss:	2207.244 (rec:1.910, round:2205.334)	b=9.31	count=13500
+Attention relation loss: {"block": "blocks.0", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.03427940234541893, "auxiliary": 0.07957876473665237, "rec_loss": 1.9097599983215332}
+Total loss:	1950.685 (rec:1.875, round:1948.810)	b=8.75	count=14000
+Attention relation loss: {"block": "blocks.0", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.037805236876010895, "auxiliary": 0.08776389807462692, "rec_loss": 1.8745194673538208}
+Total loss:	1695.393 (rec:1.979, round:1693.414)	b=8.19	count=14500
+Attention relation loss: {"block": "blocks.0", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.03176777809858322, "auxiliary": 0.07374809682369232, "rec_loss": 1.9790878295898438}
+Total loss:	1440.666 (rec:2.110, round:1438.557)	b=7.62	count=15000
+Attention relation loss: {"block": "blocks.0", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.03222827613353729, "auxiliary": 0.07481712847948074, "rec_loss": 2.1097326278686523}
+Total loss:	1185.448 (rec:2.228, round:1183.220)	b=7.06	count=15500
+Attention relation loss: {"block": "blocks.0", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.031517598778009415, "auxiliary": 0.07316730916500092, "rec_loss": 2.2278308868408203}
+Total loss:	936.811 (rec:2.285, round:934.525)	b=6.50	count=16000
+Attention relation loss: {"block": "blocks.0", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.03208927810192108, "auxiliary": 0.07449444383382797, "rec_loss": 2.2853198051452637}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.0", "refresh": 5, "min": 0.0, "max": 1.7454544305801392, "mean": 1.0, "alignment_positive_fraction": 0.5729166865348816, "alignment_mean": -0.002317206934094429}
+Total loss:	696.194 (rec:1.966, round:694.228)	b=5.94	count=16500
+Attention relation loss: {"block": "blocks.0", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.03961561620235443, "auxiliary": 0.09119202196598053, "rec_loss": 1.9658586978912354}
+Total loss:	468.793 (rec:1.937, round:466.856)	b=5.38	count=17000
+Attention relation loss: {"block": "blocks.0", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.0394967645406723, "auxiliary": 0.09091843664646149, "rec_loss": 1.937065839767456}
+Total loss:	273.579 (rec:1.913, round:271.666)	b=4.81	count=17500
+Attention relation loss: {"block": "blocks.0", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.039705172181129456, "auxiliary": 0.09139817208051682, "rec_loss": 1.9125702381134033}
+Total loss:	126.055 (rec:1.985, round:124.070)	b=4.25	count=18000
+Attention relation loss: {"block": "blocks.0", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.03893902152776718, "auxiliary": 0.08963455259799957, "rec_loss": 1.985042929649353}
+Total loss:	38.669 (rec:1.907, round:36.761)	b=3.69	count=18500
+Attention relation loss: {"block": "blocks.0", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.04036779701709747, "auxiliary": 0.09292348474264145, "rec_loss": 1.9072518348693848}
+Total loss:	7.906 (rec:1.965, round:5.941)	b=3.12	count=19000
+Attention relation loss: {"block": "blocks.0", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.043764542788267136, "auxiliary": 0.10074251890182495, "rec_loss": 1.9651591777801514}
+Total loss:	2.528 (rec:2.060, round:0.468)	b=2.56	count=19500
+Attention relation loss: {"block": "blocks.0", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.04008672386407852, "auxiliary": 0.09227647632360458, "rec_loss": 2.0599489212036133}
+Total loss:	1.880 (rec:1.860, round:0.021)	b=2.00	count=20000
+Attention relation loss: {"block": "blocks.0", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.03975608944892883, "auxiliary": 0.09151538461446762, "rec_loss": 1.8595378398895264}
+Attention relation result: {"active_steps": 16000, "alignment_mean": -0.002317206934094429, "alignment_positive_fraction": 0.5729166865348816, "block": "blocks.0", "cache_bytes": 38731776, "first_training_kl": 0.1789652556180954, "gradient_refreshes": 5, "last_auxiliary": 0.09151538461446762, "last_training_kl": 0.03975608944892883, "mode": "aligned", "protocol": "relation_v2_alignment", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.7454544305801392, "weight_min": 0.0}
+finished reconstructing blocks.0.
+reconstructing blocks.1 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.1", "protocol": "relation_v2_alignment", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "aligned", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.1 ...
+wraping quantizers in blocks.1 ...
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.1", "refresh": 1, "min": 0.0, "max": 1.3333333730697632, "mean": 1.0, "alignment_positive_fraction": 0.75, "alignment_mean": 0.017060412093997}
+Total loss:	2.000 (rec:2.000, round:0.000)	b=0.00	count=1
+Total loss:	1.170 (rec:1.170, round:0.000)	b=0.00	count=500
+Total loss:	1.051 (rec:1.051, round:0.000)	b=0.00	count=1000
+Total loss:	0.948 (rec:0.948, round:0.000)	b=0.00	count=1500
+Total loss:	0.948 (rec:0.948, round:0.000)	b=0.00	count=2000
+Total loss:	0.976 (rec:0.976, round:0.000)	b=0.00	count=2500
+Total loss:	0.974 (rec:0.974, round:0.000)	b=0.00	count=3000
+Total loss:	0.971 (rec:0.971, round:0.000)	b=0.00	count=3500
+Total loss:	15687.974 (rec:0.941, round:15687.033)	b=20.00	count=4000
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.1", "refresh": 2, "min": 0.0, "max": 1.4117646217346191, "mean": 0.9999999403953552, "alignment_positive_fraction": 0.7083333730697632, "alignment_mean": 0.004071979783475399}
+Total loss:	7929.839 (rec:1.978, round:7927.861)	b=19.44	count=4500
+Attention relation loss: {"block": "blocks.1", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.1772911548614502, "auxiliary": 0.006069036666303873, "rec_loss": 1.9777500629425049}
+Total loss:	7312.343 (rec:1.984, round:7310.359)	b=18.88	count=5000
+Attention relation loss: {"block": "blocks.1", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.15525661408901215, "auxiliary": 0.010629499331116676, "rec_loss": 1.9839526414871216}
+Total loss:	6907.523 (rec:2.026, round:6905.497)	b=18.31	count=5500
+Attention relation loss: {"block": "blocks.1", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.1429467499256134, "auxiliary": 0.014680073596537113, "rec_loss": 2.025925397872925}
+Total loss:	6559.174 (rec:2.010, round:6557.165)	b=17.75	count=6000
+Attention relation loss: {"block": "blocks.1", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.13687726855278015, "auxiliary": 0.01874234899878502, "rec_loss": 2.0098888874053955}
+Total loss:	6237.982 (rec:1.986, round:6235.996)	b=17.19	count=6500
+Attention relation loss: {"block": "blocks.1", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.12451203912496567, "auxiliary": 0.021311501041054726, "rec_loss": 1.9858441352844238}
+Total loss:	5935.557 (rec:1.906, round:5933.650)	b=16.62	count=7000
+Attention relation loss: {"block": "blocks.1", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.1121605858206749, "auxiliary": 0.023036908358335495, "rec_loss": 1.9061291217803955}
+Total loss:	5639.972 (rec:2.014, round:5637.958)	b=16.06	count=7500
+Attention relation loss: {"block": "blocks.1", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.11126701533794403, "auxiliary": 0.026662271469831467, "rec_loss": 2.0139319896698}
+Total loss:	5356.402 (rec:2.000, round:5354.401)	b=15.50	count=8000
+Attention relation loss: {"block": "blocks.1", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.11446286737918854, "auxiliary": 0.03134637326002121, "rec_loss": 2.000448703765869}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.1", "refresh": 3, "min": 0.0, "max": 1.4117646217346191, "mean": 0.9999999403953552, "alignment_positive_fraction": 0.7083333730697632, "alignment_mean": 0.0021973520051687956}
+Total loss:	5072.320 (rec:1.863, round:5070.457)	b=14.94	count=8500
+Attention relation loss: {"block": "blocks.1", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.101866215467453, "auxiliary": 0.04993287846446037, "rec_loss": 1.8627941608428955}
+Total loss:	4788.926 (rec:1.994, round:4786.932)	b=14.38	count=9000
+Attention relation loss: {"block": "blocks.1", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.09433142840862274, "auxiliary": 0.05137718841433525, "rec_loss": 1.9939839839935303}
+Total loss:	4511.045 (rec:1.926, round:4509.119)	b=13.81	count=9500
+Attention relation loss: {"block": "blocks.1", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.08902367949485779, "auxiliary": 0.05333498492836952, "rec_loss": 1.9259850978851318}
+Total loss:	4237.475 (rec:1.993, round:4235.482)	b=13.25	count=10000
+Attention relation loss: {"block": "blocks.1", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.09175574779510498, "auxiliary": 0.0599692277610302, "rec_loss": 1.9927109479904175}
+Total loss:	3962.367 (rec:1.917, round:3960.450)	b=12.69	count=10500
+Attention relation loss: {"block": "blocks.1", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.08730125427246094, "auxiliary": 0.06181270629167557, "rec_loss": 1.9169037342071533}
+Total loss:	3688.400 (rec:2.091, round:3686.310)	b=12.12	count=11000
+Attention relation loss: {"block": "blocks.1", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.09081026166677475, "auxiliary": 0.0692431628704071, "rec_loss": 2.0908446311950684}
+Total loss:	3414.655 (rec:1.988, round:3412.667)	b=11.56	count=11500
+Attention relation loss: {"block": "blocks.1", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.0862489864230156, "auxiliary": 0.07046268880367279, "rec_loss": 1.9876904487609863}
+Total loss:	3139.064 (rec:2.026, round:3137.038)	b=11.00	count=12000
+Attention relation loss: {"block": "blocks.1", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.08555685728788376, "auxiliary": 0.07455705851316452, "rec_loss": 2.026089668273926}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.1", "refresh": 4, "min": 0.0, "max": 1.7777777910232544, "mean": 1.0, "alignment_positive_fraction": 0.5625, "alignment_mean": -0.0018942831084132195}
+Total loss:	2862.819 (rec:2.045, round:2860.773)	b=10.44	count=12500
+Attention relation loss: {"block": "blocks.1", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.09087251126766205, "auxiliary": 0.1041293740272522, "rec_loss": 2.045088768005371}
+Total loss:	2581.673 (rec:2.082, round:2579.590)	b=9.88	count=13000
+Attention relation loss: {"block": "blocks.1", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.08566035330295563, "auxiliary": 0.09815684705972672, "rec_loss": 2.0824942588806152}
+Total loss:	2304.853 (rec:1.969, round:2302.884)	b=9.31	count=13500
+Attention relation loss: {"block": "blocks.1", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.08162041753530502, "auxiliary": 0.09352754801511765, "rec_loss": 1.9688392877578735}
+Total loss:	2030.358 (rec:1.975, round:2028.383)	b=8.75	count=14000
+Attention relation loss: {"block": "blocks.1", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.08052679896354675, "auxiliary": 0.09227439016103745, "rec_loss": 1.9751014709472656}
+Total loss:	1754.649 (rec:1.988, round:1752.661)	b=8.19	count=14500
+Attention relation loss: {"block": "blocks.1", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.08239512890577316, "auxiliary": 0.09441527724266052, "rec_loss": 1.9880878925323486}
+Total loss:	1475.029 (rec:1.998, round:1473.031)	b=7.62	count=15000
+Attention relation loss: {"block": "blocks.1", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.08301164954900742, "auxiliary": 0.09512174129486084, "rec_loss": 1.9978358745574951}
+Total loss:	1196.477 (rec:2.060, round:1194.416)	b=7.06	count=15500
+Attention relation loss: {"block": "blocks.1", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.08095397055149078, "auxiliary": 0.09276387840509415, "rec_loss": 2.0601372718811035}
+Total loss:	920.849 (rec:2.069, round:918.780)	b=6.50	count=16000
+Attention relation loss: {"block": "blocks.1", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.0777328833937645, "auxiliary": 0.08907288312911987, "rec_loss": 2.069397211074829}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.1", "refresh": 5, "min": 0.0, "max": 1.600000023841858, "mean": 1.0, "alignment_positive_fraction": 0.625, "alignment_mean": 0.0005798632046207786}
+Total loss:	658.039 (rec:2.033, round:656.006)	b=5.94	count=16500
+Attention relation loss: {"block": "blocks.1", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.0934952050447464, "auxiliary": 0.09693702310323715, "rec_loss": 2.0328478813171387}
+Total loss:	413.625 (rec:1.976, round:411.649)	b=5.38	count=17000
+Attention relation loss: {"block": "blocks.1", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.09363039582967758, "auxiliary": 0.09707718342542648, "rec_loss": 1.9758083820343018}
+Total loss:	210.096 (rec:2.147, round:207.950)	b=4.81	count=17500
+Attention relation loss: {"block": "blocks.1", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.09243284165859222, "auxiliary": 0.09583554416894913, "rec_loss": 2.1466493606567383}
+Total loss:	74.891 (rec:2.018, round:72.873)	b=4.25	count=18000
+Attention relation loss: {"block": "blocks.1", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.08955835551023483, "auxiliary": 0.09285523742437363, "rec_loss": 2.018312931060791}
+Total loss:	16.943 (rec:2.046, round:14.897)	b=3.69	count=18500
+Attention relation loss: {"block": "blocks.1", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.09316572546958923, "auxiliary": 0.0965954065322876, "rec_loss": 2.0457050800323486}
+Total loss:	3.614 (rec:2.011, round:1.602)	b=3.12	count=19000
+Attention relation loss: {"block": "blocks.1", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.08999548852443695, "auxiliary": 0.0933084711432457, "rec_loss": 2.011073589324951}
+Total loss:	2.132 (rec:2.063, round:0.069)	b=2.56	count=19500
+Attention relation loss: {"block": "blocks.1", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.09014102071523666, "auxiliary": 0.0934593603014946, "rec_loss": 2.062915325164795}
+Total loss:	2.070 (rec:2.069, round:0.001)	b=2.00	count=20000
+Attention relation loss: {"block": "blocks.1", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.09426721185445786, "auxiliary": 0.09773744642734528, "rec_loss": 2.069133758544922}
+Attention relation result: {"active_steps": 16000, "alignment_mean": 0.0005798632046207786, "alignment_positive_fraction": 0.625, "block": "blocks.1", "cache_bytes": 38731776, "first_training_kl": 0.18257753551006317, "gradient_refreshes": 5, "last_auxiliary": 0.09773744642734528, "last_training_kl": 0.09426721185445786, "mode": "aligned", "protocol": "relation_v2_alignment", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.600000023841858, "weight_min": 0.0}
+finished reconstructing blocks.1.
+reconstructing blocks.2 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.2", "protocol": "relation_v2_alignment", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "aligned", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.2 ...
+wraping quantizers in blocks.2 ...
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.2", "refresh": 1, "min": 0.0, "max": 1.215189814567566, "mean": 0.9999999403953552, "alignment_positive_fraction": 0.8229166865348816, "alignment_mean": 0.033371973782777786}
+Total loss:	2.000 (rec:2.000, round:0.000)	b=0.00	count=1
+Total loss:	1.429 (rec:1.429, round:0.000)	b=0.00	count=500
+Total loss:	1.309 (rec:1.309, round:0.000)	b=0.00	count=1000
+Total loss:	1.357 (rec:1.357, round:0.000)	b=0.00	count=1500
+Total loss:	1.339 (rec:1.339, round:0.000)	b=0.00	count=2000
+Total loss:	1.254 (rec:1.254, round:0.000)	b=0.00	count=2500
+Total loss:	1.251 (rec:1.251, round:0.000)	b=0.00	count=3000
+Total loss:	1.220 (rec:1.220, round:0.000)	b=0.00	count=3500
+Total loss:	15933.944 (rec:1.256, round:15932.688)	b=20.00	count=4000
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.2", "refresh": 2, "min": 0.0, "max": 2.0, "mean": 1.0, "alignment_positive_fraction": 0.5, "alignment_mean": -0.0007813849369995296}
+Total loss:	8261.356 (rec:2.118, round:8259.238)	b=19.44	count=4500
+Attention relation loss: {"block": "blocks.2", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.13665349781513214, "auxiliary": 0.006100551690906286, "rec_loss": 2.1184515953063965}
+Total loss:	7640.857 (rec:2.014, round:7638.843)	b=18.88	count=5000
+Attention relation loss: {"block": "blocks.2", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.128455251455307, "auxiliary": 0.011469122022390366, "rec_loss": 2.013901472091675}
+Total loss:	7224.950 (rec:2.055, round:7222.894)	b=18.31	count=5500
+Attention relation loss: {"block": "blocks.2", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.12162681668996811, "auxiliary": 0.01628916896879673, "rec_loss": 2.0554423332214355}
+Total loss:	6871.666 (rec:2.147, round:6869.519)	b=17.75	count=6000
+Attention relation loss: {"block": "blocks.2", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.11910339444875717, "auxiliary": 0.02126828394830227, "rec_loss": 2.1468658447265625}
+Total loss:	6549.038 (rec:1.996, round:6547.042)	b=17.19	count=6500
+Attention relation loss: {"block": "blocks.2", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.10602932423353195, "auxiliary": 0.02366705983877182, "rec_loss": 1.9958832263946533}
+Total loss:	6242.512 (rec:2.057, round:6240.455)	b=16.62	count=7000
+Attention relation loss: {"block": "blocks.2", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.1089518591761589, "auxiliary": 0.029183289036154747, "rec_loss": 2.0568416118621826}
+Total loss:	5945.172 (rec:1.994, round:5943.178)	b=16.06	count=7500
+Attention relation loss: {"block": "blocks.2", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.10523208230733871, "auxiliary": 0.03288474678993225, "rec_loss": 1.9944207668304443}
+Total loss:	5658.151 (rec:2.107, round:5656.044)	b=15.50	count=8000
+Attention relation loss: {"block": "blocks.2", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.11096131801605225, "auxiliary": 0.039628710597753525, "rec_loss": 2.1067824363708496}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.2", "refresh": 3, "min": 0.0, "max": 2.0, "mean": 1.0, "alignment_positive_fraction": 0.5, "alignment_mean": -0.0019923325162380934}
+Total loss:	5372.976 (rec:2.010, round:5370.966)	b=14.94	count=8500
+Attention relation loss: {"block": "blocks.2", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.09869393706321716, "auxiliary": 0.05205347761511803, "rec_loss": 2.0099985599517822}
+Total loss:	5090.612 (rec:2.012, round:5088.600)	b=14.38	count=9000
+Attention relation loss: {"block": "blocks.2", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.09451247751712799, "auxiliary": 0.055386755615472794, "rec_loss": 2.012482166290283}
+Total loss:	4813.827 (rec:2.018, round:4811.809)	b=13.81	count=9500
+Attention relation loss: {"block": "blocks.2", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.09682349860668182, "auxiliary": 0.06241518259048462, "rec_loss": 2.0180141925811768}
+Total loss:	4538.611 (rec:2.042, round:4536.570)	b=13.25	count=10000
+Attention relation loss: {"block": "blocks.2", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.0932072103023529, "auxiliary": 0.06554620712995529, "rec_loss": 2.0417284965515137}
+Total loss:	4261.891 (rec:2.072, round:4259.819)	b=12.69	count=10500
+Attention relation loss: {"block": "blocks.2", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.09207265079021454, "auxiliary": 0.07014404237270355, "rec_loss": 2.0719478130340576}
+Total loss:	3983.433 (rec:2.020, round:3981.414)	b=12.12	count=11000
+Attention relation loss: {"block": "blocks.2", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.09150868654251099, "auxiliary": 0.07507703453302383, "rec_loss": 2.0197763442993164}
+Total loss:	3704.581 (rec:2.049, round:3702.532)	b=11.56	count=11500
+Attention relation loss: {"block": "blocks.2", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.09202658385038376, "auxiliary": 0.08089493960142136, "rec_loss": 2.0493662357330322}
+Total loss:	3422.934 (rec:2.003, round:3420.931)	b=11.00	count=12000
+Attention relation loss: {"block": "blocks.2", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.08722794055938721, "auxiliary": 0.08178853243589401, "rec_loss": 2.0032713413238525}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.2", "refresh": 4, "min": 0.0, "max": 2.0, "mean": 1.0, "alignment_positive_fraction": 0.5, "alignment_mean": 0.00024970932281576097}
+Total loss:	3135.595 (rec:1.942, round:3133.653)	b=10.44	count=12500
+Attention relation loss: {"block": "blocks.2", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.08848069608211517, "auxiliary": 0.09270650893449783, "rec_loss": 1.942471981048584}
+Total loss:	2842.882 (rec:2.033, round:2840.848)	b=9.88	count=13000
+Attention relation loss: {"block": "blocks.2", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.10058687627315521, "auxiliary": 0.10539088398218155, "rec_loss": 2.03336238861084}
+Total loss:	2550.849 (rec:1.959, round:2548.890)	b=9.31	count=13500
+Attention relation loss: {"block": "blocks.2", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.09353356063365936, "auxiliary": 0.09800069779157639, "rec_loss": 1.9590325355529785}
+Total loss:	2251.053 (rec:1.983, round:2249.071)	b=8.75	count=14000
+Attention relation loss: {"block": "blocks.2", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.09046053886413574, "auxiliary": 0.09478091448545456, "rec_loss": 1.9828853607177734}
+Total loss:	1949.725 (rec:2.055, round:1947.670)	b=8.19	count=14500
+Attention relation loss: {"block": "blocks.2", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.0918528139591217, "auxiliary": 0.09623967856168747, "rec_loss": 2.055201292037964}
+Total loss:	1648.774 (rec:2.000, round:1646.774)	b=7.62	count=15000
+Attention relation loss: {"block": "blocks.2", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.09114664793014526, "auxiliary": 0.09549979120492935, "rec_loss": 1.9996881484985352}
+Total loss:	1346.427 (rec:2.033, round:1344.395)	b=7.06	count=15500
+Attention relation loss: {"block": "blocks.2", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.09097211062908173, "auxiliary": 0.09531691670417786, "rec_loss": 2.032979965209961}
+Total loss:	1048.248 (rec:2.036, round:1046.212)	b=6.50	count=16000
+Attention relation loss: {"block": "blocks.2", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.08923037350177765, "auxiliary": 0.09349199384450912, "rec_loss": 2.0359673500061035}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.2", "refresh": 5, "min": 0.0, "max": 2.0, "mean": 0.8958333730697632, "alignment_positive_fraction": 0.4479166865348816, "alignment_mean": -0.0025887233205139637}
+Total loss:	758.157 (rec:2.143, round:756.014)	b=5.94	count=16500
+Attention relation loss: {"block": "blocks.2", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.09127296507358551, "auxiliary": 0.10910941660404205, "rec_loss": 2.1429648399353027}
+Total loss:	484.339 (rec:2.162, round:482.177)	b=5.38	count=17000
+Attention relation loss: {"block": "blocks.2", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.0919061228632927, "auxiliary": 0.10986629873514175, "rec_loss": 2.161843776702881}
+Total loss:	251.567 (rec:2.058, round:249.509)	b=4.81	count=17500
+Attention relation loss: {"block": "blocks.2", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.08751608431339264, "auxiliary": 0.1046183705329895, "rec_loss": 2.0575995445251465}
+Total loss:	91.950 (rec:2.096, round:89.854)	b=4.25	count=18000
+Attention relation loss: {"block": "blocks.2", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.08996061980724335, "auxiliary": 0.10754060745239258, "rec_loss": 2.0955677032470703}
+Total loss:	22.303 (rec:2.040, round:20.264)	b=3.69	count=18500
+Attention relation loss: {"block": "blocks.2", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.08776040375232697, "auxiliary": 0.10491043329238892, "rec_loss": 2.039647102355957}
+Total loss:	4.856 (rec:2.092, round:2.764)	b=3.12	count=19000
+Attention relation loss: {"block": "blocks.2", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.08909633755683899, "auxiliary": 0.10650743544101715, "rec_loss": 2.0915350914001465}
+Total loss:	2.330 (rec:2.140, round:0.190)	b=2.56	count=19500
+Attention relation loss: {"block": "blocks.2", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.08989296853542328, "auxiliary": 0.10745973885059357, "rec_loss": 2.1402101516723633}
+Total loss:	2.162 (rec:2.157, round:0.004)	b=2.00	count=20000
+Attention relation loss: {"block": "blocks.2", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.09059672057628632, "auxiliary": 0.10830102115869522, "rec_loss": 2.1570324897766113}
+Attention relation result: {"active_steps": 16000, "alignment_mean": -0.0025887233205139637, "alignment_positive_fraction": 0.4479166865348816, "block": "blocks.2", "cache_bytes": 38731776, "first_training_kl": 0.14000117778778076, "gradient_refreshes": 5, "last_auxiliary": 0.10830102115869522, "last_training_kl": 0.09059672057628632, "mode": "aligned", "protocol": "relation_v2_alignment", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 2.0, "weight_min": 0.0}
+finished reconstructing blocks.2.
+reconstructing blocks.3 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.3", "protocol": "relation_v2_alignment", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "aligned", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.3 ...
+wraping quantizers in blocks.3 ...
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.3", "refresh": 1, "min": 0.0, "max": 1.246753215789795, "mean": 1.0, "alignment_positive_fraction": 0.8020833730697632, "alignment_mean": 0.0127843227237463}
+Total loss:	2.000 (rec:2.000, round:0.000)	b=0.00	count=1
+Total loss:	1.372 (rec:1.372, round:0.000)	b=0.00	count=500
+Total loss:	1.313 (rec:1.313, round:0.000)	b=0.00	count=1000
+Total loss:	1.271 (rec:1.271, round:0.000)	b=0.00	count=1500
+Total loss:	1.280 (rec:1.280, round:0.000)	b=0.00	count=2000
+Total loss:	1.301 (rec:1.301, round:0.000)	b=0.00	count=2500
+Total loss:	1.235 (rec:1.235, round:0.000)	b=0.00	count=3000
+Total loss:	1.251 (rec:1.251, round:0.000)	b=0.00	count=3500
+Total loss:	15945.808 (rec:1.192, round:15944.615)	b=20.00	count=4000
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.3", "refresh": 2, "min": 0.0, "max": 1.4769229888916016, "mean": 0.9999999403953552, "alignment_positive_fraction": 0.6770833730697632, "alignment_mean": 0.010202285833656788}
+Total loss:	8282.155 (rec:2.038, round:8280.117)	b=19.44	count=4500
+Attention relation loss: {"block": "blocks.3", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.18483132123947144, "auxiliary": 0.006512207444757223, "rec_loss": 2.038400173187256}
+Total loss:	7662.829 (rec:2.044, round:7660.785)	b=18.88	count=5000
+Attention relation loss: {"block": "blocks.3", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.16019707918167114, "auxiliary": 0.011288526467978954, "rec_loss": 2.043606758117676}
+Total loss:	7252.225 (rec:2.030, round:7250.195)	b=18.31	count=5500
+Attention relation loss: {"block": "blocks.3", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.14978134632110596, "auxiliary": 0.015831850469112396, "rec_loss": 2.029952049255371}
+Total loss:	6900.029 (rec:2.054, round:6897.975)	b=17.75	count=6000
+Attention relation loss: {"block": "blocks.3", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.134575754404068, "auxiliary": 0.01896616443991661, "rec_loss": 2.0540342330932617}
+Total loss:	6577.646 (rec:1.935, round:6575.711)	b=17.19	count=6500
+Attention relation loss: {"block": "blocks.3", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.12847352027893066, "auxiliary": 0.022632697597146034, "rec_loss": 1.9345463514328003}
+Total loss:	6267.723 (rec:2.082, round:6265.642)	b=16.62	count=7000
+Attention relation loss: {"block": "blocks.3", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.12454681843519211, "auxiliary": 0.02632913552224636, "rec_loss": 2.0816216468811035}
+Total loss:	5972.853 (rec:1.973, round:5970.879)	b=16.06	count=7500
+Attention relation loss: {"block": "blocks.3", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.11992370337247849, "auxiliary": 0.029577111825346947, "rec_loss": 1.9731948375701904}
+Total loss:	5683.925 (rec:1.968, round:5681.958)	b=15.50	count=8000
+Attention relation loss: {"block": "blocks.3", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.11453576385974884, "auxiliary": 0.032283734530210495, "rec_loss": 1.967520833015442}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.3", "refresh": 3, "min": 0.0, "max": 1.6271185874938965, "mean": 1.0, "alignment_positive_fraction": 0.6145833730697632, "alignment_mean": 0.007481679320335388}
+Total loss:	5395.848 (rec:2.004, round:5393.844)	b=14.94	count=8500
+Attention relation loss: {"block": "blocks.3", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.10174041986465454, "auxiliary": 0.05151786282658577, "rec_loss": 2.004070281982422}
+Total loss:	5109.843 (rec:1.993, round:5107.850)	b=14.38	count=9000
+Attention relation loss: {"block": "blocks.3", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.10053011029958725, "auxiliary": 0.056561119854450226, "rec_loss": 1.9932098388671875}
+Total loss:	4826.704 (rec:1.863, round:4824.841)	b=13.81	count=9500
+Attention relation loss: {"block": "blocks.3", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.09505262970924377, "auxiliary": 0.05882726609706879, "rec_loss": 1.8627724647521973}
+Total loss:	4547.312 (rec:1.935, round:4545.377)	b=13.25	count=10000
+Attention relation loss: {"block": "blocks.3", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.09691568464040756, "auxiliary": 0.06543304771184921, "rec_loss": 1.9347167015075684}
+Total loss:	4270.189 (rec:2.028, round:4268.162)	b=12.69	count=10500
+Attention relation loss: {"block": "blocks.3", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.09670515358448029, "auxiliary": 0.07073181867599487, "rec_loss": 2.0279855728149414}
+Total loss:	3991.839 (rec:1.989, round:3989.851)	b=12.12	count=11000
+Attention relation loss: {"block": "blocks.3", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.0921308621764183, "auxiliary": 0.07256964594125748, "rec_loss": 1.9887393712997437}
+Total loss:	3710.354 (rec:1.989, round:3708.364)	b=11.56	count=11500
+Attention relation loss: {"block": "blocks.3", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.09266957640647888, "auxiliary": 0.0782078355550766, "rec_loss": 1.9893748760223389}
+Total loss:	3425.849 (rec:2.015, round:3423.834)	b=11.00	count=12000
+Attention relation loss: {"block": "blocks.3", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.09384285658597946, "auxiliary": 0.08447789400815964, "rec_loss": 2.0151591300964355}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.3", "refresh": 4, "min": 0.0, "max": 1.846153736114502, "mean": 0.9999999403953552, "alignment_positive_fraction": 0.5416666865348816, "alignment_mean": 0.004031816031783819}
+Total loss:	3138.014 (rec:1.961, round:3136.053)	b=10.44	count=12500
+Attention relation loss: {"block": "blocks.3", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.09479095786809921, "auxiliary": 0.09515827149152756, "rec_loss": 1.9612853527069092}
+Total loss:	2851.777 (rec:1.976, round:2849.801)	b=9.88	count=13000
+Attention relation loss: {"block": "blocks.3", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.09743937104940414, "auxiliary": 0.09781695157289505, "rec_loss": 1.9760383367538452}
+Total loss:	2562.346 (rec:1.919, round:2560.427)	b=9.31	count=13500
+Attention relation loss: {"block": "blocks.3", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.09519662708044052, "auxiliary": 0.09556552022695541, "rec_loss": 1.9187898635864258}
+Total loss:	2272.261 (rec:1.949, round:2270.312)	b=8.75	count=14000
+Attention relation loss: {"block": "blocks.3", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.09675546735525131, "auxiliary": 0.09713039547204971, "rec_loss": 1.9486621618270874}
+Total loss:	1980.296 (rec:1.978, round:1978.317)	b=8.19	count=14500
+Attention relation loss: {"block": "blocks.3", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.09773355722427368, "auxiliary": 0.09811227768659592, "rec_loss": 1.97834312915802}
+Total loss:	1687.104 (rec:1.950, round:1685.154)	b=7.62	count=15000
+Attention relation loss: {"block": "blocks.3", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.09255504608154297, "auxiliary": 0.09291370213031769, "rec_loss": 1.9499998092651367}
+Total loss:	1394.859 (rec:2.013, round:1392.845)	b=7.06	count=15500
+Attention relation loss: {"block": "blocks.3", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.09917502850294113, "auxiliary": 0.09955932945013046, "rec_loss": 2.013345718383789}
+Total loss:	1103.406 (rec:2.011, round:1101.395)	b=6.50	count=16000
+Attention relation loss: {"block": "blocks.3", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.09592562913894653, "auxiliary": 0.09629734605550766, "rec_loss": 2.010762929916382}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.3", "refresh": 5, "min": 0.0, "max": 1.5, "mean": 1.0, "alignment_positive_fraction": 0.6666666865348816, "alignment_mean": 0.007873408496379852}
+Total loss:	818.751 (rec:1.982, round:816.769)	b=5.94	count=16500
+Attention relation loss: {"block": "blocks.3", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.10128550976514816, "auxiliary": 0.10286706686019897, "rec_loss": 1.9817967414855957}
+Total loss:	547.303 (rec:2.027, round:545.275)	b=5.38	count=17000
+Attention relation loss: {"block": "blocks.3", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.09820745885372162, "auxiliary": 0.09974095225334167, "rec_loss": 2.0271942615509033}
+Total loss:	304.959 (rec:1.967, round:302.992)	b=4.81	count=17500
+Attention relation loss: {"block": "blocks.3", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.0931696742773056, "auxiliary": 0.09462451189756393, "rec_loss": 1.9665977954864502}
+Total loss:	124.408 (rec:2.065, round:122.343)	b=4.25	count=18000
+Attention relation loss: {"block": "blocks.3", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.09436279535293579, "auxiliary": 0.09583625942468643, "rec_loss": 2.0649571418762207}
+Total loss:	31.828 (rec:2.065, round:29.763)	b=3.69	count=18500
+Attention relation loss: {"block": "blocks.3", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.09824638813734055, "auxiliary": 0.09978049248456955, "rec_loss": 2.064730167388916}
+Total loss:	5.600 (rec:2.036, round:3.565)	b=3.12	count=19000
+Attention relation loss: {"block": "blocks.3", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.09741850942373276, "auxiliary": 0.0989396870136261, "rec_loss": 2.0358200073242188}
+Total loss:	2.173 (rec:2.017, round:0.156)	b=2.56	count=19500
+Attention relation loss: {"block": "blocks.3", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.09870797395706177, "auxiliary": 0.1002492904663086, "rec_loss": 2.016629934310913}
+Total loss:	2.054 (rec:2.052, round:0.002)	b=2.00	count=20000
+Attention relation loss: {"block": "blocks.3", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.09855642914772034, "auxiliary": 0.10009538382291794, "rec_loss": 2.0519397258758545}
+Attention relation result: {"active_steps": 16000, "alignment_mean": 0.007873408496379852, "alignment_positive_fraction": 0.6666666865348816, "block": "blocks.3", "cache_bytes": 38731776, "first_training_kl": 0.1773892641067505, "gradient_refreshes": 5, "last_auxiliary": 0.10009538382291794, "last_training_kl": 0.09855642914772034, "mode": "aligned", "protocol": "relation_v2_alignment", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.5, "weight_min": 0.0}
+finished reconstructing blocks.3.
+reconstructing blocks.4 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.4", "protocol": "relation_v2_alignment", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "aligned", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.4 ...
+wraping quantizers in blocks.4 ...
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.4", "refresh": 1, "min": 0.0, "max": 1.1034482717514038, "mean": 1.0, "alignment_positive_fraction": 0.90625, "alignment_mean": 0.02212155982851982}
+Total loss:	2.000 (rec:2.000, round:0.000)	b=0.00	count=1
+Total loss:	1.496 (rec:1.496, round:0.000)	b=0.00	count=500
+Total loss:	1.375 (rec:1.375, round:0.000)	b=0.00	count=1000
+Total loss:	1.403 (rec:1.403, round:0.000)	b=0.00	count=1500
+Total loss:	1.357 (rec:1.357, round:0.000)	b=0.00	count=2000
+Total loss:	1.344 (rec:1.344, round:0.000)	b=0.00	count=2500
+Total loss:	1.294 (rec:1.294, round:0.000)	b=0.00	count=3000
+Total loss:	1.297 (rec:1.297, round:0.000)	b=0.00	count=3500
+Total loss:	15967.996 (rec:1.330, round:15966.666)	b=20.00	count=4000
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.4", "refresh": 2, "min": 0.0, "max": 1.3333333730697632, "mean": 1.0, "alignment_positive_fraction": 0.75, "alignment_mean": 0.009384889155626297}
+Total loss:	8351.088 (rec:1.954, round:8349.134)	b=19.44	count=4500
+Attention relation loss: {"block": "blocks.4", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.1895131766796112, "auxiliary": 0.006320381071418524, "rec_loss": 1.953842282295227}
+Total loss:	7737.111 (rec:2.010, round:7735.102)	b=18.88	count=5000
+Attention relation loss: {"block": "blocks.4", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.16808924078941345, "auxiliary": 0.01121175941079855, "rec_loss": 2.009890079498291}
+Total loss:	7331.003 (rec:1.947, round:7329.056)	b=18.31	count=5500
+Attention relation loss: {"block": "blocks.4", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.1564178168773651, "auxiliary": 0.015649892389774323, "rec_loss": 1.947372555732727}
+Total loss:	6990.127 (rec:1.944, round:6988.183)	b=17.75	count=6000
+Attention relation loss: {"block": "blocks.4", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.14986805617809296, "auxiliary": 0.01999276876449585, "rec_loss": 1.9443553686141968}
+Total loss:	6673.472 (rec:1.923, round:6671.549)	b=17.19	count=6500
+Attention relation loss: {"block": "blocks.4", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.14712169766426086, "auxiliary": 0.024532996118068695, "rec_loss": 1.9234912395477295}
+Total loss:	6374.810 (rec:1.930, round:6372.879)	b=16.62	count=7000
+Attention relation loss: {"block": "blocks.4", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.13878141343593597, "auxiliary": 0.02777067758142948, "rec_loss": 1.9301986694335938}
+Total loss:	6080.827 (rec:1.924, round:6078.903)	b=16.06	count=7500
+Attention relation loss: {"block": "blocks.4", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.13073980808258057, "auxiliary": 0.030521772801876068, "rec_loss": 1.9238965511322021}
+Total loss:	5792.920 (rec:1.938, round:5790.982)	b=15.50	count=8000
+Attention relation loss: {"block": "blocks.4", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.1338648647069931, "auxiliary": 0.03571580722928047, "rec_loss": 1.9380836486816406}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.4", "refresh": 3, "min": 0.0, "max": 1.523809552192688, "mean": 1.0000001192092896, "alignment_positive_fraction": 0.65625, "alignment_mean": 0.006491146981716156}
+Total loss:	5509.500 (rec:2.017, round:5507.483)	b=14.94	count=8500
+Attention relation loss: {"block": "blocks.4", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.1332368701696396, "auxiliary": 0.05468093976378441, "rec_loss": 2.017251491546631}
+Total loss:	5227.162 (rec:1.952, round:5225.210)	b=14.38	count=9000
+Attention relation loss: {"block": "blocks.4", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.11897329986095428, "auxiliary": 0.054252348840236664, "rec_loss": 1.9516137838363647}
+Total loss:	4945.347 (rec:2.024, round:4943.322)	b=13.81	count=9500
+Attention relation loss: {"block": "blocks.4", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.12612462043762207, "auxiliary": 0.06326472014188766, "rec_loss": 2.024186611175537}
+Total loss:	4668.107 (rec:1.995, round:4666.112)	b=13.25	count=10000
+Attention relation loss: {"block": "blocks.4", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.11735259741544724, "auxiliary": 0.06421596556901932, "rec_loss": 1.9945831298828125}
+Total loss:	4389.271 (rec:2.012, round:4387.259)	b=12.69	count=10500
+Attention relation loss: {"block": "blocks.4", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.11573104560375214, "auxiliary": 0.06860602647066116, "rec_loss": 2.012263536453247}
+Total loss:	4109.442 (rec:2.017, round:4107.426)	b=12.12	count=11000
+Attention relation loss: {"block": "blocks.4", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.11592388153076172, "auxiliary": 0.07400652021169662, "rec_loss": 2.0167548656463623}
+Total loss:	3826.165 (rec:1.968, round:3824.197)	b=11.56	count=11500
+Attention relation loss: {"block": "blocks.4", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.11763905733823776, "auxiliary": 0.0804658979177475, "rec_loss": 1.9678682088851929}
+Total loss:	3540.204 (rec:2.024, round:3538.180)	b=11.00	count=12000
+Attention relation loss: {"block": "blocks.4", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.1176777333021164, "auxiliary": 0.08585850894451141, "rec_loss": 2.024472951889038}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.4", "refresh": 4, "min": 0.0, "max": 1.548387050628662, "mean": 1.0, "alignment_positive_fraction": 0.6458333730697632, "alignment_mean": 0.005122696980834007}
+Total loss:	3246.227 (rec:2.000, round:3244.227)	b=10.44	count=12500
+Attention relation loss: {"block": "blocks.4", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.11747533082962036, "auxiliary": 0.09268244355916977, "rec_loss": 1.9997693300247192}
+Total loss:	2947.782 (rec:1.987, round:2945.794)	b=9.88	count=13000
+Attention relation loss: {"block": "blocks.4", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.11208117008209229, "auxiliary": 0.08842670172452927, "rec_loss": 1.987335205078125}
+Total loss:	2648.308 (rec:2.004, round:2646.303)	b=9.31	count=13500
+Attention relation loss: {"block": "blocks.4", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.11847160756587982, "auxiliary": 0.09346845746040344, "rec_loss": 2.004214286804199}
+Total loss:	2348.877 (rec:2.070, round:2346.807)	b=8.75	count=14000
+Attention relation loss: {"block": "blocks.4", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.11773868650197983, "auxiliary": 0.09289021790027618, "rec_loss": 2.070344924926758}
+Total loss:	2042.920 (rec:2.034, round:2040.885)	b=8.19	count=14500
+Attention relation loss: {"block": "blocks.4", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.11813077330589294, "auxiliary": 0.09319955110549927, "rec_loss": 2.0342483520507812}
+Total loss:	1736.768 (rec:2.043, round:1734.724)	b=7.62	count=15000
+Attention relation loss: {"block": "blocks.4", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.11804645508527756, "auxiliary": 0.09313303232192993, "rec_loss": 2.043478488922119}
+Total loss:	1432.689 (rec:1.996, round:1430.693)	b=7.06	count=15500
+Attention relation loss: {"block": "blocks.4", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.11781458556652069, "auxiliary": 0.09295009821653366, "rec_loss": 1.9962046146392822}
+Total loss:	1129.165 (rec:1.989, round:1127.176)	b=6.50	count=16000
+Attention relation loss: {"block": "blocks.4", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.11832167953252792, "auxiliary": 0.09335016459226608, "rec_loss": 1.9888710975646973}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.4", "refresh": 5, "min": 0.0, "max": 1.600000023841858, "mean": 1.0, "alignment_positive_fraction": 0.625, "alignment_mean": 0.006658926140516996}
+Total loss:	833.197 (rec:2.064, round:831.133)	b=5.94	count=16500
+Attention relation loss: {"block": "blocks.4", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.11527048051357269, "auxiliary": 0.09413592517375946, "rec_loss": 2.0636754035949707}
+Total loss:	548.753 (rec:2.062, round:546.691)	b=5.38	count=17000
+Attention relation loss: {"block": "blocks.4", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.11802911758422852, "auxiliary": 0.09638877213001251, "rec_loss": 2.0621871948242188}
+Total loss:	300.297 (rec:2.103, round:298.194)	b=4.81	count=17500
+Attention relation loss: {"block": "blocks.4", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.11629601567983627, "auxiliary": 0.09497343003749847, "rec_loss": 2.1031908988952637}
+Total loss:	120.480 (rec:2.102, round:118.378)	b=4.25	count=18000
+Attention relation loss: {"block": "blocks.4", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.11861088126897812, "auxiliary": 0.09686386585235596, "rec_loss": 2.101593017578125}
+Total loss:	33.572 (rec:2.059, round:31.514)	b=3.69	count=18500
+Attention relation loss: {"block": "blocks.4", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.1248304694890976, "auxiliary": 0.10194311290979385, "rec_loss": 2.0587706565856934}
+Total loss:	7.363 (rec:2.096, round:5.267)	b=3.12	count=19000
+Attention relation loss: {"block": "blocks.4", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.11906522512435913, "auxiliary": 0.09723490476608276, "rec_loss": 2.096031665802002}
+Total loss:	2.376 (rec:2.131, round:0.245)	b=2.56	count=19500
+Attention relation loss: {"block": "blocks.4", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.12229207158088684, "auxiliary": 0.09987012296915054, "rec_loss": 2.1306076049804688}
+Total loss:	2.082 (rec:2.080, round:0.001)	b=2.00	count=20000
+Attention relation loss: {"block": "blocks.4", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.12214110791683197, "auxiliary": 0.09974683821201324, "rec_loss": 2.080496072769165}
+Attention relation result: {"active_steps": 16000, "alignment_mean": 0.006658926140516996, "alignment_positive_fraction": 0.625, "block": "blocks.4", "cache_bytes": 38731776, "first_training_kl": 0.18740282952785492, "gradient_refreshes": 5, "last_auxiliary": 0.09974683821201324, "last_training_kl": 0.12214110791683197, "mode": "aligned", "protocol": "relation_v2_alignment", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.600000023841858, "weight_min": 0.0}
+finished reconstructing blocks.4.
+reconstructing blocks.5 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.5", "protocol": "relation_v2_alignment", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "aligned", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.5 ...
+wraping quantizers in blocks.5 ...
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.5", "refresh": 1, "min": 0.0, "max": 1.0786516666412354, "mean": 0.9999999403953552, "alignment_positive_fraction": 0.9270833730697632, "alignment_mean": 0.0333191379904747}
+Total loss:	2.000 (rec:2.000, round:0.000)	b=0.00	count=1
+Total loss:	1.464 (rec:1.464, round:0.000)	b=0.00	count=500
+Total loss:	1.375 (rec:1.375, round:0.000)	b=0.00	count=1000
+Total loss:	1.327 (rec:1.327, round:0.000)	b=0.00	count=1500
+Total loss:	1.323 (rec:1.323, round:0.000)	b=0.00	count=2000
+Total loss:	1.290 (rec:1.290, round:0.000)	b=0.00	count=2500
+Total loss:	1.299 (rec:1.299, round:0.000)	b=0.00	count=3000
+Total loss:	1.248 (rec:1.248, round:0.000)	b=0.00	count=3500
+Total loss:	15898.772 (rec:1.220, round:15897.553)	b=20.00	count=4000
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.5", "refresh": 2, "min": 0.0, "max": 1.1034482717514038, "mean": 1.0, "alignment_positive_fraction": 0.90625, "alignment_mean": 0.01386291068047285}
+Total loss:	8301.673 (rec:2.047, round:8299.626)	b=19.44	count=4500
+Attention relation loss: {"block": "blocks.5", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.1991206854581833, "auxiliary": 0.006807422731071711, "rec_loss": 2.0472187995910645}
+Total loss:	7699.502 (rec:1.928, round:7697.574)	b=18.88	count=5000
+Attention relation loss: {"block": "blocks.5", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.19454604387283325, "auxiliary": 0.013302055187523365, "rec_loss": 1.927966833114624}
+Total loss:	7303.387 (rec:1.974, round:7301.413)	b=18.31	count=5500
+Attention relation loss: {"block": "blocks.5", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.18070441484451294, "auxiliary": 0.018533455207943916, "rec_loss": 1.9742655754089355}
+Total loss:	6963.392 (rec:2.018, round:6961.374)	b=17.75	count=6000
+Attention relation loss: {"block": "blocks.5", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.17439965903759003, "auxiliary": 0.02384909801185131, "rec_loss": 2.0179436206817627}
+Total loss:	6655.901 (rec:1.944, round:6653.957)	b=17.19	count=6500
+Attention relation loss: {"block": "blocks.5", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.16457605361938477, "auxiliary": 0.028132155537605286, "rec_loss": 1.9441139698028564}
+Total loss:	6361.927 (rec:2.030, round:6359.897)	b=16.62	count=7000
+Attention relation loss: {"block": "blocks.5", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.16814327239990234, "auxiliary": 0.03449030965566635, "rec_loss": 2.030301094055176}
+Total loss:	6076.510 (rec:1.920, round:6074.590)	b=16.06	count=7500
+Attention relation loss: {"block": "blocks.5", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.1603485494852066, "auxiliary": 0.038373325020074844, "rec_loss": 1.9199128150939941}
+Total loss:	5800.958 (rec:1.985, round:5798.973)	b=15.50	count=8000
+Attention relation loss: {"block": "blocks.5", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.16485044360160828, "auxiliary": 0.04508649557828903, "rec_loss": 1.9847097396850586}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.5", "refresh": 3, "min": 0.0, "max": 1.263157844543457, "mean": 1.0, "alignment_positive_fraction": 0.7916666865348816, "alignment_mean": 0.00788840837776661}
+Total loss:	5523.785 (rec:2.108, round:5521.678)	b=14.94	count=8500
+Attention relation loss: {"block": "blocks.5", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.16260764002799988, "auxiliary": 0.058430902659893036, "rec_loss": 2.1075997352600098}
+Total loss:	5246.823 (rec:1.938, round:5244.885)	b=14.38	count=9000
+Attention relation loss: {"block": "blocks.5", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.14714094996452332, "auxiliary": 0.058747947216033936, "rec_loss": 1.938004970550537}
+Total loss:	4972.474 (rec:1.944, round:4970.530)	b=13.81	count=9500
+Attention relation loss: {"block": "blocks.5", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.15211652219295502, "auxiliary": 0.06680796295404434, "rec_loss": 1.9437081813812256}
+Total loss:	4698.971 (rec:1.996, round:4696.975)	b=13.25	count=10000
+Attention relation loss: {"block": "blocks.5", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.15718263387680054, "auxiliary": 0.0753086656332016, "rec_loss": 1.9957647323608398}
+Total loss:	4420.765 (rec:1.945, round:4418.820)	b=12.69	count=10500
+Attention relation loss: {"block": "blocks.5", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.14788034558296204, "auxiliary": 0.07675610482692719, "rec_loss": 1.9453743696212769}
+Total loss:	4141.122 (rec:2.006, round:4139.116)	b=12.12	count=11000
+Attention relation loss: {"block": "blocks.5", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.15653899312019348, "auxiliary": 0.08750033378601074, "rec_loss": 2.0057098865509033}
+Total loss:	3858.712 (rec:1.963, round:3856.749)	b=11.56	count=11500
+Attention relation loss: {"block": "blocks.5", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.1489056646823883, "auxiliary": 0.08917880058288574, "rec_loss": 1.9632291793823242}
+Total loss:	3576.923 (rec:1.914, round:3575.009)	b=11.00	count=12000
+Attention relation loss: {"block": "blocks.5", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.1470404714345932, "auxiliary": 0.09393253177404404, "rec_loss": 1.9139060974121094}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.5", "refresh": 4, "min": 0.0, "max": 1.1034482717514038, "mean": 1.0, "alignment_positive_fraction": 0.90625, "alignment_mean": 0.009231812320649624}
+Total loss:	3289.409 (rec:1.988, round:3287.421)	b=10.44	count=12500
+Attention relation loss: {"block": "blocks.5", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.13944905996322632, "auxiliary": 0.09553663432598114, "rec_loss": 1.9880948066711426}
+Total loss:	2996.140 (rec:1.986, round:2994.153)	b=9.88	count=13000
+Attention relation loss: {"block": "blocks.5", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.15291909873485565, "auxiliary": 0.10476496070623398, "rec_loss": 1.9863989353179932}
+Total loss:	2703.703 (rec:2.135, round:2701.567)	b=9.31	count=13500
+Attention relation loss: {"block": "blocks.5", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.1516534984111786, "auxiliary": 0.10389790683984756, "rec_loss": 2.135417938232422}
+Total loss:	2409.250 (rec:2.061, round:2407.189)	b=8.75	count=14000
+Attention relation loss: {"block": "blocks.5", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.14715903997421265, "auxiliary": 0.10081874579191208, "rec_loss": 2.0606560707092285}
+Total loss:	2110.113 (rec:2.013, round:2108.100)	b=8.19	count=14500
+Attention relation loss: {"block": "blocks.5", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.14560022950172424, "auxiliary": 0.0997508093714714, "rec_loss": 2.0131516456604004}
+Total loss:	1809.317 (rec:2.070, round:1807.247)	b=7.62	count=15000
+Attention relation loss: {"block": "blocks.5", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.13670113682746887, "auxiliary": 0.09365402907133102, "rec_loss": 2.070035219192505}
+Total loss:	1506.126 (rec:2.074, round:1504.052)	b=7.06	count=15500
+Attention relation loss: {"block": "blocks.5", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.15216538310050964, "auxiliary": 0.10424859821796417, "rec_loss": 2.0736680030822754}
+Total loss:	1201.313 (rec:2.059, round:1199.254)	b=6.50	count=16000
+Attention relation loss: {"block": "blocks.5", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.13837233185768127, "auxiliary": 0.0947989672422409, "rec_loss": 2.0593550205230713}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.5", "refresh": 5, "min": 0.0, "max": 1.1428571939468384, "mean": 1.0000001192092896, "alignment_positive_fraction": 0.875, "alignment_mean": 0.009097708389163017}
+Total loss:	903.626 (rec:2.051, round:901.575)	b=5.94	count=16500
+Attention relation loss: {"block": "blocks.5", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.14883670210838318, "auxiliary": 0.09872983396053314, "rec_loss": 2.050691604614258}
+Total loss:	619.254 (rec:2.012, round:617.242)	b=5.38	count=17000
+Attention relation loss: {"block": "blocks.5", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.1461758017539978, "auxiliary": 0.09696473926305771, "rec_loss": 2.0116827487945557}
+Total loss:	358.205 (rec:2.020, round:356.185)	b=4.81	count=17500
+Attention relation loss: {"block": "blocks.5", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.15238827466964722, "auxiliary": 0.10108574479818344, "rec_loss": 2.020235061645508}
+Total loss:	164.924 (rec:1.999, round:162.924)	b=4.25	count=18000
+Attention relation loss: {"block": "blocks.5", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.14384666085243225, "auxiliary": 0.09541972726583481, "rec_loss": 1.9992209672927856}
+Total loss:	57.848 (rec:2.104, round:55.744)	b=3.69	count=18500
+Attention relation loss: {"block": "blocks.5", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.15560784935951233, "auxiliary": 0.10322143137454987, "rec_loss": 2.1040494441986084}
+Total loss:	13.280 (rec:2.076, round:11.205)	b=3.12	count=19000
+Attention relation loss: {"block": "blocks.5", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.1527385711669922, "auxiliary": 0.1013181135058403, "rec_loss": 2.0755105018615723}
+Total loss:	2.507 (rec:2.045, round:0.461)	b=2.56	count=19500
+Attention relation loss: {"block": "blocks.5", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.146839439868927, "auxiliary": 0.09740496426820755, "rec_loss": 2.0453028678894043}
+Total loss:	2.064 (rec:2.063, round:0.001)	b=2.00	count=20000
+Attention relation loss: {"block": "blocks.5", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.1462756097316742, "auxiliary": 0.09703095257282257, "rec_loss": 2.063119649887085}
+Attention relation result: {"active_steps": 16000, "alignment_mean": 0.009097708389163017, "alignment_positive_fraction": 0.875, "block": "blocks.5", "cache_bytes": 38731776, "first_training_kl": 0.1828157752752304, "gradient_refreshes": 5, "last_auxiliary": 0.09703095257282257, "last_training_kl": 0.1462756097316742, "mode": "aligned", "protocol": "relation_v2_alignment", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.1428571939468384, "weight_min": 0.0}
+finished reconstructing blocks.5.
+reconstructing blocks.6 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.6", "protocol": "relation_v2_alignment", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "aligned", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.6 ...
+wraping quantizers in blocks.6 ...
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.6", "refresh": 1, "min": 0.0, "max": 1.215189814567566, "mean": 0.9999999403953552, "alignment_positive_fraction": 0.8229166865348816, "alignment_mean": 0.03504408895969391}
+Total loss:	2.000 (rec:2.000, round:0.000)	b=0.00	count=1
+Total loss:	1.212 (rec:1.212, round:0.000)	b=0.00	count=500
+Total loss:	1.207 (rec:1.207, round:0.000)	b=0.00	count=1000
+Total loss:	1.091 (rec:1.091, round:0.000)	b=0.00	count=1500
+Total loss:	1.279 (rec:1.279, round:0.000)	b=0.00	count=2000
+Total loss:	1.172 (rec:1.172, round:0.000)	b=0.00	count=2500
+Total loss:	1.035 (rec:1.035, round:0.000)	b=0.00	count=3000
+Total loss:	1.130 (rec:1.130, round:0.000)	b=0.00	count=3500
+Total loss:	15621.162 (rec:1.065, round:15620.097)	b=20.00	count=4000
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.6", "refresh": 2, "min": 0.0, "max": 1.185185194015503, "mean": 1.0, "alignment_positive_fraction": 0.84375, "alignment_mean": 0.013367973268032074}
+Total loss:	7693.519 (rec:2.013, round:7691.506)	b=19.44	count=4500
+Attention relation loss: {"block": "blocks.6", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.2666041851043701, "auxiliary": 0.006928515620529652, "rec_loss": 2.0125622749328613}
+Total loss:	7005.444 (rec:1.947, round:7003.497)	b=18.88	count=5000
+Attention relation loss: {"block": "blocks.6", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.2478182315826416, "auxiliary": 0.01288061123341322, "rec_loss": 1.9471124410629272}
+Total loss:	6535.688 (rec:2.107, round:6533.581)	b=18.31	count=5500
+Attention relation loss: {"block": "blocks.6", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.2591448724269867, "auxiliary": 0.02020398899912834, "rec_loss": 2.106907844543457}
+Total loss:	6138.587 (rec:2.093, round:6136.494)	b=17.75	count=6000
+Attention relation loss: {"block": "blocks.6", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.2583002746105194, "auxiliary": 0.026850853115320206, "rec_loss": 2.092830181121826}
+Total loss:	5783.658 (rec:2.021, round:5781.637)	b=17.19	count=6500
+Attention relation loss: {"block": "blocks.6", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.24805611371994019, "auxiliary": 0.032232437282800674, "rec_loss": 2.020871639251709}
+Total loss:	5455.248 (rec:2.043, round:5453.205)	b=16.62	count=7000
+Attention relation loss: {"block": "blocks.6", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.24015021324157715, "auxiliary": 0.03744617477059364, "rec_loss": 2.0429739952087402}
+Total loss:	5146.927 (rec:1.886, round:5145.042)	b=16.06	count=7500
+Attention relation loss: {"block": "blocks.6", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.2247743308544159, "auxiliary": 0.040890082716941833, "rec_loss": 1.885617971420288}
+Total loss:	4859.766 (rec:2.286, round:4857.480)	b=15.50	count=8000
+Attention relation loss: {"block": "blocks.6", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.23499667644500732, "auxiliary": 0.048856791108846664, "rec_loss": 2.2858963012695312}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.6", "refresh": 3, "min": 0.0, "max": 1.3333333730697632, "mean": 1.0, "alignment_positive_fraction": 0.75, "alignment_mean": 0.013632288202643394}
+Total loss:	4583.324 (rec:2.011, round:4581.313)	b=14.94	count=8500
+Attention relation loss: {"block": "blocks.6", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.2316897213459015, "auxiliary": 0.053107939660549164, "rec_loss": 2.0108768939971924}
+Total loss:	4319.512 (rec:1.847, round:4317.665)	b=14.38	count=9000
+Attention relation loss: {"block": "blocks.6", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.22658368945121765, "auxiliary": 0.05770837143063545, "rec_loss": 1.8465290069580078}
+Total loss:	4064.264 (rec:1.870, round:4062.395)	b=13.81	count=9500
+Attention relation loss: {"block": "blocks.6", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.22341710329055786, "auxiliary": 0.06259206682443619, "rec_loss": 1.8697396516799927}
+Total loss:	3812.479 (rec:1.780, round:3810.699)	b=13.25	count=10000
+Attention relation loss: {"block": "blocks.6", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.2172706574201584, "auxiliary": 0.06640373915433884, "rec_loss": 1.780036449432373}
+Total loss:	3567.327 (rec:1.954, round:3565.373)	b=12.69	count=10500
+Attention relation loss: {"block": "blocks.6", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.20497135818004608, "auxiliary": 0.06786513328552246, "rec_loss": 1.9542834758758545}
+Total loss:	3326.212 (rec:1.863, round:3324.349)	b=12.12	count=11000
+Attention relation loss: {"block": "blocks.6", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.2117248773574829, "auxiliary": 0.07549359649419785, "rec_loss": 1.8634228706359863}
+Total loss:	3085.634 (rec:1.833, round:3083.801)	b=11.56	count=11500
+Attention relation loss: {"block": "blocks.6", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.2106388807296753, "auxiliary": 0.08047111332416534, "rec_loss": 1.8331516981124878}
+Total loss:	2848.537 (rec:1.895, round:2846.643)	b=11.00	count=12000
+Attention relation loss: {"block": "blocks.6", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.20396095514297485, "auxiliary": 0.08311457931995392, "rec_loss": 1.8946352005004883}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.6", "refresh": 4, "min": 0.0, "max": 1.1999999284744263, "mean": 1.0, "alignment_positive_fraction": 0.8333333730697632, "alignment_mean": 0.015072906389832497}
+Total loss:	2612.884 (rec:1.879, round:2611.006)	b=10.44	count=12500
+Attention relation loss: {"block": "blocks.6", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.2009982466697693, "auxiliary": 0.10164715349674225, "rec_loss": 1.878511905670166}
+Total loss:	2379.907 (rec:2.043, round:2377.864)	b=9.88	count=13000
+Attention relation loss: {"block": "blocks.6", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.19647280871868134, "auxiliary": 0.09935858100652695, "rec_loss": 2.0428829193115234}
+Total loss:	2148.874 (rec:1.925, round:2146.949)	b=9.31	count=13500
+Attention relation loss: {"block": "blocks.6", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.19605205953121185, "auxiliary": 0.09914580732584, "rec_loss": 1.9247174263000488}
+Total loss:	1916.989 (rec:2.108, round:1914.881)	b=8.75	count=14000
+Attention relation loss: {"block": "blocks.6", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.20260660350322723, "auxiliary": 0.10246051847934723, "rec_loss": 2.1079893112182617}
+Total loss:	1685.583 (rec:2.111, round:1683.471)	b=8.19	count=14500
+Attention relation loss: {"block": "blocks.6", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.19946634769439697, "auxiliary": 0.1008724570274353, "rec_loss": 2.111361503601074}
+Total loss:	1455.094 (rec:2.068, round:1453.026)	b=7.62	count=15000
+Attention relation loss: {"block": "blocks.6", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.18693219125270844, "auxiliary": 0.09453378617763519, "rec_loss": 2.068434715270996}
+Total loss:	1227.896 (rec:1.927, round:1225.969)	b=7.06	count=15500
+Attention relation loss: {"block": "blocks.6", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.18868574500083923, "auxiliary": 0.09542057663202286, "rec_loss": 1.927140235900879}
+Total loss:	1004.353 (rec:2.104, round:1002.249)	b=6.50	count=16000
+Attention relation loss: {"block": "blocks.6", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.19867104291915894, "auxiliary": 0.10047025978565216, "rec_loss": 2.1038424968719482}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.6", "refresh": 5, "min": 0.0, "max": 1.1566264629364014, "mean": 1.0, "alignment_positive_fraction": 0.8645833730697632, "alignment_mean": 0.012519127689301968}
+Total loss:	785.552 (rec:2.179, round:783.373)	b=5.94	count=16500
+Attention relation loss: {"block": "blocks.6", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.2047533243894577, "auxiliary": 0.09722990542650223, "rec_loss": 2.1789634227752686}
+Total loss:	575.353 (rec:2.181, round:573.172)	b=5.38	count=17000
+Attention relation loss: {"block": "blocks.6", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.19769546389579773, "auxiliary": 0.0938783809542656, "rec_loss": 2.1813809871673584}
+Total loss:	380.993 (rec:2.094, round:378.899)	b=4.81	count=17500
+Attention relation loss: {"block": "blocks.6", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.19952182471752167, "auxiliary": 0.09474565833806992, "rec_loss": 2.093977928161621}
+Total loss:	217.361 (rec:2.063, round:215.298)	b=4.25	count=18000
+Attention relation loss: {"block": "blocks.6", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.19773590564727783, "auxiliary": 0.09389758855104446, "rec_loss": 2.062593460083008}
+Total loss:	103.961 (rec:2.090, round:101.872)	b=3.69	count=18500
+Attention relation loss: {"block": "blocks.6", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.21394668519496918, "auxiliary": 0.10159549862146378, "rec_loss": 2.0897533893585205}
+Total loss:	40.127 (rec:2.098, round:38.029)	b=3.12	count=19000
+Attention relation loss: {"block": "blocks.6", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.2116832733154297, "auxiliary": 0.10052068531513214, "rec_loss": 2.0979018211364746}
+Total loss:	10.567 (rec:2.099, round:8.468)	b=2.56	count=19500
+Attention relation loss: {"block": "blocks.6", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.19949784874916077, "auxiliary": 0.09473427385091782, "rec_loss": 2.098881244659424}
+Total loss:	2.835 (rec:2.106, round:0.730)	b=2.00	count=20000
+Attention relation loss: {"block": "blocks.6", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.20719394087791443, "auxiliary": 0.09838886559009552, "rec_loss": 2.1055712699890137}
+Attention relation result: {"active_steps": 16000, "alignment_mean": 0.012519127689301968, "alignment_positive_fraction": 0.8645833730697632, "block": "blocks.6", "cache_bytes": 38731776, "first_training_kl": 0.24049541354179382, "gradient_refreshes": 5, "last_auxiliary": 0.09838886559009552, "last_training_kl": 0.20719394087791443, "mode": "aligned", "protocol": "relation_v2_alignment", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.1566264629364014, "weight_min": 0.0}
+finished reconstructing blocks.6.
+reconstructing blocks.7 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.7", "protocol": "relation_v2_alignment", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "aligned", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.7 ...
+wraping quantizers in blocks.7 ...
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.7", "refresh": 1, "min": 0.0, "max": 1.0786516666412354, "mean": 0.9999999403953552, "alignment_positive_fraction": 0.9270833730697632, "alignment_mean": 0.029685815796256065}
+Total loss:	2.000 (rec:2.000, round:0.000)	b=0.00	count=1
+Total loss:	1.762 (rec:1.762, round:0.000)	b=0.00	count=500
+Total loss:	1.732 (rec:1.732, round:0.000)	b=0.00	count=1000
+Total loss:	1.629 (rec:1.629, round:0.000)	b=0.00	count=1500
+Total loss:	1.591 (rec:1.591, round:0.000)	b=0.00	count=2000
+Total loss:	1.668 (rec:1.668, round:0.000)	b=0.00	count=2500
+Total loss:	1.523 (rec:1.523, round:0.000)	b=0.00	count=3000
+Total loss:	1.471 (rec:1.471, round:0.000)	b=0.00	count=3500
+Total loss:	15774.456 (rec:1.502, round:15772.954)	b=20.00	count=4000
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.7", "refresh": 2, "min": 0.0, "max": 1.0666667222976685, "mean": 1.000000238418579, "alignment_positive_fraction": 0.9375, "alignment_mean": 0.021928777918219566}
+Total loss:	8051.067 (rec:1.910, round:8049.157)	b=19.44	count=4500
+Attention relation loss: {"block": "blocks.7", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.3973955810070038, "auxiliary": 0.005968932062387466, "rec_loss": 1.9101314544677734}
+Total loss:	7421.309 (rec:1.970, round:7419.339)	b=18.88	count=5000
+Attention relation loss: {"block": "blocks.7", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.3711676597595215, "auxiliary": 0.011149970814585686, "rec_loss": 1.9697554111480713}
+Total loss:	6984.883 (rec:2.011, round:6982.872)	b=18.31	count=5500
+Attention relation loss: {"block": "blocks.7", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.39766725897789, "auxiliary": 0.017919039353728294, "rec_loss": 2.0109994411468506}
+Total loss:	6606.735 (rec:2.021, round:6604.714)	b=17.75	count=6000
+Attention relation loss: {"block": "blocks.7", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.3771323561668396, "auxiliary": 0.022658303380012512, "rec_loss": 2.0208141803741455}
+Total loss:	6256.417 (rec:1.934, round:6254.483)	b=17.19	count=6500
+Attention relation loss: {"block": "blocks.7", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.3522706627845764, "auxiliary": 0.026455750688910484, "rec_loss": 1.9339373111724854}
+Total loss:	5921.779 (rec:2.010, round:5919.769)	b=16.62	count=7000
+Attention relation loss: {"block": "blocks.7", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.3765825629234314, "auxiliary": 0.033937908709049225, "rec_loss": 2.0104479789733887}
+Total loss:	5598.155 (rec:2.036, round:5596.119)	b=16.06	count=7500
+Attention relation loss: {"block": "blocks.7", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.3633372485637665, "auxiliary": 0.038201600313186646, "rec_loss": 2.036362648010254}
+Total loss:	5285.224 (rec:1.933, round:5283.291)	b=15.50	count=8000
+Attention relation loss: {"block": "blocks.7", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.3331819474697113, "auxiliary": 0.04003548249602318, "rec_loss": 1.9326770305633545}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.7", "refresh": 3, "min": 0.0, "max": 1.1034482717514038, "mean": 1.0, "alignment_positive_fraction": 0.90625, "alignment_mean": 0.017309585586190224}
+Total loss:	4977.004 (rec:2.035, round:4974.969)	b=14.94	count=8500
+Attention relation loss: {"block": "blocks.7", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.3385399281978607, "auxiliary": 0.05749080330133438, "rec_loss": 2.035407781600952}
+Total loss:	4675.894 (rec:2.042, round:4673.852)	b=14.38	count=9000
+Attention relation loss: {"block": "blocks.7", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.35230493545532227, "auxiliary": 0.06647597253322601, "rec_loss": 2.0416860580444336}
+Total loss:	4383.218 (rec:2.042, round:4381.176)	b=13.81	count=9500
+Attention relation loss: {"block": "blocks.7", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.3187747001647949, "auxiliary": 0.06616411358118057, "rec_loss": 2.041895866394043}
+Total loss:	4094.749 (rec:2.029, round:4092.721)	b=13.25	count=10000
+Attention relation loss: {"block": "blocks.7", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.31588470935821533, "auxiliary": 0.07152466475963593, "rec_loss": 2.028679370880127}
+Total loss:	3809.062 (rec:1.998, round:3807.064)	b=12.69	count=10500
+Attention relation loss: {"block": "blocks.7", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.3115372657775879, "auxiliary": 0.07641863822937012, "rec_loss": 1.997644066810608}
+Total loss:	3528.471 (rec:2.018, round:3526.454)	b=12.12	count=11000
+Attention relation loss: {"block": "blocks.7", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.3261963129043579, "auxiliary": 0.08616939187049866, "rec_loss": 2.0177531242370605}
+Total loss:	3251.627 (rec:2.087, round:3249.540)	b=11.56	count=11500
+Attention relation loss: {"block": "blocks.7", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.31619003415107727, "auxiliary": 0.08949224650859833, "rec_loss": 2.0865817070007324}
+Total loss:	2979.792 (rec:2.110, round:2977.683)	b=11.00	count=12000
+Attention relation loss: {"block": "blocks.7", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.31395283341407776, "auxiliary": 0.09478297829627991, "rec_loss": 2.109697103500366}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.7", "refresh": 4, "min": 0.0, "max": 1.1566264629364014, "mean": 1.0, "alignment_positive_fraction": 0.8645833730697632, "alignment_mean": 0.013817954808473587}
+Total loss:	2713.852 (rec:2.136, round:2711.716)	b=10.44	count=12500
+Attention relation loss: {"block": "blocks.7", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.3189885914325714, "auxiliary": 0.10188763588666916, "rec_loss": 2.1362900733947754}
+Total loss:	2447.447 (rec:1.963, round:2445.484)	b=9.88	count=13000
+Attention relation loss: {"block": "blocks.7", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.30041787028312683, "auxiliary": 0.095955990254879, "rec_loss": 1.9629331827163696}
+Total loss:	2187.939 (rec:1.965, round:2185.975)	b=9.31	count=13500
+Attention relation loss: {"block": "blocks.7", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.30916130542755127, "auxiliary": 0.09874871373176575, "rec_loss": 1.964646339416504}
+Total loss:	1931.857 (rec:2.063, round:1929.794)	b=8.75	count=14000
+Attention relation loss: {"block": "blocks.7", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.32002508640289307, "auxiliary": 0.10221870243549347, "rec_loss": 2.063155174255371}
+Total loss:	1678.141 (rec:1.985, round:1676.156)	b=8.19	count=14500
+Attention relation loss: {"block": "blocks.7", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.30521121621131897, "auxiliary": 0.09748702496290207, "rec_loss": 1.9848113059997559}
+Total loss:	1426.348 (rec:2.065, round:1424.284)	b=7.62	count=15000
+Attention relation loss: {"block": "blocks.7", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.3072147071361542, "auxiliary": 0.09812695533037186, "rec_loss": 2.0648794174194336}
+Total loss:	1179.197 (rec:2.112, round:1177.085)	b=7.06	count=15500
+Attention relation loss: {"block": "blocks.7", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.3115147352218628, "auxiliary": 0.09950041770935059, "rec_loss": 2.112232208251953}
+Total loss:	937.319 (rec:1.990, round:935.329)	b=6.50	count=16000
+Attention relation loss: {"block": "blocks.7", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.30060824751853943, "auxiliary": 0.0960167944431305, "rec_loss": 1.9898769855499268}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.7", "refresh": 5, "min": 0.0, "max": 1.1999999284744263, "mean": 1.0, "alignment_positive_fraction": 0.8333333730697632, "alignment_mean": 0.015192268416285515}
+Total loss:	700.067 (rec:1.967, round:698.100)	b=5.94	count=16500
+Attention relation loss: {"block": "blocks.7", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.3133437931537628, "auxiliary": 0.09824001789093018, "rec_loss": 1.9668514728546143}
+Total loss:	475.472 (rec:2.082, round:473.390)	b=5.38	count=17000
+Attention relation loss: {"block": "blocks.7", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.3391910791397095, "auxiliary": 0.10634370148181915, "rec_loss": 2.082056999206543}
+Total loss:	269.019 (rec:1.985, round:267.034)	b=4.81	count=17500
+Attention relation loss: {"block": "blocks.7", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.32920223474502563, "auxiliary": 0.10321197658777237, "rec_loss": 1.9851741790771484}
+Total loss:	108.163 (rec:2.156, round:106.007)	b=4.25	count=18000
+Attention relation loss: {"block": "blocks.7", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.32889026403427124, "auxiliary": 0.10311418026685715, "rec_loss": 2.1555252075195312}
+Total loss:	27.831 (rec:1.986, round:25.845)	b=3.69	count=18500
+Attention relation loss: {"block": "blocks.7", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.3243386149406433, "auxiliary": 0.10168713331222534, "rec_loss": 1.9859235286712646}
+Total loss:	5.239 (rec:2.007, round:3.232)	b=3.12	count=19000
+Attention relation loss: {"block": "blocks.7", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.31344231963157654, "auxiliary": 0.09827090799808502, "rec_loss": 2.007143497467041}
+Total loss:	2.230 (rec:2.066, round:0.164)	b=2.56	count=19500
+Attention relation loss: {"block": "blocks.7", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.32124340534210205, "auxiliary": 0.10071671009063721, "rec_loss": 2.066380023956299}
+Total loss:	2.145 (rec:2.143, round:0.002)	b=2.00	count=20000
+Attention relation loss: {"block": "blocks.7", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.3335777223110199, "auxiliary": 0.10458379238843918, "rec_loss": 2.143160581588745}
+Attention relation result: {"active_steps": 16000, "alignment_mean": 0.015192268416285515, "alignment_positive_fraction": 0.8333333730697632, "block": "blocks.7", "cache_bytes": 38731776, "first_training_kl": 0.4161083400249481, "gradient_refreshes": 5, "last_auxiliary": 0.10458379238843918, "last_training_kl": 0.3335777223110199, "mode": "aligned", "protocol": "relation_v2_alignment", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.1999999284744263, "weight_min": 0.0}
+finished reconstructing blocks.7.
+reconstructing blocks.8 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.8", "protocol": "relation_v2_alignment", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "aligned", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.8 ...
+wraping quantizers in blocks.8 ...
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.8", "refresh": 1, "min": 0.0, "max": 1.1034482717514038, "mean": 1.0, "alignment_positive_fraction": 0.90625, "alignment_mean": 0.036380186676979065}
+Total loss:	2.000 (rec:2.000, round:0.000)	b=0.00	count=1
+Total loss:	1.610 (rec:1.610, round:0.000)	b=0.00	count=500
+Total loss:	1.492 (rec:1.492, round:0.000)	b=0.00	count=1000
+Total loss:	1.390 (rec:1.390, round:0.000)	b=0.00	count=1500
+Total loss:	1.362 (rec:1.362, round:0.000)	b=0.00	count=2000
+Total loss:	1.333 (rec:1.333, round:0.000)	b=0.00	count=2500
+Total loss:	1.330 (rec:1.330, round:0.000)	b=0.00	count=3000
+Total loss:	1.268 (rec:1.268, round:0.000)	b=0.00	count=3500
+Total loss:	15881.796 (rec:1.211, round:15880.585)	b=20.00	count=4000
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.8", "refresh": 2, "min": 0.0, "max": 1.2799999713897705, "mean": 1.0, "alignment_positive_fraction": 0.78125, "alignment_mean": 0.022299667820334435}
+Total loss:	8255.346 (rec:1.933, round:8253.413)	b=19.44	count=4500
+Attention relation loss: {"block": "blocks.8", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.6232470273971558, "auxiliary": 0.006524282973259687, "rec_loss": 1.9330079555511475}
+Total loss:	7637.741 (rec:1.960, round:7635.780)	b=18.88	count=5000
+Attention relation loss: {"block": "blocks.8", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.577201247215271, "auxiliary": 0.012084531597793102, "rec_loss": 1.9603383541107178}
+Total loss:	7221.252 (rec:1.993, round:7219.260)	b=18.31	count=5500
+Attention relation loss: {"block": "blocks.8", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.5174789428710938, "auxiliary": 0.01625123992562294, "rec_loss": 1.9928596019744873}
+Total loss:	6861.036 (rec:2.099, round:6858.938)	b=17.75	count=6000
+Attention relation loss: {"block": "blocks.8", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.4915007948875427, "auxiliary": 0.020580541342496872, "rec_loss": 2.098506212234497}
+Total loss:	6526.806 (rec:1.930, round:6524.876)	b=17.19	count=6500
+Attention relation loss: {"block": "blocks.8", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.49225160479545593, "auxiliary": 0.02576497383415699, "rec_loss": 1.930417537689209}
+Total loss:	6206.874 (rec:2.007, round:6204.868)	b=16.62	count=7000
+Attention relation loss: {"block": "blocks.8", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.49707692861557007, "auxiliary": 0.031221043318510056, "rec_loss": 2.0065603256225586}
+Total loss:	5895.118 (rec:1.792, round:5893.326)	b=16.06	count=7500
+Attention relation loss: {"block": "blocks.8", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.4222888946533203, "auxiliary": 0.03094427101314068, "rec_loss": 1.792212724685669}
+Total loss:	5590.725 (rec:2.047, round:5588.678)	b=15.50	count=8000
+Attention relation loss: {"block": "blocks.8", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.45030587911605835, "auxiliary": 0.03771118447184563, "rec_loss": 2.046964168548584}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.8", "refresh": 3, "min": 0.0, "max": 1.263157844543457, "mean": 1.0, "alignment_positive_fraction": 0.7916666865348816, "alignment_mean": 0.022996336221694946}
+Total loss:	5294.254 (rec:1.977, round:5292.277)	b=14.94	count=8500
+Attention relation loss: {"block": "blocks.8", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.41390663385391235, "auxiliary": 0.04796985164284706, "rec_loss": 1.9769914150238037}
+Total loss:	5005.871 (rec:1.928, round:5003.943)	b=14.38	count=9000
+Attention relation loss: {"block": "blocks.8", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.40493282675743103, "auxiliary": 0.052144259214401245, "rec_loss": 1.927883267402649}
+Total loss:	4722.747 (rec:1.960, round:4720.787)	b=13.81	count=9500
+Attention relation loss: {"block": "blocks.8", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.42448949813842773, "auxiliary": 0.06012888625264168, "rec_loss": 1.9597344398498535}
+Total loss:	4445.010 (rec:1.943, round:4443.067)	b=13.25	count=10000
+Attention relation loss: {"block": "blocks.8", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.3891933858394623, "auxiliary": 0.0601409412920475, "rec_loss": 1.942931890487671}
+Total loss:	4168.238 (rec:1.979, round:4166.259)	b=12.69	count=10500
+Attention relation loss: {"block": "blocks.8", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.4062744975090027, "auxiliary": 0.06801213324069977, "rec_loss": 1.9788477420806885}
+Total loss:	3893.072 (rec:1.943, round:3891.129)	b=12.12	count=11000
+Attention relation loss: {"block": "blocks.8", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.3919715881347656, "auxiliary": 0.07066528499126434, "rec_loss": 1.9425877332687378}
+Total loss:	3616.860 (rec:1.991, round:3614.870)	b=11.56	count=11500
+Attention relation loss: {"block": "blocks.8", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.3833247125148773, "auxiliary": 0.07404258847236633, "rec_loss": 1.99053955078125}
+Total loss:	3342.435 (rec:1.975, round:3340.460)	b=11.00	count=12000
+Attention relation loss: {"block": "blocks.8", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.38555270433425903, "auxiliary": 0.07943780720233917, "rec_loss": 1.975198745727539}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.8", "refresh": 4, "min": 0.0, "max": 1.1428571939468384, "mean": 1.0000001192092896, "alignment_positive_fraction": 0.875, "alignment_mean": 0.022619422525167465}
+Total loss:	3063.693 (rec:1.897, round:3061.796)	b=10.44	count=12500
+Attention relation loss: {"block": "blocks.8", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.37680596113204956, "auxiliary": 0.09332796186208725, "rec_loss": 1.896684169769287}
+Total loss:	2788.795 (rec:1.939, round:2786.856)	b=9.88	count=13000
+Attention relation loss: {"block": "blocks.8", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.38894039392471313, "auxiliary": 0.09633343666791916, "rec_loss": 1.9387538433074951}
+Total loss:	2514.614 (rec:1.862, round:2512.752)	b=9.31	count=13500
+Attention relation loss: {"block": "blocks.8", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.34741878509521484, "auxiliary": 0.08604929596185684, "rec_loss": 1.8615460395812988}
+Total loss:	2236.061 (rec:1.879, round:2234.181)	b=8.75	count=14000
+Attention relation loss: {"block": "blocks.8", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.3666815161705017, "auxiliary": 0.0908203199505806, "rec_loss": 1.8793246746063232}
+Total loss:	1959.985 (rec:2.015, round:1957.970)	b=8.19	count=14500
+Attention relation loss: {"block": "blocks.8", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.37460213899612427, "auxiliary": 0.09278210997581482, "rec_loss": 2.0154261589050293}
+Total loss:	1688.492 (rec:1.909, round:1686.583)	b=7.62	count=15000
+Attention relation loss: {"block": "blocks.8", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.36187589168548584, "auxiliary": 0.08963005989789963, "rec_loss": 1.9091811180114746}
+Total loss:	1416.461 (rec:1.970, round:1414.491)	b=7.06	count=15500
+Attention relation loss: {"block": "blocks.8", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.3753625750541687, "auxiliary": 0.09297046065330505, "rec_loss": 1.9700279235839844}
+Total loss:	1146.704 (rec:1.916, round:1144.788)	b=6.50	count=16000
+Attention relation loss: {"block": "blocks.8", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.37489622831344604, "auxiliary": 0.09285495430231094, "rec_loss": 1.915534257888794}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.8", "refresh": 5, "min": 0.0, "max": 1.1566264629364014, "mean": 1.0, "alignment_positive_fraction": 0.8645833730697632, "alignment_mean": 0.020941734313964844}
+Total loss:	883.547 (rec:2.030, round:881.517)	b=5.94	count=16500
+Attention relation loss: {"block": "blocks.8", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.38655775785446167, "auxiliary": 0.10437033325433731, "rec_loss": 2.030224084854126}
+Total loss:	631.469 (rec:2.010, round:629.459)	b=5.38	count=17000
+Attention relation loss: {"block": "blocks.8", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.37342262268066406, "auxiliary": 0.10082385689020157, "rec_loss": 2.009768486022949}
+Total loss:	397.830 (rec:2.196, round:395.634)	b=4.81	count=17500
+Attention relation loss: {"block": "blocks.8", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.39517149329185486, "auxiliary": 0.10669604688882828, "rec_loss": 2.1964755058288574}
+Total loss:	195.552 (rec:2.136, round:193.416)	b=4.25	count=18000
+Attention relation loss: {"block": "blocks.8", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.40023061633110046, "auxiliary": 0.1080620065331459, "rec_loss": 2.1358542442321777}
+Total loss:	58.064 (rec:2.014, round:56.050)	b=3.69	count=18500
+Attention relation loss: {"block": "blocks.8", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.38536056876182556, "auxiliary": 0.10404709726572037, "rec_loss": 2.014235496520996}
+Total loss:	9.361 (rec:2.149, round:7.212)	b=3.12	count=19000
+Attention relation loss: {"block": "blocks.8", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.39097556471824646, "auxiliary": 0.10556314140558243, "rec_loss": 2.1489052772521973}
+Total loss:	2.424 (rec:2.112, round:0.312)	b=2.56	count=19500
+Attention relation loss: {"block": "blocks.8", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.369454562664032, "auxiliary": 0.09975248575210571, "rec_loss": 2.111670970916748}
+Total loss:	2.086 (rec:2.084, round:0.002)	b=2.00	count=20000
+Attention relation loss: {"block": "blocks.8", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.3715459704399109, "auxiliary": 0.10031717270612717, "rec_loss": 2.0842065811157227}
+Attention relation result: {"active_steps": 16000, "alignment_mean": 0.020941734313964844, "alignment_positive_fraction": 0.8645833730697632, "block": "blocks.8", "cache_bytes": 38731776, "first_training_kl": 0.5970455408096313, "gradient_refreshes": 5, "last_auxiliary": 0.10031717270612717, "last_training_kl": 0.3715459704399109, "mode": "aligned", "protocol": "relation_v2_alignment", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.1566264629364014, "weight_min": 0.0}
+finished reconstructing blocks.8.
+reconstructing blocks.9 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.9", "protocol": "relation_v2_alignment", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "aligned", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.9 ...
+wraping quantizers in blocks.9 ...
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.9", "refresh": 1, "min": 0.0, "max": 1.548387050628662, "mean": 1.0, "alignment_positive_fraction": 0.6458333730697632, "alignment_mean": 0.014577198773622513}
+Total loss:	2.000 (rec:2.000, round:0.000)	b=0.00	count=1
+Total loss:	1.471 (rec:1.471, round:0.000)	b=0.00	count=500
+Total loss:	1.456 (rec:1.456, round:0.000)	b=0.00	count=1000
+Total loss:	1.417 (rec:1.417, round:0.000)	b=0.00	count=1500
+Total loss:	1.382 (rec:1.382, round:0.000)	b=0.00	count=2000
+Total loss:	1.319 (rec:1.319, round:0.000)	b=0.00	count=2500
+Total loss:	1.317 (rec:1.317, round:0.000)	b=0.00	count=3000
+Total loss:	1.280 (rec:1.280, round:0.000)	b=0.00	count=3500
+Total loss:	16002.421 (rec:1.323, round:16001.098)	b=20.00	count=4000
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.9", "refresh": 2, "min": 1.0, "max": 1.0, "mean": 1.0, "alignment_positive_fraction": 1.0, "alignment_mean": 0.04491546005010605}
+Total loss:	8384.539 (rec:1.944, round:8382.596)	b=19.44	count=4500
+Attention relation loss: {"block": "blocks.9", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.6321232318878174, "auxiliary": 0.0067864395678043365, "rec_loss": 1.9437780380249023}
+Total loss:	7776.545 (rec:1.934, round:7774.611)	b=18.88	count=5000
+Attention relation loss: {"block": "blocks.9", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.534574031829834, "auxiliary": 0.01147831417620182, "rec_loss": 1.933585286140442}
+Total loss:	7362.928 (rec:2.034, round:7360.894)	b=18.31	count=5500
+Attention relation loss: {"block": "blocks.9", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.5658162832260132, "auxiliary": 0.0182237159460783, "rec_loss": 2.0344624519348145}
+Total loss:	7009.967 (rec:1.978, round:7007.989)	b=17.75	count=6000
+Attention relation loss: {"block": "blocks.9", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.55838942527771, "auxiliary": 0.023979350924491882, "rec_loss": 1.9781880378723145}
+Total loss:	6677.391 (rec:1.973, round:6675.418)	b=17.19	count=6500
+Attention relation loss: {"block": "blocks.9", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.5431939959526062, "auxiliary": 0.02915850095450878, "rec_loss": 1.9732006788253784}
+Total loss:	6354.516 (rec:1.940, round:6352.576)	b=16.62	count=7000
+Attention relation loss: {"block": "blocks.9", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.5084656476974487, "auxiliary": 0.03275315463542938, "rec_loss": 1.939918875694275}
+Total loss:	6043.907 (rec:2.035, round:6041.872)	b=16.06	count=7500
+Attention relation loss: {"block": "blocks.9", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.5220879316329956, "auxiliary": 0.03923574835062027, "rec_loss": 2.0349087715148926}
+Total loss:	5739.475 (rec:2.103, round:5737.372)	b=15.50	count=8000
+Attention relation loss: {"block": "blocks.9", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.559218168258667, "auxiliary": 0.048029880970716476, "rec_loss": 2.1028385162353516}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.9", "refresh": 3, "min": 0.0, "max": 1.0322580337524414, "mean": 1.0, "alignment_positive_fraction": 0.96875, "alignment_mean": 0.032181836664676666}
+Total loss:	5435.667 (rec:1.965, round:5433.702)	b=14.94	count=8500
+Attention relation loss: {"block": "blocks.9", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.48120349645614624, "auxiliary": 0.0553993284702301, "rec_loss": 1.964750051498413}
+Total loss:	5135.377 (rec:2.078, round:5133.299)	b=14.38	count=9000
+Attention relation loss: {"block": "blocks.9", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.5016368627548218, "auxiliary": 0.06416861712932587, "rec_loss": 2.077702522277832}
+Total loss:	4842.097 (rec:2.089, round:4840.008)	b=13.81	count=9500
+Attention relation loss: {"block": "blocks.9", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.49670490622520447, "auxiliary": 0.06989150494337082, "rec_loss": 2.088667392730713}
+Total loss:	4551.468 (rec:1.950, round:4549.518)	b=13.25	count=10000
+Attention relation loss: {"block": "blocks.9", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.4594576954841614, "auxiliary": 0.07052774727344513, "rec_loss": 1.9496030807495117}
+Total loss:	4264.467 (rec:1.967, round:4262.500)	b=12.69	count=10500
+Attention relation loss: {"block": "blocks.9", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.4534197747707367, "auxiliary": 0.07540098577737808, "rec_loss": 1.9670019149780273}
+Total loss:	3976.569 (rec:2.119, round:3974.450)	b=12.12	count=11000
+Attention relation loss: {"block": "blocks.9", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.44750988483428955, "auxiliary": 0.08014268428087234, "rec_loss": 2.119469165802002}
+Total loss:	3690.657 (rec:1.934, round:3688.723)	b=11.56	count=11500
+Attention relation loss: {"block": "blocks.9", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.3972429633140564, "auxiliary": 0.07622206211090088, "rec_loss": 1.9340046644210815}
+Total loss:	3407.273 (rec:2.031, round:3405.242)	b=11.00	count=12000
+Attention relation loss: {"block": "blocks.9", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.4250195622444153, "auxiliary": 0.08698856085538864, "rec_loss": 2.030522346496582}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.9", "refresh": 4, "min": 0.0, "max": 1.0322580337524414, "mean": 1.0, "alignment_positive_fraction": 0.96875, "alignment_mean": 0.030993860214948654}
+Total loss:	3119.676 (rec:2.035, round:3117.642)	b=10.44	count=12500
+Attention relation loss: {"block": "blocks.9", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.4245483875274658, "auxiliary": 0.1022953987121582, "rec_loss": 2.0346298217773438}
+Total loss:	2836.727 (rec:2.040, round:2834.687)	b=9.88	count=13000
+Attention relation loss: {"block": "blocks.9", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.44796857237815857, "auxiliary": 0.10793852061033249, "rec_loss": 2.0399887561798096}
+Total loss:	2553.247 (rec:1.894, round:2551.353)	b=9.31	count=13500
+Attention relation loss: {"block": "blocks.9", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.41587767004966736, "auxiliary": 0.1002061739563942, "rec_loss": 1.8936138153076172}
+Total loss:	2272.575 (rec:1.852, round:2270.724)	b=8.75	count=14000
+Attention relation loss: {"block": "blocks.9", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.36150917410850525, "auxiliary": 0.08710603415966034, "rec_loss": 1.8516409397125244}
+Total loss:	1993.863 (rec:1.970, round:1991.893)	b=8.19	count=14500
+Attention relation loss: {"block": "blocks.9", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.3897305428981781, "auxiliary": 0.09390600025653839, "rec_loss": 1.9702376127243042}
+Total loss:	1713.843 (rec:2.062, round:1711.780)	b=7.62	count=15000
+Attention relation loss: {"block": "blocks.9", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.4433968961238861, "auxiliary": 0.1068369671702385, "rec_loss": 2.0623350143432617}
+Total loss:	1436.222 (rec:2.022, round:1434.200)	b=7.06	count=15500
+Attention relation loss: {"block": "blocks.9", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.4164435863494873, "auxiliary": 0.1003425344824791, "rec_loss": 2.021617889404297}
+Total loss:	1164.961 (rec:1.883, round:1163.078)	b=6.50	count=16000
+Attention relation loss: {"block": "blocks.9", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.383941113948822, "auxiliary": 0.09251102805137634, "rec_loss": 1.8825938701629639}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.9", "refresh": 5, "min": 0.0, "max": 1.0322580337524414, "mean": 1.0, "alignment_positive_fraction": 0.96875, "alignment_mean": 0.03291603550314903}
+Total loss:	901.339 (rec:1.974, round:899.365)	b=5.94	count=16500
+Attention relation loss: {"block": "blocks.9", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.4010162949562073, "auxiliary": 0.09318064898252487, "rec_loss": 1.9740583896636963}
+Total loss:	648.970 (rec:2.089, round:646.881)	b=5.38	count=17000
+Attention relation loss: {"block": "blocks.9", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.45373520255088806, "auxiliary": 0.1054304763674736, "rec_loss": 2.0889172554016113}
+Total loss:	413.547 (rec:2.060, round:411.487)	b=4.81	count=17500
+Attention relation loss: {"block": "blocks.9", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.42517757415771484, "auxiliary": 0.09879478812217712, "rec_loss": 2.0601840019226074}
+Total loss:	209.210 (rec:2.037, round:207.173)	b=4.25	count=18000
+Attention relation loss: {"block": "blocks.9", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.3965298533439636, "auxiliary": 0.09213817119598389, "rec_loss": 2.0366859436035156}
+Total loss:	68.301 (rec:2.028, round:66.272)	b=3.69	count=18500
+Attention relation loss: {"block": "blocks.9", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.4023556113243103, "auxiliary": 0.09349185228347778, "rec_loss": 2.028380870819092}
+Total loss:	11.873 (rec:2.017, round:9.857)	b=3.12	count=19000
+Attention relation loss: {"block": "blocks.9", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.3956289291381836, "auxiliary": 0.09192883223295212, "rec_loss": 2.0167384147644043}
+Total loss:	2.586 (rec:2.051, round:0.535)	b=2.56	count=19500
+Attention relation loss: {"block": "blocks.9", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.40824562311172485, "auxiliary": 0.09486045688390732, "rec_loss": 2.0513501167297363}
+Total loss:	1.978 (rec:1.972, round:0.006)	b=2.00	count=20000
+Attention relation loss: {"block": "blocks.9", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.375944584608078, "auxiliary": 0.08735495060682297, "rec_loss": 1.9717379808425903}
+Attention relation result: {"active_steps": 16000, "alignment_mean": 0.03291603550314903, "alignment_positive_fraction": 0.96875, "block": "blocks.9", "cache_bytes": 38731776, "first_training_kl": 0.5821565389633179, "gradient_refreshes": 5, "last_auxiliary": 0.08735495060682297, "last_training_kl": 0.375944584608078, "mode": "aligned", "protocol": "relation_v2_alignment", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.0322580337524414, "weight_min": 0.0}
+finished reconstructing blocks.9.
+reconstructing blocks.10 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.10", "protocol": "relation_v2_alignment", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "aligned", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.10 ...
+wraping quantizers in blocks.10 ...
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.10", "refresh": 1, "min": 0.0, "max": 1.8823529481887817, "mean": 1.0, "alignment_positive_fraction": 0.53125, "alignment_mean": 0.019744671881198883}
+Total loss:	2.000 (rec:2.000, round:0.000)	b=0.00	count=1
+Total loss:	1.294 (rec:1.294, round:0.000)	b=0.00	count=500
+Total loss:	1.064 (rec:1.064, round:0.000)	b=0.00	count=1000
+Total loss:	0.994 (rec:0.994, round:0.000)	b=0.00	count=1500
+Total loss:	0.944 (rec:0.944, round:0.000)	b=0.00	count=2000
+Total loss:	0.951 (rec:0.951, round:0.000)	b=0.00	count=2500
+Total loss:	0.981 (rec:0.981, round:0.000)	b=0.00	count=3000
+Total loss:	0.924 (rec:0.924, round:0.000)	b=0.00	count=3500
+Total loss:	16283.189 (rec:0.888, round:16282.301)	b=20.00	count=4000
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.10", "refresh": 2, "min": 0.0, "max": 1.0909091234207153, "mean": 1.0000001192092896, "alignment_positive_fraction": 0.9166666865348816, "alignment_mean": 0.0703609362244606}
+Total loss:	8656.943 (rec:1.959, round:8654.984)	b=19.44	count=4500
+Attention relation loss: {"block": "blocks.10", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.9070612788200378, "auxiliary": 0.007186952978372574, "rec_loss": 1.9593605995178223}
+Total loss:	8036.839 (rec:1.966, round:8034.873)	b=18.88	count=5000
+Attention relation loss: {"block": "blocks.10", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.885049045085907, "auxiliary": 0.014025084674358368, "rec_loss": 1.966073751449585}
+Total loss:	7618.687 (rec:1.941, round:7616.746)	b=18.31	count=5500
+Attention relation loss: {"block": "blocks.10", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.7871919870376587, "auxiliary": 0.01871156506240368, "rec_loss": 1.9406578540802002}
+Total loss:	7260.866 (rec:1.900, round:7258.965)	b=17.75	count=6000
+Attention relation loss: {"block": "blocks.10", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.7756268978118896, "auxiliary": 0.024582214653491974, "rec_loss": 1.900373935699463}
+Total loss:	6927.318 (rec:1.959, round:6925.359)	b=17.19	count=6500
+Attention relation loss: {"block": "blocks.10", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.7326297760009766, "auxiliary": 0.029024364426732063, "rec_loss": 1.9586904048919678}
+Total loss:	6606.668 (rec:1.880, round:6604.788)	b=16.62	count=7000
+Attention relation loss: {"block": "blocks.10", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.7389026880264282, "auxiliary": 0.03512745350599289, "rec_loss": 1.8796563148498535}
+Total loss:	6293.281 (rec:1.925, round:6291.355)	b=16.06	count=7500
+Attention relation loss: {"block": "blocks.10", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.8020026683807373, "auxiliary": 0.04448176175355911, "rec_loss": 1.9251351356506348}
+Total loss:	5985.296 (rec:1.855, round:5983.440)	b=15.50	count=8000
+Attention relation loss: {"block": "blocks.10", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.648331344127655, "auxiliary": 0.041095584630966187, "rec_loss": 1.8554699420928955}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.10", "refresh": 3, "min": 0.0, "max": 1.655172348022461, "mean": 1.0, "alignment_positive_fraction": 0.6041666865348816, "alignment_mean": 0.07101993262767792}
+Total loss:	5677.610 (rec:1.645, round:5675.964)	b=14.94	count=8500
+Attention relation loss: {"block": "blocks.10", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.6655181050300598, "auxiliary": 0.053962886333465576, "rec_loss": 1.6452937126159668}
+Total loss:	5390.747 (rec:1.746, round:5389.001)	b=14.38	count=9000
+Attention relation loss: {"block": "blocks.10", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.6307237148284912, "auxiliary": 0.05682402104139328, "rec_loss": 1.746138572692871}
+Total loss:	5116.442 (rec:1.700, round:5114.741)	b=13.81	count=9500
+Attention relation loss: {"block": "blocks.10", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.6356209516525269, "auxiliary": 0.06299175322055817, "rec_loss": 1.7004458904266357}
+Total loss:	4849.413 (rec:1.676, round:4847.736)	b=13.25	count=10000
+Attention relation loss: {"block": "blocks.10", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.5619911551475525, "auxiliary": 0.06075800955295563, "rec_loss": 1.6761069297790527}
+Total loss:	4581.787 (rec:1.689, round:4580.099)	b=12.69	count=10500
+Attention relation loss: {"block": "blocks.10", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.6110953688621521, "auxiliary": 0.07157232612371445, "rec_loss": 1.688612937927246}
+Total loss:	4308.661 (rec:1.632, round:4307.029)	b=12.12	count=11000
+Attention relation loss: {"block": "blocks.10", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.5652808547019958, "auxiliary": 0.07129926979541779, "rec_loss": 1.6317187547683716}
+Total loss:	4033.315 (rec:1.591, round:4031.724)	b=11.56	count=11500
+Attention relation loss: {"block": "blocks.10", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.5200175046920776, "auxiliary": 0.0702751874923706, "rec_loss": 1.5911067724227905}
+Total loss:	3756.292 (rec:1.673, round:3754.619)	b=11.00	count=12000
+Attention relation loss: {"block": "blocks.10", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.5248004794120789, "auxiliary": 0.07564966380596161, "rec_loss": 1.6733936071395874}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.10", "refresh": 4, "min": 0.0, "max": 1.185185194015503, "mean": 1.0, "alignment_positive_fraction": 0.84375, "alignment_mean": 0.046035539358854294}
+Total loss:	3477.829 (rec:1.949, round:3475.879)	b=10.44	count=12500
+Attention relation loss: {"block": "blocks.10", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.5895795822143555, "auxiliary": 0.10157161206007004, "rec_loss": 1.9493358135223389}
+Total loss:	3199.688 (rec:1.928, round:3197.760)	b=9.88	count=13000
+Attention relation loss: {"block": "blocks.10", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.5339781641960144, "auxiliary": 0.09199269860982895, "rec_loss": 1.9275610446929932}
+Total loss:	2920.708 (rec:1.913, round:2918.795)	b=9.31	count=13500
+Attention relation loss: {"block": "blocks.10", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.5500564575195312, "auxiliary": 0.0947626456618309, "rec_loss": 1.9127368927001953}
+Total loss:	2642.300 (rec:1.959, round:2640.341)	b=8.75	count=14000
+Attention relation loss: {"block": "blocks.10", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.5686456561088562, "auxiliary": 0.09796515107154846, "rec_loss": 1.9585195779800415}
+Total loss:	2359.995 (rec:1.950, round:2358.045)	b=8.19	count=14500
+Attention relation loss: {"block": "blocks.10", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.5811139941215515, "auxiliary": 0.1001131683588028, "rec_loss": 1.9497698545455933}
+Total loss:	2076.237 (rec:2.048, round:2074.188)	b=7.62	count=15000
+Attention relation loss: {"block": "blocks.10", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.5957822799682617, "auxiliary": 0.10264018923044205, "rec_loss": 2.0484743118286133}
+Total loss:	1787.901 (rec:2.010, round:1785.891)	b=7.06	count=15500
+Attention relation loss: {"block": "blocks.10", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.5902770757675171, "auxiliary": 0.10169177502393723, "rec_loss": 2.0103163719177246}
+Total loss:	1498.947 (rec:1.948, round:1496.999)	b=6.50	count=16000
+Attention relation loss: {"block": "blocks.10", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.5295560359954834, "auxiliary": 0.09123086929321289, "rec_loss": 1.947577714920044}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.10", "refresh": 5, "min": 0.0, "max": 1.3150684833526611, "mean": 1.0, "alignment_positive_fraction": 0.7604166865348816, "alignment_mean": 0.04510576277971268}
+Total loss:	1211.982 (rec:2.132, round:1209.850)	b=5.94	count=16500
+Attention relation loss: {"block": "blocks.10", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.5585202574729919, "auxiliary": 0.10840541124343872, "rec_loss": 2.132136583328247}
+Total loss:	930.278 (rec:2.096, round:928.182)	b=5.38	count=17000
+Attention relation loss: {"block": "blocks.10", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.5836821794509888, "auxiliary": 0.11328919231891632, "rec_loss": 2.0958738327026367}
+Total loss:	658.445 (rec:2.028, round:656.417)	b=4.81	count=17500
+Attention relation loss: {"block": "blocks.10", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.5077905654907227, "auxiliary": 0.09855908155441284, "rec_loss": 2.027658462524414}
+Total loss:	411.626 (rec:2.027, round:409.599)	b=4.25	count=18000
+Attention relation loss: {"block": "blocks.10", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.5360361337661743, "auxiliary": 0.10404137521982193, "rec_loss": 2.0266289710998535}
+Total loss:	202.416 (rec:2.057, round:200.359)	b=3.69	count=18500
+Attention relation loss: {"block": "blocks.10", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.5386795997619629, "auxiliary": 0.10455446690320969, "rec_loss": 2.056753635406494}
+Total loss:	61.985 (rec:2.083, round:59.902)	b=3.12	count=19000
+Attention relation loss: {"block": "blocks.10", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.557363748550415, "auxiliary": 0.1081809401512146, "rec_loss": 2.0830016136169434}
+Total loss:	10.323 (rec:2.153, round:8.171)	b=2.56	count=19500
+Attention relation loss: {"block": "blocks.10", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.5566085577011108, "auxiliary": 0.10803436487913132, "rec_loss": 2.1527295112609863}
+Total loss:	2.452 (rec:1.995, round:0.456)	b=2.00	count=20000
+Attention relation loss: {"block": "blocks.10", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.5259405970573425, "auxiliary": 0.10208189487457275, "rec_loss": 1.9953300952911377}
+Attention relation result: {"active_steps": 16000, "alignment_mean": 0.04510576277971268, "alignment_positive_fraction": 0.7604166865348816, "block": "blocks.10", "cache_bytes": 38731776, "first_training_kl": 0.7888090014457703, "gradient_refreshes": 5, "last_auxiliary": 0.10208189487457275, "last_training_kl": 0.5259405970573425, "mode": "aligned", "protocol": "relation_v2_alignment", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.3150684833526611, "weight_min": 0.0}
+finished reconstructing blocks.10.
+reconstructing blocks.11 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.11", "protocol": "relation_v2_alignment", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "aligned", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.11 ...
+wraping quantizers in blocks.11 ...
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.11", "refresh": 1, "min": 0.0, "max": 2.0, "mean": 0.0625, "alignment_positive_fraction": 0.03125, "alignment_mean": -0.001039553084410727}
+Total loss:	2.000 (rec:2.000, round:0.000)	b=0.00	count=1
+Total loss:	1.162 (rec:1.162, round:0.000)	b=0.00	count=500
+Total loss:	1.207 (rec:1.207, round:0.000)	b=0.00	count=1000
+Total loss:	1.119 (rec:1.119, round:0.000)	b=0.00	count=1500
+Total loss:	1.022 (rec:1.022, round:0.000)	b=0.00	count=2000
+Total loss:	0.953 (rec:0.953, round:0.000)	b=0.00	count=2500
+Total loss:	0.949 (rec:0.949, round:0.000)	b=0.00	count=3000
+Total loss:	0.910 (rec:0.910, round:0.000)	b=0.00	count=3500
+Total loss:	16542.619 (rec:0.926, round:16541.693)	b=20.00	count=4000
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.11", "refresh": 2, "min": 0.0, "max": 2.0, "mean": 0.1041666716337204, "alignment_positive_fraction": 0.0520833358168602, "alignment_mean": 0.0058591230772435665}
+Total loss:	9669.196 (rec:1.934, round:9667.262)	b=19.44	count=4500
+Attention relation loss: {"block": "blocks.11", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.04457559436559677, "auxiliary": 0.006587115582078695, "rec_loss": 1.9343880414962769}
+Total loss:	9120.229 (rec:2.108, round:9118.121)	b=18.88	count=5000
+Attention relation loss: {"block": "blocks.11", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.0437626950442791, "auxiliary": 0.012933979742228985, "rec_loss": 2.1080784797668457}
+Total loss:	8781.379 (rec:1.910, round:8779.470)	b=18.31	count=5500
+Attention relation loss: {"block": "blocks.11", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.047398678958415985, "auxiliary": 0.02101288177073002, "rec_loss": 1.9095184803009033}
+Total loss:	8498.539 (rec:1.881, round:8496.657)	b=17.75	count=6000
+Attention relation loss: {"block": "blocks.11", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.05242970585823059, "auxiliary": 0.030990997329354286, "rec_loss": 1.8813586235046387}
+Total loss:	8236.515 (rec:1.858, round:8234.656)	b=17.19	count=6500
+Attention relation loss: {"block": "blocks.11", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.04054618999361992, "auxiliary": 0.029958369210362434, "rec_loss": 1.858307123184204}
+Total loss:	7984.647 (rec:1.838, round:7982.810)	b=16.62	count=7000
+Attention relation loss: {"block": "blocks.11", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.035703979432582855, "auxiliary": 0.03165672719478607, "rec_loss": 1.8377443552017212}
+Total loss:	7735.112 (rec:1.893, round:7733.219)	b=16.06	count=7500
+Attention relation loss: {"block": "blocks.11", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.049917832016944885, "auxiliary": 0.05163591355085373, "rec_loss": 1.8934948444366455}
+Total loss:	7484.535 (rec:1.894, round:7482.642)	b=15.50	count=8000
+Attention relation loss: {"block": "blocks.11", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.04088142141699791, "auxiliary": 0.04832969978451729, "rec_loss": 1.893714189529419}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.11", "refresh": 3, "min": 0.0, "max": 2.0, "mean": 0.0833333358168602, "alignment_positive_fraction": 0.0416666679084301, "alignment_mean": 0.002987623680382967}
+Total loss:	7233.825 (rec:1.883, round:7231.941)	b=14.94	count=8500
+Attention relation loss: {"block": "blocks.11", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.030329784378409386, "auxiliary": 0.0527116134762764, "rec_loss": 1.8831801414489746}
+Total loss:	6983.374 (rec:1.958, round:6981.416)	b=14.38	count=9000
+Attention relation loss: {"block": "blocks.11", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.03458064794540405, "auxiliary": 0.06677711009979248, "rec_loss": 1.9579250812530518}
+Total loss:	6727.748 (rec:2.166, round:6725.582)	b=13.81	count=9500
+Attention relation loss: {"block": "blocks.11", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.034487854689359665, "auxiliary": 0.07325771450996399, "rec_loss": 2.166144371032715}
+Total loss:	6466.956 (rec:1.883, round:6465.073)	b=13.25	count=10000
+Attention relation loss: {"block": "blocks.11", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.034527819603681564, "auxiliary": 0.08001011610031128, "rec_loss": 1.882936716079712}
+Total loss:	6199.679 (rec:1.746, round:6197.933)	b=12.69	count=10500
+Attention relation loss: {"block": "blocks.11", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.031123531982302666, "auxiliary": 0.07813159376382828, "rec_loss": 1.7455620765686035}
+Total loss:	5922.056 (rec:1.894, round:5920.161)	b=12.12	count=11000
+Attention relation loss: {"block": "blocks.11", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.03091907501220703, "auxiliary": 0.08358897268772125, "rec_loss": 1.8943254947662354}
+Total loss:	5637.992 (rec:1.935, round:5636.057)	b=11.56	count=11500
+Attention relation loss: {"block": "blocks.11", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.026190057396888733, "auxiliary": 0.07586163282394409, "rec_loss": 1.9347248077392578}
+Total loss:	5342.351 (rec:1.676, round:5340.674)	b=11.00	count=12000
+Attention relation loss: {"block": "blocks.11", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.027627605944871902, "auxiliary": 0.08536065369844437, "rec_loss": 1.6764044761657715}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.11", "refresh": 4, "min": 0.0, "max": 2.0, "mean": 0.0625, "alignment_positive_fraction": 0.03125, "alignment_mean": 0.0017800655914470553}
+Total loss:	5042.302 (rec:2.056, round:5040.246)	b=10.44	count=12500
+Attention relation loss: {"block": "blocks.11", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.01886006072163582, "auxiliary": 0.08728352934122086, "rec_loss": 2.055617570877075}
+Total loss:	4736.008 (rec:2.154, round:4733.854)	b=9.88	count=13000
+Attention relation loss: {"block": "blocks.11", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.01956532895565033, "auxiliary": 0.09054747968912125, "rec_loss": 2.154111385345459}
+Total loss:	4423.209 (rec:2.010, round:4421.200)	b=9.31	count=13500
+Attention relation loss: {"block": "blocks.11", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.018363311886787415, "auxiliary": 0.08498459309339523, "rec_loss": 2.009787082672119}
+Total loss:	4098.682 (rec:2.100, round:4096.581)	b=8.75	count=14000
+Attention relation loss: {"block": "blocks.11", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.02172575518488884, "auxiliary": 0.10054583847522736, "rec_loss": 2.100498676300049}
+Total loss:	3759.041 (rec:2.060, round:3756.980)	b=8.19	count=14500
+Attention relation loss: {"block": "blocks.11", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.02380203828215599, "auxiliary": 0.11015478521585464, "rec_loss": 2.060225486755371}
+Total loss:	3408.888 (rec:2.251, round:3406.636)	b=7.62	count=15000
+Attention relation loss: {"block": "blocks.11", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.01882302761077881, "auxiliary": 0.08711214363574982, "rec_loss": 2.2514097690582275}
+Total loss:	3043.239 (rec:2.039, round:3041.199)	b=7.06	count=15500
+Attention relation loss: {"block": "blocks.11", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.019098959863185883, "auxiliary": 0.08838914334774017, "rec_loss": 2.039357900619507}
+Total loss:	2667.314 (rec:2.166, round:2665.148)	b=6.50	count=16000
+Attention relation loss: {"block": "blocks.11", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.018639005720615387, "auxiliary": 0.08626049011945724, "rec_loss": 2.165756940841675}
+updating fisher information matrix ...
+Attention relation weights: {"block": "blocks.11", "refresh": 5, "min": 0.0, "max": 2.0, "mean": 0.0833333358168602, "alignment_positive_fraction": 0.0416666679084301, "alignment_mean": 0.0017908149166032672}
+Total loss:	2273.812 (rec:2.033, round:2271.779)	b=5.94	count=16500
+Attention relation loss: {"block": "blocks.11", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.030476195737719536, "auxiliary": 0.09561976045370102, "rec_loss": 2.0329060554504395}
+Total loss:	1866.319 (rec:2.164, round:1864.155)	b=5.38	count=17000
+Attention relation loss: {"block": "blocks.11", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.024793513119220734, "auxiliary": 0.07779020816087723, "rec_loss": 2.1642024517059326}
+Total loss:	1449.161 (rec:2.025, round:1447.136)	b=4.81	count=17500
+Attention relation loss: {"block": "blocks.11", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.02584867738187313, "auxiliary": 0.08110081404447556, "rec_loss": 2.025143623352051}
+Total loss:	1042.691 (rec:2.165, round:1040.526)	b=4.25	count=18000
+Attention relation loss: {"block": "blocks.11", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.02788776159286499, "auxiliary": 0.0874984860420227, "rec_loss": 2.164957046508789}
+Total loss:	656.483 (rec:2.047, round:654.436)	b=3.69	count=18500
+Attention relation loss: {"block": "blocks.11", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.02756749466061592, "auxiliary": 0.08649364113807678, "rec_loss": 2.0465760231018066}
+Total loss:	322.044 (rec:2.038, round:320.006)	b=3.12	count=19000
+Attention relation loss: {"block": "blocks.11", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.026721540838479996, "auxiliary": 0.08383943885564804, "rec_loss": 2.03767466545105}
+Total loss:	96.210 (rec:2.140, round:94.070)	b=2.56	count=19500
+Attention relation loss: {"block": "blocks.11", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.028947187587618828, "auxiliary": 0.09082245826721191, "rec_loss": 2.1401071548461914}
+Total loss:	17.029 (rec:2.198, round:14.831)	b=2.00	count=20000
+Attention relation loss: {"block": "blocks.11", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.025821328163146973, "auxiliary": 0.08101500570774078, "rec_loss": 2.197626829147339}
+Attention relation result: {"active_steps": 16000, "alignment_mean": 0.0017908149166032672, "alignment_positive_fraction": 0.0416666679084301, "block": "blocks.11", "cache_bytes": 38731776, "first_training_kl": 0.04229430481791496, "gradient_refreshes": 5, "last_auxiliary": 0.08101500570774078, "last_training_kl": 0.025821328163146973, "mode": "aligned", "protocol": "relation_v2_alignment", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 2.0, "weight_min": 0.0}
+finished reconstructing blocks.11.
+reconstructing head ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for head ...
+wraping quantizers in head ...
+Total loss:	0.054 (rec:0.054, round:0.000)	b=0.00	count=1
+Total loss:	0.066 (rec:0.066, round:0.000)	b=0.00	count=500
+Total loss:	0.035 (rec:0.035, round:0.000)	b=0.00	count=1000
+Total loss:	0.044 (rec:0.044, round:0.000)	b=0.00	count=1500
+Total loss:	0.019 (rec:0.019, round:0.000)	b=0.00	count=2000
+Total loss:	0.036 (rec:0.036, round:0.000)	b=0.00	count=2500
+Total loss:	0.021 (rec:0.021, round:0.000)	b=0.00	count=3000
+Total loss:	0.041 (rec:0.041, round:0.000)	b=0.00	count=3500
+Total loss:	3614.009 (rec:0.018, round:3613.991)	b=20.00	count=4000
+Total loss:	1976.057 (rec:0.041, round:1976.015)	b=19.44	count=4500
+Total loss:	1848.241 (rec:0.031, round:1848.210)	b=18.88	count=5000
+Total loss:	1770.174 (rec:0.029, round:1770.145)	b=18.31	count=5500
+Total loss:	1708.989 (rec:0.021, round:1708.968)	b=17.75	count=6000
+Total loss:	1652.484 (rec:0.023, round:1652.461)	b=17.19	count=6500
+Total loss:	1599.122 (rec:0.033, round:1599.088)	b=16.62	count=7000
+Total loss:	1546.595 (rec:0.020, round:1546.574)	b=16.06	count=7500
+Total loss:	1496.565 (rec:0.018, round:1496.547)	b=15.50	count=8000
+Total loss:	1444.593 (rec:0.027, round:1444.567)	b=14.94	count=8500
+Total loss:	1393.377 (rec:0.022, round:1393.356)	b=14.38	count=9000
+Total loss:	1340.269 (rec:0.028, round:1340.241)	b=13.81	count=9500
+Total loss:	1286.130 (rec:0.029, round:1286.101)	b=13.25	count=10000
+Total loss:	1231.996 (rec:0.022, round:1231.974)	b=12.69	count=10500
+Total loss:	1173.945 (rec:0.020, round:1173.925)	b=12.12	count=11000
+Total loss:	1112.317 (rec:0.018, round:1112.300)	b=11.56	count=11500
+Total loss:	1050.144 (rec:0.032, round:1050.112)	b=11.00	count=12000
+Total loss:	984.937 (rec:0.020, round:984.917)	b=10.44	count=12500
+Total loss:	916.904 (rec:0.020, round:916.884)	b=9.88	count=13000
+Total loss:	847.437 (rec:0.023, round:847.414)	b=9.31	count=13500
+Total loss:	774.615 (rec:0.013, round:774.602)	b=8.75	count=14000
+Total loss:	699.662 (rec:0.018, round:699.643)	b=8.19	count=14500
+Total loss:	621.727 (rec:0.039, round:621.688)	b=7.62	count=15000
+Total loss:	541.753 (rec:0.019, round:541.734)	b=7.06	count=15500
+Total loss:	460.192 (rec:0.018, round:460.174)	b=6.50	count=16000
+Total loss:	376.705 (rec:0.030, round:376.675)	b=5.94	count=16500
+Total loss:	293.292 (rec:0.026, round:293.266)	b=5.38	count=17000
+Total loss:	211.901 (rec:0.019, round:211.883)	b=4.81	count=17500
+Total loss:	135.521 (rec:0.011, round:135.510)	b=4.25	count=18000
+Total loss:	69.558 (rec:0.015, round:69.543)	b=3.69	count=18500
+Total loss:	22.547 (rec:0.023, round:22.524)	b=3.12	count=19000
+Total loss:	3.154 (rec:0.033, round:3.121)	b=2.56	count=19500
+Total loss:	0.162 (rec:0.022, round:0.140)	b=2.00	count=20000
+finished reconstructing head.
+Block reconstruction elapsed seconds: 7506.789
+2026-10-21 19:37:37 - fisher_dplr guided block reconstruction finished.
+Saving checkpoint to /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261021_172536_headwise_alignment_w3a3_seed3407_seeded_full_relation_v2_alignment/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop.pth
+Validating on calibration set after block reconstruction ...
+Test: [0/32]	Time 1.053 (1.053)	Loss 0.6551 (0.6551)	Prec@1 84.375 (84.375)	Prec@5 100.000 (100.000)
+Test: [10/32]	Time 0.026 (0.157)	Loss 0.9220 (0.6655)	Prec@1 71.875 (82.102)	Prec@5 90.625 (96.023)
+Test: [20/32]	Time 0.025 (0.095)	Loss 1.0241 (0.7258)	Prec@1 75.000 (82.440)	Prec@5 93.750 (94.940)
+Test: [30/32]	Time 0.025 (0.072)	Loss 0.4079 (0.7093)	Prec@1 84.375 (82.359)	Prec@5 100.000 (94.960)
+ * Prec@1 82.324 Prec@5 95.117 Loss 0.703 Time 2.369
+Validating on test set after block reconstruction ...
+Test: [0/782]	Time 1.695 (1.695)	Loss 0.7582 (0.7582)	Prec@1 84.375 (84.375)	Prec@5 92.188 (92.188)
+Test: [10/782]	Time 0.078 (0.235)	Loss 0.5961 (0.8485)	Prec@1 85.938 (77.983)	Prec@5 95.312 (94.318)
+Test: [20/782]	Time 0.077 (0.159)	Loss 1.1036 (0.8842)	Prec@1 59.375 (77.455)	Prec@5 95.312 (94.122)
+Test: [30/782]	Time 0.076 (0.132)	Loss 1.0742 (1.0708)	Prec@1 71.875 (73.488)	Prec@5 90.625 (91.431)
+Test: [40/782]	Time 0.074 (0.119)	Loss 0.9286 (1.1430)	Prec@1 81.250 (71.608)	Prec@5 92.188 (90.625)
+Test: [50/782]	Time 0.081 (0.111)	Loss 1.3302 (1.2637)	Prec@1 64.062 (67.616)	Prec@5 92.188 (89.430)
+Test: [60/782]	Time 0.088 (0.105)	Loss 1.2855 (1.2564)	Prec@1 60.938 (66.752)	Prec@5 89.062 (89.703)
+Test: [70/782]	Time 0.074 (0.102)	Loss 0.4477 (1.2110)	Prec@1 87.500 (68.530)	Prec@5 95.312 (89.811)
+Test: [80/782]	Time 0.078 (0.099)	Loss 1.2392 (1.1574)	Prec@1 73.438 (69.927)	Prec@5 87.500 (90.316)
+Test: [90/782]	Time 0.078 (0.097)	Loss 1.0889 (1.1749)	Prec@1 64.062 (69.935)	Prec@5 96.875 (90.076)
+Test: [100/782]	Time 0.079 (0.095)	Loss 1.1658 (1.1802)	Prec@1 65.625 (69.771)	Prec@5 89.062 (90.053)
+Test: [110/782]	Time 0.078 (0.093)	Loss 0.8964 (1.1483)	Prec@1 78.125 (70.552)	Prec@5 92.188 (90.386)
+Test: [120/782]	Time 0.077 (0.092)	Loss 1.0763 (1.1347)	Prec@1 71.875 (70.971)	Prec@5 87.500 (90.418)
+Test: [130/782]	Time 0.075 (0.091)	Loss 1.6832 (1.1572)	Prec@1 40.625 (70.098)	Prec@5 87.500 (90.303)
+Test: [140/782]	Time 0.078 (0.090)	Loss 1.5080 (1.1636)	Prec@1 48.438 (69.648)	Prec@5 92.188 (90.337)
+Test: [150/782]	Time 0.073 (0.089)	Loss 1.9290 (1.1744)	Prec@1 51.562 (69.174)	Prec@5 75.000 (90.377)
+Test: [160/782]	Time 0.077 (0.088)	Loss 1.2329 (1.1924)	Prec@1 68.750 (68.527)	Prec@5 93.750 (90.266)
+Test: [170/782]	Time 0.076 (0.088)	Loss 0.6758 (1.1835)	Prec@1 84.375 (68.841)	Prec@5 98.438 (90.406)
+Test: [180/782]	Time 0.077 (0.087)	Loss 1.3131 (1.1954)	Prec@1 54.688 (68.603)	Prec@5 90.625 (90.401)
+Test: [190/782]	Time 0.079 (0.087)	Loss 0.8061 (1.2031)	Prec@1 79.688 (68.079)	Prec@5 96.875 (90.404)
+Test: [200/782]	Time 0.076 (0.086)	Loss 1.3236 (1.1988)	Prec@1 64.062 (68.027)	Prec@5 90.625 (90.586)
+Test: [210/782]	Time 0.076 (0.086)	Loss 1.0926 (1.1950)	Prec@1 76.562 (68.150)	Prec@5 95.312 (90.692)
+Test: [220/782]	Time 0.078 (0.085)	Loss 2.3633 (1.2008)	Prec@1 25.000 (67.951)	Prec@5 85.938 (90.710)
+Test: [230/782]	Time 0.075 (0.085)	Loss 0.9719 (1.1908)	Prec@1 71.875 (68.236)	Prec@5 96.875 (90.835)
+Test: [240/782]	Time 0.077 (0.085)	Loss 1.0193 (1.1968)	Prec@1 68.750 (68.050)	Prec@5 93.750 (90.761)
+Test: [250/782]	Time 0.073 (0.084)	Loss 0.9778 (1.1965)	Prec@1 73.438 (68.134)	Prec@5 92.188 (90.793)
+Test: [260/782]	Time 0.076 (0.084)	Loss 0.5234 (1.1825)	Prec@1 85.938 (68.558)	Prec@5 96.875 (90.924)
+Test: [270/782]	Time 0.079 (0.084)	Loss 1.5181 (1.1820)	Prec@1 59.375 (68.756)	Prec@5 87.500 (90.913)
+Test: [280/782]	Time 0.086 (0.084)	Loss 1.7408 (1.1868)	Prec@1 42.188 (68.572)	Prec@5 92.188 (90.909)
+Test: [290/782]	Time 0.073 (0.083)	Loss 1.5793 (1.1861)	Prec@1 56.250 (68.691)	Prec@5 87.500 (90.883)
+Test: [300/782]	Time 0.081 (0.083)	Loss 0.9359 (1.1887)	Prec@1 65.625 (68.620)	Prec@5 95.312 (90.838)
+Test: [310/782]	Time 0.076 (0.083)	Loss 0.8742 (1.1850)	Prec@1 75.000 (68.690)	Prec@5 95.312 (90.891)
+Test: [320/782]	Time 0.079 (0.083)	Loss 1.1887 (1.1960)	Prec@1 65.625 (68.414)	Prec@5 98.438 (90.756)
+Test: [330/782]	Time 0.076 (0.083)	Loss 1.8261 (1.2130)	Prec@1 57.812 (68.051)	Prec@5 82.812 (90.573)
+Test: [340/782]	Time 0.078 (0.083)	Loss 2.3240 (1.2253)	Prec@1 26.562 (67.765)	Prec@5 79.688 (90.414)
+Test: [350/782]	Time 0.084 (0.083)	Loss 1.1429 (1.2406)	Prec@1 71.875 (67.472)	Prec@5 95.312 (90.229)
+Test: [360/782]	Time 0.075 (0.082)	Loss 1.4059 (1.2493)	Prec@1 51.562 (67.309)	Prec@5 95.312 (90.080)
+Test: [370/782]	Time 0.074 (0.082)	Loss 1.5749 (1.2657)	Prec@1 56.250 (67.061)	Prec@5 87.500 (89.804)
+Test: [380/782]	Time 0.082 (0.082)	Loss 1.3647 (1.2766)	Prec@1 65.625 (66.753)	Prec@5 89.062 (89.653)
+Test: [390/782]	Time 0.079 (0.082)	Loss 2.4900 (1.2936)	Prec@1 48.438 (66.472)	Prec@5 70.312 (89.438)
+Test: [400/782]	Time 0.078 (0.082)	Loss 1.6695 (1.3117)	Prec@1 56.250 (66.073)	Prec@5 84.375 (89.195)
+Test: [410/782]	Time 0.074 (0.082)	Loss 1.2876 (1.3179)	Prec@1 70.312 (65.963)	Prec@5 90.625 (89.097)
+Test: [420/782]	Time 0.076 (0.082)	Loss 1.2286 (1.3209)	Prec@1 71.875 (65.981)	Prec@5 89.062 (89.081)
+Test: [430/782]	Time 0.070 (0.081)	Loss 1.4167 (1.3263)	Prec@1 64.062 (65.919)	Prec@5 89.062 (89.004)
+Test: [440/782]	Time 0.074 (0.081)	Loss 1.0985 (1.3296)	Prec@1 71.875 (65.940)	Prec@5 92.188 (88.914)
+Test: [450/782]	Time 0.070 (0.081)	Loss 0.7570 (1.3270)	Prec@1 84.375 (66.075)	Prec@5 93.750 (88.917)
+Test: [460/782]	Time 0.073 (0.081)	Loss 2.1146 (1.3356)	Prec@1 57.812 (65.957)	Prec@5 73.438 (88.788)
+Test: [470/782]	Time 0.071 (0.081)	Loss 1.9211 (1.3462)	Prec@1 50.000 (65.774)	Prec@5 87.500 (88.668)
+Test: [480/782]	Time 0.079 (0.081)	Loss 1.6153 (1.3467)	Prec@1 64.062 (65.849)	Prec@5 78.125 (88.598)
+Test: [490/782]	Time 0.071 (0.080)	Loss 0.9689 (1.3579)	Prec@1 75.000 (65.650)	Prec@5 90.625 (88.404)
+Test: [500/782]	Time 0.074 (0.080)	Loss 1.1553 (1.3644)	Prec@1 73.438 (65.447)	Prec@5 95.312 (88.358)
+Test: [510/782]	Time 0.074 (0.080)	Loss 2.5043 (1.3752)	Prec@1 53.125 (65.310)	Prec@5 67.188 (88.167)
+Test: [520/782]	Time 0.078 (0.080)	Loss 1.3145 (1.3815)	Prec@1 68.750 (65.115)	Prec@5 89.062 (88.100)
+Test: [530/782]	Time 0.073 (0.080)	Loss 1.8223 (1.3886)	Prec@1 65.625 (65.060)	Prec@5 76.562 (87.977)
+Test: [540/782]	Time 0.080 (0.080)	Loss 2.3117 (1.3930)	Prec@1 43.750 (64.978)	Prec@5 78.125 (87.896)
+Test: [550/782]	Time 0.077 (0.080)	Loss 1.0969 (1.3943)	Prec@1 71.875 (65.010)	Prec@5 89.062 (87.852)
+Test: [560/782]	Time 0.075 (0.080)	Loss 1.8198 (1.4019)	Prec@1 48.438 (64.856)	Prec@5 85.938 (87.776)
+Test: [570/782]	Time 0.072 (0.080)	Loss 1.8074 (1.4049)	Prec@1 56.250 (64.842)	Prec@5 81.250 (87.713)
+Test: [580/782]	Time 0.081 (0.080)	Loss 1.7976 (1.4135)	Prec@1 51.562 (64.662)	Prec@5 84.375 (87.586)
+Test: [590/782]	Time 0.081 (0.080)	Loss 0.9066 (1.4196)	Prec@1 79.688 (64.530)	Prec@5 95.312 (87.495)
+Test: [600/782]	Time 0.075 (0.080)	Loss 1.3596 (1.4242)	Prec@1 67.188 (64.484)	Prec@5 87.500 (87.414)
+Test: [610/782]	Time 0.074 (0.079)	Loss 0.8702 (1.4265)	Prec@1 82.812 (64.467)	Prec@5 96.875 (87.367)
+Test: [620/782]	Time 0.075 (0.079)	Loss 2.1608 (1.4334)	Prec@1 57.812 (64.364)	Prec@5 75.000 (87.258)
+Test: [630/782]	Time 0.077 (0.079)	Loss 1.6846 (1.4346)	Prec@1 67.188 (64.340)	Prec@5 82.812 (87.257)
+Test: [640/782]	Time 0.076 (0.079)	Loss 1.5195 (1.4387)	Prec@1 71.875 (64.231)	Prec@5 89.062 (87.217)
+Test: [650/782]	Time 0.071 (0.079)	Loss 0.9374 (1.4412)	Prec@1 82.812 (64.199)	Prec@5 89.062 (87.205)
+Test: [660/782]	Time 0.072 (0.079)	Loss 2.5831 (1.4536)	Prec@1 43.750 (63.942)	Prec@5 68.750 (87.013)
+Test: [670/782]	Time 0.074 (0.079)	Loss 1.7499 (1.4550)	Prec@1 62.500 (63.895)	Prec@5 79.688 (86.992)
+Test: [680/782]	Time 0.080 (0.079)	Loss 0.7168 (1.4570)	Prec@1 76.562 (63.872)	Prec@5 95.312 (86.965)
+Test: [690/782]	Time 0.073 (0.079)	Loss 1.6789 (1.4574)	Prec@1 56.250 (63.861)	Prec@5 84.375 (86.951)
+Test: [700/782]	Time 0.081 (0.079)	Loss 1.2884 (1.4598)	Prec@1 65.625 (63.815)	Prec@5 85.938 (86.920)
+Test: [710/782]	Time 0.070 (0.079)	Loss 2.0521 (1.4682)	Prec@1 39.062 (63.658)	Prec@5 81.250 (86.810)
+Test: [720/782]	Time 0.086 (0.079)	Loss 1.2495 (1.4651)	Prec@1 64.062 (63.727)	Prec@5 93.750 (86.869)
+Test: [730/782]	Time 0.070 (0.079)	Loss 1.6767 (1.4666)	Prec@1 64.062 (63.680)	Prec@5 82.812 (86.867)
+Test: [740/782]	Time 0.077 (0.079)	Loss 1.0213 (1.4600)	Prec@1 59.375 (63.803)	Prec@5 96.875 (86.950)
+Test: [750/782]	Time 0.077 (0.079)	Loss 2.9418 (1.4584)	Prec@1 34.375 (63.906)	Prec@5 71.875 (86.955)
+Test: [760/782]	Time 0.079 (0.079)	Loss 1.0770 (1.4634)	Prec@1 73.438 (63.843)	Prec@5 96.875 (86.876)
+Test: [770/782]	Time 0.076 (0.079)	Loss 0.1093 (1.4598)	Prec@1 100.000 (63.919)	Prec@5 100.000 (86.933)
+Test: [780/782]	Time 0.072 (0.079)	Loss 2.5592 (1.4532)	Prec@1 34.375 (64.077)	Prec@5 71.875 (87.004)
+ * Prec@1 64.066 Prec@5 86.994 Loss 1.454 Time 61.519
+2026-10-21 19:38:41 - finished the process.
