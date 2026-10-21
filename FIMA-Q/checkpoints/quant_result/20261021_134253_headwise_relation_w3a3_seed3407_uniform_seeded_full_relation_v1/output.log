@@ -1,0 +1,693 @@
+2026-10-21 13:42:53 - start the process.
+Experiment directory: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261021_134253_headwise_relation_w3a3_seed3407_uniform_seeded_full_relation_v1
+Namespace(model='vit_small', config='./configs/3bit/best.py', dataset='../imagenet_fimaq', optim_size=1024, val_batch_size=64, num_workers=8, device='cuda', calibrate=True, load_calibrate_checkpoint=None, test_calibrate_checkpoint=False, optimize=True, load_optimize_checkpoint=None, test_optimize_checkpoint=False, print_freq=10, seed=3407, skip_final_validation=False, headwise_hadamard=True, headwise_mode='all', qk_joint_variant='none', qk_joint_protocol='v2_integer_zp', qk_joint_steps=300, qk_joint_batch_size=8, qk_joint_holdout=128, qk_joint_lr=0.003, qk_joint_eval_every=50, attention_relation='uniform', relation_protocol='relation_v1', relation_weight=0.1, relation_queries=16, relation_start=0.2, relation_full=0.6, optim_metric='fisher_dplr', optim_mode='qdrop', drop_prob=0.5, p1=1.0, p2=1.0, dis_mode='q', calib_size=128, calib_batch_size=32, optim_batch_size=32, recon_iters=20000, k=5)
+Successfully imported Config class!
+optim_size: 1024
+calib_size: 128
+optim_batch_size: 32
+calib_batch_size: 32
+w_bit: 3
+a_bit: 3
+qconv_a_bit: 8
+qhead_a_bit: 3
+calib_metric: mse
+matmul_head_channel_wise: True
+token_channel_wise: True
+eq_n: 128
+search_round: 3
+keep_gpu: True
+optim_metric: fisher_dplr
+temp: 20
+k: 5
+p1: 1.0
+p2: 1.0
+dis_mode: q
+optim_mode: qdrop
+drop_prob: 0.5
+robust_beta: 0.5
+robust_temperature: 0.5
+recon_iters: 20000
+Python random seeded: 3407
+Building model ...
+No checkpoint found at './checkpoints/vit_raw/vit_small_patch16_224.bin'
+Loading pretrained weights from Hugging Face hub (timm/vit_small_patch16_224.augreg_in21k_ft_in1k)
+[timm/vit_small_patch16_224.augreg_in21k_ft_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+Applied head-wise Hadamard rotation: {'mode': 'all', 'blocks': 12, 'heads': 72, 'head_dims': [64], 'max_logit_abs_error': 2.9206275939941406e-06}
+Building validation dataloader ...
+Wraping quantiztion modules (reparam: True) ...
+2026-10-21 13:43:09 - start mse guided calibration
+Calibration cache: count=128 sample_sha256=05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6 tensor_sha256=4d822ba3ffa61432a9b41f34ff74ddabdb4733ec3f496b4c689a9b7f4c18cb8c
+2026-10-21 13:54:37 - mse guided calibration finished.
+Saving checkpoint to /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261021_134253_headwise_relation_w3a3_seed3407_uniform_seeded_full_relation_v1/vit_small_w3_a3_calibsize_128_mse.pth
+Validating after calibration ...
+Test: [0/782]	Time 1.254 (1.254)	Loss 4.6286 (4.6286)	Prec@1 15.625 (15.625)	Prec@5 26.562 (26.562)
+Test: [10/782]	Time 0.130 (0.259)	Loss 6.3640 (5.8695)	Prec@1 0.000 (5.682)	Prec@5 1.562 (13.920)
+Test: [20/782]	Time 0.142 (0.202)	Loss 4.7714 (5.9842)	Prec@1 10.938 (4.390)	Prec@5 28.125 (10.789)
+Test: [30/782]	Time 0.142 (0.179)	Loss 5.2350 (5.8104)	Prec@1 9.375 (5.696)	Prec@5 26.562 (13.810)
+Test: [40/782]	Time 0.078 (0.164)	Loss 7.5340 (5.7007)	Prec@1 1.562 (6.250)	Prec@5 1.562 (16.159)
+Test: [50/782]	Time 0.100 (0.150)	Loss 4.0290 (5.5969)	Prec@1 12.500 (6.281)	Prec@5 43.750 (17.402)
+Test: [60/782]	Time 0.100 (0.139)	Loss 4.9131 (5.6411)	Prec@1 10.938 (5.712)	Prec@5 23.438 (16.265)
+Test: [70/782]	Time 0.100 (0.134)	Loss 5.5284 (5.7884)	Prec@1 9.375 (5.216)	Prec@5 18.750 (14.789)
+Test: [80/782]	Time 0.159 (0.132)	Loss 6.7840 (5.8139)	Prec@1 0.000 (5.093)	Prec@5 1.562 (14.198)
+Test: [90/782]	Time 0.143 (0.132)	Loss 4.8346 (5.7625)	Prec@1 10.938 (5.048)	Prec@5 25.000 (14.475)
+Test: [100/782]	Time 0.128 (0.132)	Loss 5.2037 (5.7407)	Prec@1 4.688 (5.090)	Prec@5 17.188 (14.403)
+Test: [110/782]	Time 0.104 (0.132)	Loss 5.8241 (5.7035)	Prec@1 1.562 (5.180)	Prec@5 9.375 (14.682)
+Test: [120/782]	Time 0.141 (0.132)	Loss 6.5789 (5.7165)	Prec@1 0.000 (5.191)	Prec@5 1.562 (14.411)
+Test: [130/782]	Time 0.135 (0.133)	Loss 8.8572 (5.8366)	Prec@1 0.000 (4.854)	Prec@5 0.000 (13.430)
+Test: [140/782]	Time 0.129 (0.134)	Loss 6.2749 (5.9110)	Prec@1 0.000 (4.566)	Prec@5 3.125 (12.688)
+Test: [150/782]	Time 0.127 (0.134)	Loss 7.6262 (5.9804)	Prec@1 0.000 (4.284)	Prec@5 0.000 (12.014)
+Test: [160/782]	Time 0.117 (0.132)	Loss 7.1998 (6.0470)	Prec@1 0.000 (4.028)	Prec@5 1.562 (11.355)
+Test: [170/782]	Time 0.144 (0.133)	Loss 5.0654 (6.0862)	Prec@1 9.375 (3.874)	Prec@5 23.438 (10.956)
+Test: [180/782]	Time 0.121 (0.133)	Loss 5.5431 (6.1098)	Prec@1 0.000 (3.738)	Prec@5 7.812 (10.679)
+Test: [190/782]	Time 0.124 (0.132)	Loss 7.9294 (6.1565)	Prec@1 0.000 (3.616)	Prec@5 0.000 (10.308)
+Test: [200/782]	Time 0.153 (0.133)	Loss 7.0207 (6.1843)	Prec@1 0.000 (3.483)	Prec@5 0.000 (9.966)
+Test: [210/782]	Time 0.120 (0.133)	Loss 5.2723 (6.1943)	Prec@1 6.250 (3.399)	Prec@5 18.750 (9.775)
+Test: [220/782]	Time 0.154 (0.133)	Loss 6.7291 (6.1873)	Prec@1 0.000 (3.457)	Prec@5 0.000 (9.884)
+Test: [230/782]	Time 0.166 (0.134)	Loss 5.8288 (6.1564)	Prec@1 1.562 (3.598)	Prec@5 7.812 (10.268)
+Test: [240/782]	Time 0.149 (0.135)	Loss 6.7500 (6.1715)	Prec@1 0.000 (3.501)	Prec@5 0.000 (10.023)
+Test: [250/782]	Time 0.182 (0.136)	Loss 4.5586 (6.1281)	Prec@1 7.812 (3.629)	Prec@5 25.000 (10.464)
+Test: [260/782]	Time 0.121 (0.137)	Loss 6.1428 (6.1027)	Prec@1 0.000 (3.658)	Prec@5 0.000 (10.572)
+Test: [270/782]	Time 0.138 (0.137)	Loss 5.6891 (6.1019)	Prec@1 3.125 (3.690)	Prec@5 12.500 (10.672)
+Test: [280/782]	Time 0.131 (0.137)	Loss 6.4957 (6.1140)	Prec@1 0.000 (3.598)	Prec@5 0.000 (10.504)
+Test: [290/782]	Time 0.149 (0.137)	Loss 5.8577 (6.1108)	Prec@1 0.000 (3.598)	Prec@5 6.250 (10.454)
+Test: [300/782]	Time 0.137 (0.137)	Loss 6.2700 (6.1060)	Prec@1 1.562 (3.587)	Prec@5 3.125 (10.398)
+Test: [310/782]	Time 0.138 (0.138)	Loss 6.3970 (6.0819)	Prec@1 1.562 (3.668)	Prec@5 9.375 (10.747)
+Test: [320/782]	Time 0.137 (0.138)	Loss 6.0136 (6.0882)	Prec@1 6.250 (3.699)	Prec@5 17.188 (10.850)
+Test: [330/782]	Time 0.133 (0.138)	Loss 7.8333 (6.1161)	Prec@1 0.000 (3.611)	Prec@5 0.000 (10.617)
+Test: [340/782]	Time 0.137 (0.138)	Loss 6.4411 (6.1312)	Prec@1 1.562 (3.579)	Prec@5 6.250 (10.557)
+Test: [350/782]	Time 0.130 (0.137)	Loss 6.9818 (6.1380)	Prec@1 1.562 (3.597)	Prec@5 6.250 (10.541)
+Test: [360/782]	Time 0.142 (0.137)	Loss 6.5423 (6.1436)	Prec@1 4.688 (3.601)	Prec@5 10.938 (10.557)
+Test: [370/782]	Time 0.134 (0.137)	Loss 7.4333 (6.1650)	Prec@1 0.000 (3.525)	Prec@5 0.000 (10.373)
+Test: [380/782]	Time 0.137 (0.137)	Loss 6.7609 (6.1740)	Prec@1 0.000 (3.531)	Prec@5 0.000 (10.351)
+Test: [390/782]	Time 0.140 (0.137)	Loss 5.6461 (6.1852)	Prec@1 9.375 (3.589)	Prec@5 15.625 (10.378)
+Test: [400/782]	Time 0.134 (0.137)	Loss 7.1377 (6.2036)	Prec@1 0.000 (3.585)	Prec@5 0.000 (10.302)
+Test: [410/782]	Time 0.131 (0.137)	Loss 5.3796 (6.2287)	Prec@1 4.688 (3.528)	Prec@5 20.312 (10.143)
+Test: [420/782]	Time 0.146 (0.137)	Loss 5.4195 (6.2359)	Prec@1 3.125 (3.522)	Prec@5 14.062 (10.147)
+Test: [430/782]	Time 0.141 (0.137)	Loss 6.9493 (6.2569)	Prec@1 0.000 (3.473)	Prec@5 0.000 (10.006)
+Test: [440/782]	Time 0.135 (0.137)	Loss 6.7986 (6.2623)	Prec@1 1.562 (3.447)	Prec@5 1.562 (9.963)
+Test: [450/782]	Time 0.133 (0.137)	Loss 6.4242 (6.2706)	Prec@1 0.000 (3.492)	Prec@5 4.688 (10.037)
+Test: [460/782]	Time 0.126 (0.137)	Loss 8.8312 (6.2903)	Prec@1 0.000 (3.501)	Prec@5 0.000 (10.012)
+Test: [470/782]	Time 0.132 (0.137)	Loss 8.3881 (6.3112)	Prec@1 0.000 (3.470)	Prec@5 0.000 (9.889)
+Test: [480/782]	Time 0.128 (0.137)	Loss 7.0964 (6.3210)	Prec@1 1.562 (3.456)	Prec@5 1.562 (9.778)
+Test: [490/782]	Time 0.127 (0.136)	Loss 5.8734 (6.3381)	Prec@1 0.000 (3.392)	Prec@5 3.125 (9.642)
+Test: [500/782]	Time 0.131 (0.136)	Loss 6.7804 (6.3470)	Prec@1 0.000 (3.343)	Prec@5 1.562 (9.565)
+Test: [510/782]	Time 0.136 (0.136)	Loss 6.0587 (6.3536)	Prec@1 3.125 (3.345)	Prec@5 7.812 (9.549)
+Test: [520/782]	Time 0.143 (0.136)	Loss 6.4605 (6.3500)	Prec@1 0.000 (3.314)	Prec@5 1.562 (9.507)
+Test: [530/782]	Time 0.131 (0.136)	Loss 7.5782 (6.3619)	Prec@1 0.000 (3.293)	Prec@5 0.000 (9.443)
+Test: [540/782]	Time 0.129 (0.136)	Loss 8.1271 (6.3740)	Prec@1 0.000 (3.319)	Prec@5 3.125 (9.467)
+Test: [550/782]	Time 0.139 (0.136)	Loss 6.2799 (6.3808)	Prec@1 3.125 (3.287)	Prec@5 6.250 (9.386)
+Test: [560/782]	Time 0.129 (0.136)	Loss 4.5616 (6.3776)	Prec@1 14.062 (3.326)	Prec@5 34.375 (9.428)
+Test: [570/782]	Time 0.134 (0.136)	Loss 7.0178 (6.3839)	Prec@1 0.000 (3.306)	Prec@5 1.562 (9.372)
+Test: [580/782]	Time 0.126 (0.136)	Loss 5.5041 (6.3955)	Prec@1 6.250 (3.262)	Prec@5 21.875 (9.289)
+Test: [590/782]	Time 0.128 (0.136)	Loss 6.5780 (6.4075)	Prec@1 4.688 (3.236)	Prec@5 10.938 (9.198)
+Test: [600/782]	Time 0.130 (0.136)	Loss 7.8841 (6.4134)	Prec@1 0.000 (3.234)	Prec@5 0.000 (9.164)
+Test: [610/782]	Time 0.126 (0.136)	Loss 5.4592 (6.4159)	Prec@1 10.938 (3.268)	Prec@5 15.625 (9.183)
+Test: [620/782]	Time 0.133 (0.135)	Loss 6.8337 (6.4283)	Prec@1 0.000 (3.238)	Prec@5 1.562 (9.081)
+Test: [630/782]	Time 0.126 (0.135)	Loss 6.6761 (6.4274)	Prec@1 4.688 (3.298)	Prec@5 4.688 (9.194)
+Test: [640/782]	Time 0.135 (0.135)	Loss 6.8940 (6.4374)	Prec@1 3.125 (3.313)	Prec@5 4.688 (9.175)
+Test: [650/782]	Time 0.126 (0.135)	Loss 3.7269 (6.4455)	Prec@1 31.250 (3.331)	Prec@5 51.562 (9.202)
+Test: [660/782]	Time 0.137 (0.135)	Loss 7.4463 (6.4523)	Prec@1 0.000 (3.321)	Prec@5 0.000 (9.202)
+Test: [670/782]	Time 0.135 (0.135)	Loss 6.4693 (6.4562)	Prec@1 3.125 (3.302)	Prec@5 9.375 (9.193)
+Test: [680/782]	Time 0.143 (0.135)	Loss 4.8771 (6.4514)	Prec@1 12.500 (3.309)	Prec@5 34.375 (9.221)
+Test: [690/782]	Time 0.128 (0.135)	Loss 5.0776 (6.4475)	Prec@1 12.500 (3.362)	Prec@5 29.688 (9.303)
+Test: [700/782]	Time 0.124 (0.135)	Loss 6.8309 (6.4526)	Prec@1 1.562 (3.341)	Prec@5 3.125 (9.241)
+Test: [710/782]	Time 0.113 (0.135)	Loss 6.7411 (6.4578)	Prec@1 0.000 (3.332)	Prec@5 1.562 (9.212)
+Test: [720/782]	Time 0.149 (0.135)	Loss 5.4216 (6.4466)	Prec@1 4.688 (3.392)	Prec@5 20.312 (9.327)
+Test: [730/782]	Time 0.171 (0.136)	Loss 6.2293 (6.4423)	Prec@1 1.562 (3.373)	Prec@5 3.125 (9.279)
+Test: [740/782]	Time 0.182 (0.136)	Loss 4.7611 (6.4174)	Prec@1 10.938 (3.528)	Prec@5 29.688 (9.609)
+Test: [750/782]	Time 0.176 (0.136)	Loss 7.8841 (6.4100)	Prec@1 0.000 (3.539)	Prec@5 0.000 (9.629)
+Test: [760/782]	Time 0.120 (0.136)	Loss 3.3248 (6.4031)	Prec@1 46.875 (3.647)	Prec@5 70.312 (9.806)
+Test: [770/782]	Time 0.126 (0.136)	Loss 4.6521 (6.3778)	Prec@1 14.062 (3.851)	Prec@5 23.438 (10.190)
+Test: [780/782]	Time 0.126 (0.136)	Loss 6.8067 (6.3754)	Prec@1 1.562 (3.859)	Prec@5 1.562 (10.165)
+ * Prec@1 3.858 Prec@5 10.162 Loss 6.376 Time 106.138
+Building calibrator ...
+Calibration cache: count=1024 sample_sha256=51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b tensor_sha256=65a35d17aee6c729c0ac21d93b467f9fba2c3b14e80425926b91270caf5a25c5
+2026-10-21 13:56:58 - start fisher_dplr guided block reconstruction
+reconstructing patch_embed ...
+initializing raw input and raw output ...
+adaround training for patch_embed ...
+finished reconstructing patch_embed.
+reconstructing blocks.0 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.0", "protocol": "relation_v1", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "uniform", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.0 ...
+Attention relation loss: {"block": "blocks.0", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.16464808583259583, "auxiliary": 0.006167078390717506, "rec_loss": 2.0769994258880615}
+Attention relation loss: {"block": "blocks.0", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.14506462216377258, "auxiliary": 0.010867116041481495, "rec_loss": 2.02677059173584}
+Attention relation loss: {"block": "blocks.0", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.13135668635368347, "auxiliary": 0.014760334976017475, "rec_loss": 1.8638169765472412}
+Attention relation loss: {"block": "blocks.0", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.12168862670660019, "auxiliary": 0.018231933936476707, "rec_loss": 1.9841623306274414}
+Attention relation loss: {"block": "blocks.0", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.11056184768676758, "auxiliary": 0.020706089213490486, "rec_loss": 2.0110247135162354}
+Attention relation loss: {"block": "blocks.0", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.10158537328243256, "auxiliary": 0.022829964756965637, "rec_loss": 1.889296293258667}
+Attention relation loss: {"block": "blocks.0", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.0887330025434494, "auxiliary": 0.023265155032277107, "rec_loss": 2.1743860244750977}
+Attention relation loss: {"block": "blocks.0", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.0862254947423935, "auxiliary": 0.025837380439043045, "rec_loss": 1.8751850128173828}
+Attention relation loss: {"block": "blocks.0", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.06905782222747803, "auxiliary": 0.044135455042123795, "rec_loss": 1.9338297843933105}
+Attention relation loss: {"block": "blocks.0", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.05750521272420883, "auxiliary": 0.04083564877510071, "rec_loss": 1.9615435600280762}
+Attention relation loss: {"block": "blocks.0", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.06000865623354912, "auxiliary": 0.04687473550438881, "rec_loss": 1.9627633094787598}
+Attention relation loss: {"block": "blocks.0", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.05652906745672226, "auxiliary": 0.04817096143960953, "rec_loss": 1.8359156847000122}
+Attention relation loss: {"block": "blocks.0", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.04958611726760864, "auxiliary": 0.045775771141052246, "rec_loss": 2.1575679779052734}
+Attention relation loss: {"block": "blocks.0", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.050333864986896515, "auxiliary": 0.05004037544131279, "rec_loss": 2.0938920974731445}
+Attention relation loss: {"block": "blocks.0", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.04881712794303894, "auxiliary": 0.051999084651470184, "rec_loss": 2.0563440322875977}
+Attention relation loss: {"block": "blocks.0", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.04727277159690857, "auxiliary": 0.05371100455522537, "rec_loss": 2.0631442070007324}
+Attention relation loss: {"block": "blocks.0", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.04038333520293236, "auxiliary": 0.09029370546340942, "rec_loss": 2.12601900100708}
+Attention relation loss: {"block": "blocks.0", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.03910989686846733, "auxiliary": 0.08744640648365021, "rec_loss": 1.8030097484588623}
+Attention relation loss: {"block": "blocks.0", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.03765817731618881, "auxiliary": 0.08420048654079437, "rec_loss": 1.9227747917175293}
+Attention relation loss: {"block": "blocks.0", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.04099541902542114, "auxiliary": 0.09166227281093597, "rec_loss": 1.8764922618865967}
+Attention relation loss: {"block": "blocks.0", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.03765682131052017, "auxiliary": 0.08419745415449142, "rec_loss": 1.984447717666626}
+Attention relation loss: {"block": "blocks.0", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.03749104589223862, "auxiliary": 0.08382679522037506, "rec_loss": 2.1053380966186523}
+Attention relation loss: {"block": "blocks.0", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.03764919191598892, "auxiliary": 0.08418039232492447, "rec_loss": 2.2299275398254395}
+Attention relation loss: {"block": "blocks.0", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.03781987726688385, "auxiliary": 0.0845620259642601, "rec_loss": 2.3038954734802246}
+Attention relation loss: {"block": "blocks.0", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.03667757660150528, "auxiliary": 0.0977265015244484, "rec_loss": 1.9530155658721924}
+Attention relation loss: {"block": "blocks.0", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.03830071911215782, "auxiliary": 0.10205133259296417, "rec_loss": 1.9451968669891357}
+Attention relation loss: {"block": "blocks.0", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.03536380082368851, "auxiliary": 0.09422598034143448, "rec_loss": 1.8986179828643799}
+Attention relation loss: {"block": "blocks.0", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.037638574838638306, "auxiliary": 0.1002870574593544, "rec_loss": 1.9800403118133545}
+Attention relation loss: {"block": "blocks.0", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.03754133731126785, "auxiliary": 0.10002797096967697, "rec_loss": 1.8971210718154907}
+Attention relation loss: {"block": "blocks.0", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.040329255163669586, "auxiliary": 0.10745631903409958, "rec_loss": 1.9612698554992676}
+Attention relation loss: {"block": "blocks.0", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.037077710032463074, "auxiliary": 0.0987926498055458, "rec_loss": 2.0616307258605957}
+Attention relation loss: {"block": "blocks.0", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.0362163707613945, "auxiliary": 0.09649763256311417, "rec_loss": 1.8480260372161865}
+Attention relation result: {"active_steps": 16000, "block": "blocks.0", "cache_bytes": 38731776, "first_training_kl": 0.16686192154884338, "gradient_refreshes": 0, "last_auxiliary": 0.09649763256311417, "last_training_kl": 0.0362163707613945, "mode": "uniform", "protocol": "relation_v1", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.0, "weight_min": 1.0}
+finished reconstructing blocks.0.
+reconstructing blocks.1 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.1", "protocol": "relation_v1", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "uniform", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.1 ...
+Attention relation loss: {"block": "blocks.1", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.17736457288265228, "auxiliary": 0.006302850786596537, "rec_loss": 1.991731882095337}
+Attention relation loss: {"block": "blocks.1", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.1533728539943695, "auxiliary": 0.010900556109845638, "rec_loss": 1.993044376373291}
+Attention relation loss: {"block": "blocks.1", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.14608927071094513, "auxiliary": 0.015574343502521515, "rec_loss": 2.045095205307007}
+Attention relation loss: {"block": "blocks.1", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.13853660225868225, "auxiliary": 0.01969221979379654, "rec_loss": 2.0224835872650146}
+Attention relation loss: {"block": "blocks.1", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.12655870616436005, "auxiliary": 0.022487033158540726, "rec_loss": 1.9996638298034668}
+Attention relation loss: {"block": "blocks.1", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.11472187936306, "auxiliary": 0.024460632354021072, "rec_loss": 1.9178268909454346}
+Attention relation loss: {"block": "blocks.1", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.11502198874950409, "auxiliary": 0.028612054884433746, "rec_loss": 2.0315752029418945}
+Attention relation loss: {"block": "blocks.1", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.11505386233329773, "auxiliary": 0.0327085517346859, "rec_loss": 2.0110583305358887}
+Attention relation loss: {"block": "blocks.1", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.10479386150836945, "auxiliary": 0.05216920003294945, "rec_loss": 1.8612614870071411}
+Attention relation loss: {"block": "blocks.1", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.09827970713376999, "auxiliary": 0.05436253175139427, "rec_loss": 1.988861083984375}
+Attention relation loss: {"block": "blocks.1", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.0935024544596672, "auxiliary": 0.056892044842243195, "rec_loss": 1.9190239906311035}
+Attention relation loss: {"block": "blocks.1", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.0945746898651123, "auxiliary": 0.06277576833963394, "rec_loss": 1.9957325458526611}
+Attention relation loss: {"block": "blocks.1", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.09089580178260803, "auxiliary": 0.06536164879798889, "rec_loss": 1.9090337753295898}
+Attention relation loss: {"block": "blocks.1", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.0955328568816185, "auxiliary": 0.07398039102554321, "rec_loss": 2.084026575088501}
+Attention relation loss: {"block": "blocks.1", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.09199193120002747, "auxiliary": 0.07632675766944885, "rec_loss": 1.9866523742675781}
+Attention relation loss: {"block": "blocks.1", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.08774061501026154, "auxiliary": 0.07765268534421921, "rec_loss": 2.0295298099517822}
+Attention relation loss: {"block": "blocks.1", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.09002216905355453, "auxiliary": 0.10192950814962387, "rec_loss": 2.0469558238983154}
+Attention relation loss: {"block": "blocks.1", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.08466781675815582, "auxiliary": 0.09586693346500397, "rec_loss": 2.088944911956787}
+Attention relation loss: {"block": "blocks.1", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.08430956304073334, "auxiliary": 0.09546129405498505, "rec_loss": 1.974287748336792}
+Attention relation loss: {"block": "blocks.1", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.08431290090084076, "auxiliary": 0.09546507149934769, "rec_loss": 1.9791302680969238}
+Attention relation loss: {"block": "blocks.1", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.08382706344127655, "auxiliary": 0.09491496533155441, "rec_loss": 1.9893085956573486}
+Attention relation loss: {"block": "blocks.1", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.08541406691074371, "auxiliary": 0.0967118889093399, "rec_loss": 2.001802444458008}
+Attention relation loss: {"block": "blocks.1", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.08246037364006042, "auxiliary": 0.09336750954389572, "rec_loss": 2.071035861968994}
+Attention relation loss: {"block": "blocks.1", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.08094854652881622, "auxiliary": 0.09165570884943008, "rec_loss": 2.0867342948913574}
+Attention relation loss: {"block": "blocks.1", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.08698534220457077, "auxiliary": 0.10077740997076035, "rec_loss": 2.029599666595459}
+Attention relation loss: {"block": "blocks.1", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.08466213941574097, "auxiliary": 0.09808585792779922, "rec_loss": 1.9594916105270386}
+Attention relation loss: {"block": "blocks.1", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.08739855885505676, "auxiliary": 0.10125615447759628, "rec_loss": 2.1363937854766846}
+Attention relation loss: {"block": "blocks.1", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.0858374685049057, "auxiliary": 0.09944754093885422, "rec_loss": 2.0163803100585938}
+Attention relation loss: {"block": "blocks.1", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.08777680993080139, "auxiliary": 0.10169438272714615, "rec_loss": 2.0345394611358643}
+Attention relation loss: {"block": "blocks.1", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.08581613004207611, "auxiliary": 0.09942281991243362, "rec_loss": 2.0083861351013184}
+Attention relation loss: {"block": "blocks.1", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.08565239608287811, "auxiliary": 0.09923312067985535, "rec_loss": 2.0543015003204346}
+Attention relation loss: {"block": "blocks.1", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.08758032321929932, "auxiliary": 0.10146673768758774, "rec_loss": 2.0580344200134277}
+Attention relation result: {"active_steps": 16000, "block": "blocks.1", "cache_bytes": 38731776, "first_training_kl": 0.17587733268737793, "gradient_refreshes": 0, "last_auxiliary": 0.10146673768758774, "last_training_kl": 0.08758032321929932, "mode": "uniform", "protocol": "relation_v1", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.0, "weight_min": 1.0}
+finished reconstructing blocks.1.
+reconstructing blocks.2 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.2", "protocol": "relation_v1", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "uniform", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.2 ...
+Attention relation loss: {"block": "blocks.2", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.1440565586090088, "auxiliary": 0.0061118523590266705, "rec_loss": 2.10854172706604}
+Attention relation loss: {"block": "blocks.2", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.13534973561763763, "auxiliary": 0.011484900489449501, "rec_loss": 2.0110387802124023}
+Attention relation loss: {"block": "blocks.2", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.12417475879192352, "auxiliary": 0.015804998576641083, "rec_loss": 2.057068109512329}
+Attention relation loss: {"block": "blocks.2", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.12203915417194366, "auxiliary": 0.0207109022885561, "rec_loss": 2.1404993534088135}
+Attention relation loss: {"block": "blocks.2", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.11146434396505356, "auxiliary": 0.023645352572202682, "rec_loss": 1.9974427223205566}
+Attention relation loss: {"block": "blocks.2", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.10848355293273926, "auxiliary": 0.027615630999207497, "rec_loss": 2.0552549362182617}
+Attention relation loss: {"block": "blocks.2", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.10580490529537201, "auxiliary": 0.03142271190881729, "rec_loss": 1.9880331754684448}
+Attention relation loss: {"block": "blocks.2", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.1082233339548111, "auxiliary": 0.036732520908117294, "rec_loss": 2.1173839569091797}
+Attention relation loss: {"block": "blocks.2", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.09803029149770737, "auxiliary": 0.05422065779566765, "rec_loss": 2.003819465637207}
+Attention relation loss: {"block": "blocks.2", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.09627142548561096, "auxiliary": 0.05916425213217735, "rec_loss": 2.011826515197754}
+Attention relation loss: {"block": "blocks.2", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.0969170555472374, "auxiliary": 0.0655171349644661, "rec_loss": 2.0133609771728516}
+Attention relation loss: {"block": "blocks.2", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.09369798749685287, "auxiliary": 0.06909927725791931, "rec_loss": 2.032834053039551}
+Attention relation loss: {"block": "blocks.2", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.09491746872663498, "auxiliary": 0.0758318230509758, "rec_loss": 2.0681352615356445}
+Attention relation loss: {"block": "blocks.2", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.09154769033193588, "auxiliary": 0.07876574993133545, "rec_loss": 2.0135750770568848}
+Attention relation loss: {"block": "blocks.2", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.09213411808013916, "auxiliary": 0.08493246883153915, "rec_loss": 2.053316831588745}
+Attention relation loss: {"block": "blocks.2", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.08780060708522797, "auxiliary": 0.08633353561162949, "rec_loss": 1.9967668056488037}
+Attention relation loss: {"block": "blocks.2", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.08641400188207626, "auxiliary": 0.0970810055732727, "rec_loss": 1.9374721050262451}
+Attention relation loss: {"block": "blocks.2", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.09330077469348907, "auxiliary": 0.10481788963079453, "rec_loss": 2.015239715576172}
+Attention relation loss: {"block": "blocks.2", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.08968483656644821, "auxiliary": 0.10075559467077255, "rec_loss": 1.957350254058838}
+Attention relation loss: {"block": "blocks.2", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.08891326189041138, "auxiliary": 0.09988877922296524, "rec_loss": 1.9789602756500244}
+Attention relation loss: {"block": "blocks.2", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.09131640195846558, "auxiliary": 0.10258855670690536, "rec_loss": 2.0514068603515625}
+Attention relation loss: {"block": "blocks.2", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.08857673406600952, "auxiliary": 0.09951070696115494, "rec_loss": 2.0029966831207275}
+Attention relation loss: {"block": "blocks.2", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.09072309732437134, "auxiliary": 0.10192202776670456, "rec_loss": 2.0218489170074463}
+Attention relation loss: {"block": "blocks.2", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.0881759375333786, "auxiliary": 0.09906043857336044, "rec_loss": 2.0310466289520264}
+Attention relation loss: {"block": "blocks.2", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.09337764233350754, "auxiliary": 0.10577050596475601, "rec_loss": 2.1493678092956543}
+Attention relation loss: {"block": "blocks.2", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.09331224858760834, "auxiliary": 0.1056964322924614, "rec_loss": 2.152658462524414}
+Attention relation loss: {"block": "blocks.2", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.09077337384223938, "auxiliary": 0.10282059758901596, "rec_loss": 2.0471351146698}
+Attention relation loss: {"block": "blocks.2", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.093382827937603, "auxiliary": 0.10577636957168579, "rec_loss": 2.0788774490356445}
+Attention relation loss: {"block": "blocks.2", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.0912545770406723, "auxiliary": 0.10336567461490631, "rec_loss": 2.034986972808838}
+Attention relation loss: {"block": "blocks.2", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.09309979528188705, "auxiliary": 0.10545577853918076, "rec_loss": 2.080024003982544}
+Attention relation loss: {"block": "blocks.2", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.09175726771354675, "auxiliary": 0.10393507778644562, "rec_loss": 2.1392173767089844}
+Attention relation loss: {"block": "blocks.2", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.09569151699542999, "auxiliary": 0.10839146375656128, "rec_loss": 2.1473116874694824}
+Attention relation result: {"active_steps": 16000, "block": "blocks.2", "cache_bytes": 38731776, "first_training_kl": 0.1473127007484436, "gradient_refreshes": 0, "last_auxiliary": 0.10839146375656128, "last_training_kl": 0.09569151699542999, "mode": "uniform", "protocol": "relation_v1", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.0, "weight_min": 1.0}
+finished reconstructing blocks.2.
+reconstructing blocks.3 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.3", "protocol": "relation_v1", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "uniform", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.3 ...
+Attention relation loss: {"block": "blocks.3", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.18518167734146118, "auxiliary": 0.00654331361874938, "rec_loss": 2.0435070991516113}
+Attention relation loss: {"block": "blocks.3", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.1624472439289093, "auxiliary": 0.011480005457997322, "rec_loss": 2.0582218170166016}
+Attention relation loss: {"block": "blocks.3", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.1486477106809616, "auxiliary": 0.015757206827402115, "rec_loss": 2.0292787551879883}
+Attention relation loss: {"block": "blocks.3", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.139798104763031, "auxiliary": 0.01975882053375244, "rec_loss": 2.0524802207946777}
+Attention relation loss: {"block": "blocks.3", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.12807714939117432, "auxiliary": 0.022627752274274826, "rec_loss": 1.9352025985717773}
+Attention relation loss: {"block": "blocks.3", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.12577706575393677, "auxiliary": 0.026665668934583664, "rec_loss": 2.073578119277954}
+Attention relation loss: {"block": "blocks.3", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.11910045146942139, "auxiliary": 0.029458537697792053, "rec_loss": 1.980334997177124}
+Attention relation loss: {"block": "blocks.3", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.11492639780044556, "auxiliary": 0.032486993819475174, "rec_loss": 1.9776924848556519}
+Attention relation loss: {"block": "blocks.3", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.10560014098882675, "auxiliary": 0.05210846662521362, "rec_loss": 2.027954578399658}
+Attention relation loss: {"block": "blocks.3", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.10773700475692749, "auxiliary": 0.05906989425420761, "rec_loss": 2.009680986404419}
+Attention relation loss: {"block": "blocks.3", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.100389763712883, "auxiliary": 0.06054571643471718, "rec_loss": 1.8881351947784424}
+Attention relation loss: {"block": "blocks.3", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.10207498073577881, "auxiliary": 0.06715863943099976, "rec_loss": 1.932384729385376}
+Attention relation loss: {"block": "blocks.3", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.10392862558364868, "auxiliary": 0.07407639175653458, "rec_loss": 2.0632760524749756}
+Attention relation loss: {"block": "blocks.3", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.09997528046369553, "auxiliary": 0.07674003392457962, "rec_loss": 2.012794256210327}
+Attention relation loss: {"block": "blocks.3", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.09819736331701279, "auxiliary": 0.08075927197933197, "rec_loss": 2.0033516883850098}
+Attention relation loss: {"block": "blocks.3", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.10183566808700562, "auxiliary": 0.08933491259813309, "rec_loss": 2.050865888595581}
+Attention relation loss: {"block": "blocks.3", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.09070171415805817, "auxiliary": 0.09175615012645721, "rec_loss": 1.9378697872161865}
+Attention relation loss: {"block": "blocks.3", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.09614744037389755, "auxiliary": 0.09726518392562866, "rec_loss": 1.9609776735305786}
+Attention relation loss: {"block": "blocks.3", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.0973367914557457, "auxiliary": 0.0984683558344841, "rec_loss": 1.9198684692382812}
+Attention relation loss: {"block": "blocks.3", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.09664061665534973, "auxiliary": 0.09776409715414047, "rec_loss": 1.9444091320037842}
+Attention relation loss: {"block": "blocks.3", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.09714013338088989, "auxiliary": 0.09826941788196564, "rec_loss": 1.9505655765533447}
+Attention relation loss: {"block": "blocks.3", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.09176898002624512, "auxiliary": 0.09283582121133804, "rec_loss": 1.933212399482727}
+Attention relation loss: {"block": "blocks.3", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.0994623526930809, "auxiliary": 0.1006186231970787, "rec_loss": 2.017843723297119}
+Attention relation loss: {"block": "blocks.3", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.09660004079341888, "auxiliary": 0.09772304445505142, "rec_loss": 2.006671905517578}
+Attention relation loss: {"block": "blocks.3", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.10090538114309311, "auxiliary": 0.10230373591184616, "rec_loss": 1.9851502180099487}
+Attention relation loss: {"block": "blocks.3", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.09912942349910736, "auxiliary": 0.10050316900014877, "rec_loss": 2.0399723052978516}
+Attention relation loss: {"block": "blocks.3", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.09456252306699753, "auxiliary": 0.09587298333644867, "rec_loss": 1.968794822692871}
+Attention relation loss: {"block": "blocks.3", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.09683036059141159, "auxiliary": 0.09817224740982056, "rec_loss": 2.036166191101074}
+Attention relation loss: {"block": "blocks.3", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.10066208243370056, "auxiliary": 0.1020570620894432, "rec_loss": 2.0578298568725586}
+Attention relation loss: {"block": "blocks.3", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.09967043250799179, "auxiliary": 0.1010516807436943, "rec_loss": 2.0317156314849854}
+Attention relation loss: {"block": "blocks.3", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.10108223557472229, "auxiliary": 0.10248304903507233, "rec_loss": 2.0176639556884766}
+Attention relation loss: {"block": "blocks.3", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.10070878267288208, "auxiliary": 0.10210441797971725, "rec_loss": 2.0347061157226562}
+Attention relation result: {"active_steps": 16000, "block": "blocks.3", "cache_bytes": 38731776, "first_training_kl": 0.1768806278705597, "gradient_refreshes": 0, "last_auxiliary": 0.10210441797971725, "last_training_kl": 0.10070878267288208, "mode": "uniform", "protocol": "relation_v1", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.0, "weight_min": 1.0}
+finished reconstructing blocks.3.
+reconstructing blocks.4 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.4", "protocol": "relation_v1", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "uniform", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.4 ...
+Attention relation loss: {"block": "blocks.4", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.18680521845817566, "auxiliary": 0.006274184677749872, "rec_loss": 1.9505479335784912}
+Attention relation loss: {"block": "blocks.4", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.16516520082950592, "auxiliary": 0.011094733141362667, "rec_loss": 1.9975759983062744}
+Attention relation loss: {"block": "blocks.4", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.15732455253601074, "auxiliary": 0.015852073207497597, "rec_loss": 1.9559322595596313}
+Attention relation loss: {"block": "blocks.4", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.15030847489833832, "auxiliary": 0.02019350789487362, "rec_loss": 1.9143438339233398}
+Attention relation loss: {"block": "blocks.4", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.14632879197597504, "auxiliary": 0.024573560804128647, "rec_loss": 1.8977248668670654}
+Attention relation loss: {"block": "blocks.4", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.13819128274917603, "auxiliary": 0.027848398312926292, "rec_loss": 1.9216301441192627}
+Attention relation loss: {"block": "blocks.4", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.13048651814460754, "auxiliary": 0.030678346753120422, "rec_loss": 1.8868378400802612}
+Attention relation loss: {"block": "blocks.4", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.13342392444610596, "auxiliary": 0.03585023805499077, "rec_loss": 1.9218984842300415}
+Attention relation loss: {"block": "blocks.4", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.129319429397583, "auxiliary": 0.05586521700024605, "rec_loss": 2.022636651992798}
+Attention relation loss: {"block": "blocks.4", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.11901138722896576, "auxiliary": 0.05712467059493065, "rec_loss": 1.9763559103012085}
+Attention relation loss: {"block": "blocks.4", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.12394283711910248, "auxiliary": 0.06544090807437897, "rec_loss": 2.0418710708618164}
+Attention relation loss: {"block": "blocks.4", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.11821846663951874, "auxiliary": 0.06809289008378983, "rec_loss": 2.0148348808288574}
+Attention relation loss: {"block": "blocks.4", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.11625073850154877, "auxiliary": 0.07253944873809814, "rec_loss": 2.02850079536438}
+Attention relation loss: {"block": "blocks.4", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.11688794940710068, "auxiliary": 0.07854760438203812, "rec_loss": 2.0360300540924072}
+Attention relation loss: {"block": "blocks.4", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.11713554710149765, "auxiliary": 0.08433641493320465, "rec_loss": 1.9684841632843018}
+Attention relation loss: {"block": "blocks.4", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.11989519000053406, "auxiliary": 0.09207823127508163, "rec_loss": 2.044041395187378}
+Attention relation loss: {"block": "blocks.4", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.11785893142223358, "auxiliary": 0.09618248790502548, "rec_loss": 1.9964673519134521}
+Attention relation loss: {"block": "blocks.4", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.11806386709213257, "auxiliary": 0.09634973108768463, "rec_loss": 2.0032706260681152}
+Attention relation loss: {"block": "blocks.4", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.1171504408121109, "auxiliary": 0.0956043004989624, "rec_loss": 2.006686210632324}
+Attention relation loss: {"block": "blocks.4", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.11659848690032959, "auxiliary": 0.09515386074781418, "rec_loss": 2.0819625854492188}
+Attention relation loss: {"block": "blocks.4", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.11742013692855835, "auxiliary": 0.09582439064979553, "rec_loss": 2.0450258255004883}
+Attention relation loss: {"block": "blocks.4", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.11789649724960327, "auxiliary": 0.09621313959360123, "rec_loss": 2.0528712272644043}
+Attention relation loss: {"block": "blocks.4", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.11506806313991547, "auxiliary": 0.09390490502119064, "rec_loss": 2.0171897411346436}
+Attention relation loss: {"block": "blocks.4", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.12139260768890381, "auxiliary": 0.09906625002622604, "rec_loss": 2.0113096237182617}
+Attention relation loss: {"block": "blocks.4", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.11550816893577576, "auxiliary": 0.10068177431821823, "rec_loss": 2.039611577987671}
+Attention relation loss: {"block": "blocks.4", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.11942780017852783, "auxiliary": 0.10409828275442123, "rec_loss": 2.050544261932373}
+Attention relation loss: {"block": "blocks.4", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.11504088342189789, "auxiliary": 0.100274458527565, "rec_loss": 2.0881035327911377}
+Attention relation loss: {"block": "blocks.4", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.11833449453115463, "auxiliary": 0.10314531624317169, "rec_loss": 2.0914974212646484}
+Attention relation loss: {"block": "blocks.4", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.1222095936536789, "auxiliary": 0.10652301460504532, "rec_loss": 2.058530330657959}
+Attention relation loss: {"block": "blocks.4", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.1188846156001091, "auxiliary": 0.10362482070922852, "rec_loss": 2.075165271759033}
+Attention relation loss: {"block": "blocks.4", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.11946498602628708, "auxiliary": 0.10413070023059845, "rec_loss": 2.1002964973449707}
+Attention relation loss: {"block": "blocks.4", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.12069843709468842, "auxiliary": 0.10520582646131516, "rec_loss": 2.0637519359588623}
+Attention relation result: {"active_steps": 16000, "block": "blocks.4", "cache_bytes": 38731776, "first_training_kl": 0.18608514964580536, "gradient_refreshes": 0, "last_auxiliary": 0.10520582646131516, "last_training_kl": 0.12069843709468842, "mode": "uniform", "protocol": "relation_v1", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.0, "weight_min": 1.0}
+finished reconstructing blocks.4.
+reconstructing blocks.5 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.5", "protocol": "relation_v1", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "uniform", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.5 ...
+Attention relation loss: {"block": "blocks.5", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.19918066263198853, "auxiliary": 0.006826598197221756, "rec_loss": 2.011645555496216}
+Attention relation loss: {"block": "blocks.5", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.19312915205955505, "auxiliary": 0.013238384388387203, "rec_loss": 2.006707191467285}
+Attention relation loss: {"block": "blocks.5", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.1808030605316162, "auxiliary": 0.018590206280350685, "rec_loss": 1.9695439338684082}
+Attention relation loss: {"block": "blocks.5", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.17021185159683228, "auxiliary": 0.02333495393395424, "rec_loss": 1.9751605987548828}
+Attention relation loss: {"block": "blocks.5", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.16209766268730164, "auxiliary": 0.02777818776667118, "rec_loss": 1.9164910316467285}
+Attention relation loss: {"block": "blocks.5", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.16447845101356506, "auxiliary": 0.033823411911726, "rec_loss": 2.0281872749328613}
+Attention relation loss: {"block": "blocks.5", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.15756681561470032, "auxiliary": 0.037802450358867645, "rec_loss": 1.8963981866836548}
+Attention relation loss: {"block": "blocks.5", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.1657922863960266, "auxiliary": 0.0454581193625927, "rec_loss": 2.0210046768188477}
+Attention relation loss: {"block": "blocks.5", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.16443032026290894, "auxiliary": 0.05963311716914177, "rec_loss": 2.1589109897613525}
+Attention relation loss: {"block": "blocks.5", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.14924980700016022, "auxiliary": 0.06014186143875122, "rec_loss": 1.996981143951416}
+Attention relation loss: {"block": "blocks.5", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.15599337220191956, "auxiliary": 0.06914518028497696, "rec_loss": 2.031088352203369}
+Attention relation loss: {"block": "blocks.5", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.15616294741630554, "auxiliary": 0.07551310956478119, "rec_loss": 2.079728603363037}
+Attention relation loss: {"block": "blocks.5", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.14793317019939423, "auxiliary": 0.07749469578266144, "rec_loss": 2.0026934146881104}
+Attention relation loss: {"block": "blocks.5", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.15219536423683167, "auxiliary": 0.08586032688617706, "rec_loss": 2.033759832382202}
+Attention relation loss: {"block": "blocks.5", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.149391770362854, "auxiliary": 0.0902986004948616, "rec_loss": 2.0398688316345215}
+Attention relation loss: {"block": "blocks.5", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.1492445170879364, "auxiliary": 0.09622356295585632, "rec_loss": 2.0063939094543457}
+Attention relation loss: {"block": "blocks.5", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.14201563596725464, "auxiliary": 0.0987151563167572, "rec_loss": 1.9727356433868408}
+Attention relation loss: {"block": "blocks.5", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.15285435318946838, "auxiliary": 0.10624915361404419, "rec_loss": 1.9123914241790771}
+Attention relation loss: {"block": "blocks.5", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.14853744208812714, "auxiliary": 0.1032484695315361, "rec_loss": 2.027165174484253}
+Attention relation loss: {"block": "blocks.5", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.1476527601480484, "auxiliary": 0.1026335284113884, "rec_loss": 1.9807968139648438}
+Attention relation loss: {"block": "blocks.5", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.14531159400939941, "auxiliary": 0.1010061725974083, "rec_loss": 1.9603005647659302}
+Attention relation loss: {"block": "blocks.5", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.14033930003643036, "auxiliary": 0.0975499376654625, "rec_loss": 1.971935510635376}
+Attention relation loss: {"block": "blocks.5", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.15104293823242188, "auxiliary": 0.10499004274606705, "rec_loss": 2.032149314880371}
+Attention relation loss: {"block": "blocks.5", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.14013488590717316, "auxiliary": 0.09740784764289856, "rec_loss": 1.9806162118911743}
+Attention relation loss: {"block": "blocks.5", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.14545345306396484, "auxiliary": 0.09470007568597794, "rec_loss": 2.032745599746704}
+Attention relation loss: {"block": "blocks.5", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.14692352712154388, "auxiliary": 0.09565719217061996, "rec_loss": 1.9748562574386597}
+Attention relation loss: {"block": "blocks.5", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.15409401059150696, "auxiliary": 0.10032566636800766, "rec_loss": 2.028787851333618}
+Attention relation loss: {"block": "blocks.5", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.14434027671813965, "auxiliary": 0.09397532790899277, "rec_loss": 2.039865732192993}
+Attention relation loss: {"block": "blocks.5", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.15821489691734314, "auxiliary": 0.10300864279270172, "rec_loss": 2.1217775344848633}
+Attention relation loss: {"block": "blocks.5", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.15590104460716248, "auxiliary": 0.10150217264890671, "rec_loss": 2.0771055221557617}
+Attention relation loss: {"block": "blocks.5", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.15049496293067932, "auxiliary": 0.09798244386911392, "rec_loss": 2.050248622894287}
+Attention relation loss: {"block": "blocks.5", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.15097317099571228, "auxiliary": 0.09829378873109818, "rec_loss": 2.0754005908966064}
+Attention relation result: {"active_steps": 16000, "block": "blocks.5", "cache_bytes": 38731776, "first_training_kl": 0.18235717713832855, "gradient_refreshes": 0, "last_auxiliary": 0.09829378873109818, "last_training_kl": 0.15097317099571228, "mode": "uniform", "protocol": "relation_v1", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.0, "weight_min": 1.0}
+finished reconstructing blocks.5.
+reconstructing blocks.6 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.6", "protocol": "relation_v1", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "uniform", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.6 ...
+Attention relation loss: {"block": "blocks.6", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.2783765196800232, "auxiliary": 0.00685486663132906, "rec_loss": 2.0008726119995117}
+Attention relation loss: {"block": "blocks.6", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.26498377323150635, "auxiliary": 0.013050155714154243, "rec_loss": 1.925400733947754}
+Attention relation loss: {"block": "blocks.6", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.27281782031059265, "auxiliary": 0.020153960213065147, "rec_loss": 2.053103446960449}
+Attention relation loss: {"block": "blocks.6", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.2644035220146179, "auxiliary": 0.026043159887194633, "rec_loss": 1.9343156814575195}
+Attention relation loss: {"block": "blocks.6", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.2609660029411316, "auxiliary": 0.032130710780620575, "rec_loss": 1.9597759246826172}
+Attention relation loss: {"block": "blocks.6", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.25607025623321533, "auxiliary": 0.037833526730537415, "rec_loss": 1.994415283203125}
+Attention relation loss: {"block": "blocks.6", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.24040751159191132, "auxiliary": 0.04143930599093437, "rec_loss": 1.9200832843780518}
+Attention relation loss: {"block": "blocks.6", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.2489633411169052, "auxiliary": 0.049044668674468994, "rec_loss": 2.228635787963867}
+Attention relation loss: {"block": "blocks.6", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.2332870215177536, "auxiliary": 0.05494179204106331, "rec_loss": 1.933189868927002}
+Attention relation loss: {"block": "blocks.6", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.22835636138916016, "auxiliary": 0.05975618213415146, "rec_loss": 1.8970797061920166}
+Attention relation loss: {"block": "blocks.6", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.228928804397583, "auxiliary": 0.06589657813310623, "rec_loss": 2.0196802616119385}
+Attention relation loss: {"block": "blocks.6", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.22117218375205994, "auxiliary": 0.0694514811038971, "rec_loss": 1.9014455080032349}
+Attention relation loss: {"block": "blocks.6", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.21761825680732727, "auxiliary": 0.07403010874986649, "rec_loss": 2.001338005065918}
+Attention relation loss: {"block": "blocks.6", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.21697096526622772, "auxiliary": 0.07948759943246841, "rec_loss": 1.878218412399292}
+Attention relation loss: {"block": "blocks.6", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.20857542753219604, "auxiliary": 0.08186987787485123, "rec_loss": 1.8697419166564941}
+Attention relation loss: {"block": "blocks.6", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.21020036935806274, "auxiliary": 0.08800821751356125, "rec_loss": 1.9211461544036865}
+Attention relation loss: {"block": "blocks.6", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.2043055295944214, "auxiliary": 0.10062499344348907, "rec_loss": 1.8960762023925781}
+Attention relation loss: {"block": "blocks.6", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.20343512296676636, "auxiliary": 0.10019629448652267, "rec_loss": 2.023512125015259}
+Attention relation loss: {"block": "blocks.6", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.20136365294456482, "auxiliary": 0.09917604923248291, "rec_loss": 1.9340145587921143}
+Attention relation loss: {"block": "blocks.6", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.20700907707214355, "auxiliary": 0.10195654630661011, "rec_loss": 1.9082692861557007}
+Attention relation loss: {"block": "blocks.6", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.20339953899383545, "auxiliary": 0.10017877072095871, "rec_loss": 2.0142464637756348}
+Attention relation loss: {"block": "blocks.6", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.19743387401103973, "auxiliary": 0.09724054485559464, "rec_loss": 2.075157642364502}
+Attention relation loss: {"block": "blocks.6", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.1908319890499115, "auxiliary": 0.09398897737264633, "rec_loss": 1.9621678590774536}
+Attention relation loss: {"block": "blocks.6", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.2003544569015503, "auxiliary": 0.09867899864912033, "rec_loss": 1.9855999946594238}
+Attention relation loss: {"block": "blocks.6", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.20277202129364014, "auxiliary": 0.09871936589479446, "rec_loss": 2.079333782196045}
+Attention relation loss: {"block": "blocks.6", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.19607314467430115, "auxiliary": 0.095458023250103, "rec_loss": 1.9828828573226929}
+Attention relation loss: {"block": "blocks.6", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.20468240976333618, "auxiliary": 0.09964943677186966, "rec_loss": 2.131511688232422}
+Attention relation loss: {"block": "blocks.6", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.1940971463918686, "auxiliary": 0.09449601173400879, "rec_loss": 2.098022222518921}
+Attention relation loss: {"block": "blocks.6", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.21057967841625214, "auxiliary": 0.10252051800489426, "rec_loss": 2.002567768096924}
+Attention relation loss: {"block": "blocks.6", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.21376201510429382, "auxiliary": 0.10406982898712158, "rec_loss": 2.0207014083862305}
+Attention relation loss: {"block": "blocks.6", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.20061945915222168, "auxiliary": 0.09767138957977295, "rec_loss": 2.025397300720215}
+Attention relation loss: {"block": "blocks.6", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.211757093667984, "auxiliary": 0.10309374332427979, "rec_loss": 2.010800838470459}
+Attention relation result: {"active_steps": 16000, "block": "blocks.6", "cache_bytes": 38731776, "first_training_kl": 0.25381284952163696, "gradient_refreshes": 0, "last_auxiliary": 0.10309374332427979, "last_training_kl": 0.211757093667984, "mode": "uniform", "protocol": "relation_v1", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.0, "weight_min": 1.0}
+finished reconstructing blocks.6.
+reconstructing blocks.7 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.7", "protocol": "relation_v1", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "uniform", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.7 ...
+Attention relation loss: {"block": "blocks.7", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.4007728099822998, "auxiliary": 0.006182378623634577, "rec_loss": 2.042179584503174}
+Attention relation loss: {"block": "blocks.7", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.3836613595485687, "auxiliary": 0.011836829595267773, "rec_loss": 2.1465396881103516}
+Attention relation loss: {"block": "blocks.7", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.3854616582393646, "auxiliary": 0.017838560044765472, "rec_loss": 2.02778959274292}
+Attention relation loss: {"block": "blocks.7", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.3748319745063782, "auxiliary": 0.023128846660256386, "rec_loss": 1.9974193572998047}
+Attention relation loss: {"block": "blocks.7", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.35990414023399353, "auxiliary": 0.02775966376066208, "rec_loss": 2.150306224822998}
+Attention relation loss: {"block": "blocks.7", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.367139995098114, "auxiliary": 0.0339813269674778, "rec_loss": 2.102069854736328}
+Attention relation loss: {"block": "blocks.7", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.3655420243740082, "auxiliary": 0.039472322911024094, "rec_loss": 2.163886785507202}
+Attention relation loss: {"block": "blocks.7", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.3423837125301361, "auxiliary": 0.0422532819211483, "rec_loss": 2.075930118560791}
+Attention relation loss: {"block": "blocks.7", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.3559630811214447, "auxiliary": 0.05991116166114807, "rec_loss": 2.1865763664245605}
+Attention relation loss: {"block": "blocks.7", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.3556396961212158, "auxiliary": 0.066507488489151, "rec_loss": 2.132406711578369}
+Attention relation loss: {"block": "blocks.7", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.313244104385376, "auxiliary": 0.06443708389997482, "rec_loss": 2.098350763320923}
+Attention relation loss: {"block": "blocks.7", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.3383718430995941, "auxiliary": 0.07593391090631485, "rec_loss": 2.195594072341919}
+Attention relation loss: {"block": "blocks.7", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.316966712474823, "auxiliary": 0.07705792039632797, "rec_loss": 2.0432114601135254}
+Attention relation loss: {"block": "blocks.7", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.3422808349132538, "auxiliary": 0.08961297571659088, "rec_loss": 2.1786370277404785}
+Attention relation loss: {"block": "blocks.7", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.3218560814857483, "auxiliary": 0.09028451144695282, "rec_loss": 2.0561904907226562}
+Attention relation loss: {"block": "blocks.7", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.33015188574790955, "auxiliary": 0.09878569096326828, "rec_loss": 2.180666208267212}
+Attention relation loss: {"block": "blocks.7", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.3223302364349365, "auxiliary": 0.09930523484945297, "rec_loss": 1.9760040044784546}
+Attention relation loss: {"block": "blocks.7", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.3135544955730438, "auxiliary": 0.09660156071186066, "rec_loss": 1.9588048458099365}
+Attention relation loss: {"block": "blocks.7", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.3146025836467743, "auxiliary": 0.09692445397377014, "rec_loss": 1.8294955492019653}
+Attention relation loss: {"block": "blocks.7", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.3159888684749603, "auxiliary": 0.0973515510559082, "rec_loss": 1.8521815538406372}
+Attention relation loss: {"block": "blocks.7", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.32860511541366577, "auxiliary": 0.1012384295463562, "rec_loss": 1.9472588300704956}
+Attention relation loss: {"block": "blocks.7", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.321864515542984, "auxiliary": 0.09916175156831741, "rec_loss": 1.9957259893417358}
+Attention relation loss: {"block": "blocks.7", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.3296918272972107, "auxiliary": 0.10157322883605957, "rec_loss": 2.027120351791382}
+Attention relation loss: {"block": "blocks.7", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.3114907741546631, "auxiliary": 0.09596575796604156, "rec_loss": 1.9212136268615723}
+Attention relation loss: {"block": "blocks.7", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.30490821599960327, "auxiliary": 0.09591972827911377, "rec_loss": 2.024235248565674}
+Attention relation loss: {"block": "blocks.7", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.3250889480113983, "auxiliary": 0.10226830095052719, "rec_loss": 2.2216172218322754}
+Attention relation loss: {"block": "blocks.7", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.32010114192962646, "auxiliary": 0.10069920867681503, "rec_loss": 2.039686679840088}
+Attention relation loss: {"block": "blocks.7", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.3179299533367157, "auxiliary": 0.10001617670059204, "rec_loss": 2.0546951293945312}
+Attention relation loss: {"block": "blocks.7", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.32706859707832336, "auxiliary": 0.10289106518030167, "rec_loss": 1.9874564409255981}
+Attention relation loss: {"block": "blocks.7", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.31856533885002136, "auxiliary": 0.10021606832742691, "rec_loss": 2.075302839279175}
+Attention relation loss: {"block": "blocks.7", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.3387434184551239, "auxiliary": 0.10656379908323288, "rec_loss": 2.2728347778320312}
+Attention relation loss: {"block": "blocks.7", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.31009408831596375, "auxiliary": 0.097551129758358, "rec_loss": 1.9894020557403564}
+Attention relation result: {"active_steps": 16000, "block": "blocks.7", "cache_bytes": 38731776, "first_training_kl": 0.40515637397766113, "gradient_refreshes": 0, "last_auxiliary": 0.097551129758358, "last_training_kl": 0.31009408831596375, "mode": "uniform", "protocol": "relation_v1", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.0, "weight_min": 1.0}
+finished reconstructing blocks.7.
+reconstructing blocks.8 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.8", "protocol": "relation_v1", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "uniform", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.8 ...
+Attention relation loss: {"block": "blocks.8", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.5609513521194458, "auxiliary": 0.006494004279375076, "rec_loss": 1.8979121446609497}
+Attention relation loss: {"block": "blocks.8", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.5331003069877625, "auxiliary": 0.012343158014118671, "rec_loss": 1.8708281517028809}
+Attention relation loss: {"block": "blocks.8", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.48337239027023315, "auxiliary": 0.01678767241537571, "rec_loss": 1.9054863452911377}
+Attention relation loss: {"block": "blocks.8", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.45515379309654236, "auxiliary": 0.02107684127986431, "rec_loss": 1.9836626052856445}
+Attention relation loss: {"block": "blocks.8", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.4609621465206146, "auxiliary": 0.026682259514927864, "rec_loss": 1.9250850677490234}
+Attention relation loss: {"block": "blocks.8", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.4607112407684326, "auxiliary": 0.03200128674507141, "rec_loss": 1.9430524110794067}
+Attention relation loss: {"block": "blocks.8", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.4204971194267273, "auxiliary": 0.03407598286867142, "rec_loss": 1.8988308906555176}
+Attention relation loss: {"block": "blocks.8", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.42797380685806274, "auxiliary": 0.03963642939925194, "rec_loss": 1.950545310974121}
+Attention relation loss: {"block": "blocks.8", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.41495561599731445, "auxiliary": 0.053722869604825974, "rec_loss": 2.016967535018921}
+Attention relation loss: {"block": "blocks.8", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.4136388301849365, "auxiliary": 0.059502653777599335, "rec_loss": 1.920262336730957}
+Attention relation loss: {"block": "blocks.8", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.40163272619247437, "auxiliary": 0.06355311721563339, "rec_loss": 1.9061498641967773}
+Attention relation loss: {"block": "blocks.8", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.35597777366638184, "auxiliary": 0.06144961714744568, "rec_loss": 1.8544241189956665}
+Attention relation loss: {"block": "blocks.8", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.381660521030426, "auxiliary": 0.07137327641248703, "rec_loss": 1.9295852184295654}
+Attention relation loss: {"block": "blocks.8", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.37459635734558105, "auxiliary": 0.07544086128473282, "rec_loss": 1.9081802368164062}
+Attention relation loss: {"block": "blocks.8", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.3735550045967102, "auxiliary": 0.08060479164123535, "rec_loss": 1.923764705657959}
+Attention relation loss: {"block": "blocks.8", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.3976430296897888, "auxiliary": 0.09152261167764664, "rec_loss": 2.07669997215271}
+Attention relation loss: {"block": "blocks.8", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.36354535818099976, "auxiliary": 0.09226568043231964, "rec_loss": 1.9069899320602417}
+Attention relation loss: {"block": "blocks.8", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.36636126041412354, "auxiliary": 0.09298034012317657, "rec_loss": 1.8892148733139038}
+Attention relation loss: {"block": "blocks.8", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.34600067138671875, "auxiliary": 0.08781294524669647, "rec_loss": 1.8867124319076538}
+Attention relation loss: {"block": "blocks.8", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.3679463267326355, "auxiliary": 0.09338261932134628, "rec_loss": 1.9048826694488525}
+Attention relation loss: {"block": "blocks.8", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.3629831075668335, "auxiliary": 0.09212298691272736, "rec_loss": 1.9501819610595703}
+Attention relation loss: {"block": "blocks.8", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.372997522354126, "auxiliary": 0.09466458857059479, "rec_loss": 1.933542251586914}
+Attention relation loss: {"block": "blocks.8", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.3396313190460205, "auxiliary": 0.08619643747806549, "rec_loss": 1.8125905990600586}
+Attention relation loss: {"block": "blocks.8", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.3629014194011688, "auxiliary": 0.09210225194692612, "rec_loss": 1.9290436506271362}
+Attention relation loss: {"block": "blocks.8", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.3809615969657898, "auxiliary": 0.10261251777410507, "rec_loss": 2.093552350997925}
+Attention relation loss: {"block": "blocks.8", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.3613020181655884, "auxiliary": 0.0973171815276146, "rec_loss": 2.0387890338897705}
+Attention relation loss: {"block": "blocks.8", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.3706932067871094, "auxiliary": 0.09984671324491501, "rec_loss": 2.1522560119628906}
+Attention relation loss: {"block": "blocks.8", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.3617914915084839, "auxiliary": 0.09744902700185776, "rec_loss": 2.1118946075439453}
+Attention relation loss: {"block": "blocks.8", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.36147964000701904, "auxiliary": 0.09736502170562744, "rec_loss": 1.9970598220825195}
+Attention relation loss: {"block": "blocks.8", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.3708537817001343, "auxiliary": 0.09988996386528015, "rec_loss": 2.0559048652648926}
+Attention relation loss: {"block": "blocks.8", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.37322139739990234, "auxiliary": 0.10052768141031265, "rec_loss": 2.111220359802246}
+Attention relation loss: {"block": "blocks.8", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.34955233335494995, "auxiliary": 0.09415239095687866, "rec_loss": 1.9780722856521606}
+Attention relation result: {"active_steps": 16000, "block": "blocks.8", "cache_bytes": 38731776, "first_training_kl": 0.5398743152618408, "gradient_refreshes": 0, "last_auxiliary": 0.09415239095687866, "last_training_kl": 0.34955233335494995, "mode": "uniform", "protocol": "relation_v1", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.0, "weight_min": 1.0}
+finished reconstructing blocks.8.
+reconstructing blocks.9 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.9", "protocol": "relation_v1", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "uniform", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.9 ...
+Attention relation loss: {"block": "blocks.9", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.6651268601417542, "auxiliary": 0.007249888032674789, "rec_loss": 1.990453839302063}
+Attention relation loss: {"block": "blocks.9", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.5573486089706421, "auxiliary": 0.012150208465754986, "rec_loss": 2.005603313446045}
+Attention relation loss: {"block": "blocks.9", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.5476495027542114, "auxiliary": 0.01790815219283104, "rec_loss": 2.0150508880615234}
+Attention relation loss: {"block": "blocks.9", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.5484481453895569, "auxiliary": 0.023912357166409492, "rec_loss": 1.9906694889068604}
+Attention relation loss: {"block": "blocks.9", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.565809428691864, "auxiliary": 0.030836638063192368, "rec_loss": 2.0462284088134766}
+Attention relation loss: {"block": "blocks.9", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.5013679265975952, "auxiliary": 0.03278948739171028, "rec_loss": 2.0038976669311523}
+Attention relation loss: {"block": "blocks.9", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.49997004866600037, "auxiliary": 0.03814774379134178, "rec_loss": 1.9831435680389404}
+Attention relation loss: {"block": "blocks.9", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.5464635491371155, "auxiliary": 0.047651659697294235, "rec_loss": 2.0757930278778076}
+Attention relation loss: {"block": "blocks.9", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.4604926109313965, "auxiliary": 0.05687444284558296, "rec_loss": 1.9772448539733887}
+Attention relation loss: {"block": "blocks.9", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.4989684522151947, "auxiliary": 0.06847390532493591, "rec_loss": 2.0757060050964355}
+Attention relation loss: {"block": "blocks.9", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.45969974994659424, "auxiliary": 0.06939352303743362, "rec_loss": 2.107288122177124}
+Attention relation loss: {"block": "blocks.9", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.4492321014404297, "auxiliary": 0.0739782452583313, "rec_loss": 1.9669133424758911}
+Attention relation loss: {"block": "blocks.9", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.42986226081848145, "auxiliary": 0.0766875147819519, "rec_loss": 2.000602960586548}
+Attention relation loss: {"block": "blocks.9", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.43665990233421326, "auxiliary": 0.08389253914356232, "rec_loss": 2.129398822784424}
+Attention relation loss: {"block": "blocks.9", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.4114525318145752, "auxiliary": 0.08469601720571518, "rec_loss": 2.0285608768463135}
+Attention relation loss: {"block": "blocks.9", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.40615928173065186, "auxiliary": 0.08918018639087677, "rec_loss": 1.9405914545059204}
+Attention relation loss: {"block": "blocks.9", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.4116392731666565, "auxiliary": 0.09908966720104218, "rec_loss": 2.027087450027466}
+Attention relation loss: {"block": "blocks.9", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.38609394431114197, "auxiliary": 0.09294040501117706, "rec_loss": 2.0415549278259277}
+Attention relation loss: {"block": "blocks.9", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.4193808436393738, "auxiliary": 0.10095321387052536, "rec_loss": 2.0149199962615967}
+Attention relation loss: {"block": "blocks.9", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.40388309955596924, "auxiliary": 0.09722259640693665, "rec_loss": 2.0922698974609375}
+Attention relation loss: {"block": "blocks.9", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.4235607981681824, "auxiliary": 0.10195940732955933, "rec_loss": 2.03702712059021}
+Attention relation loss: {"block": "blocks.9", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.4314305782318115, "auxiliary": 0.10385382175445557, "rec_loss": 2.1192173957824707}
+Attention relation loss: {"block": "blocks.9", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.403392493724823, "auxiliary": 0.0971045047044754, "rec_loss": 2.1234607696533203}
+Attention relation loss: {"block": "blocks.9", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.3777177929878235, "auxiliary": 0.09092409908771515, "rec_loss": 1.9883891344070435}
+Attention relation loss: {"block": "blocks.9", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.4354097247123718, "auxiliary": 0.09790635108947754, "rec_loss": 1.9789845943450928}
+Attention relation loss: {"block": "blocks.9", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.4339364469051361, "auxiliary": 0.09757506847381592, "rec_loss": 1.9727423191070557}
+Attention relation loss: {"block": "blocks.9", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.3932340145111084, "auxiliary": 0.08842270821332932, "rec_loss": 1.9605484008789062}
+Attention relation loss: {"block": "blocks.9", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.4327251613140106, "auxiliary": 0.09730269759893417, "rec_loss": 2.0208935737609863}
+Attention relation loss: {"block": "blocks.9", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.3949441909790039, "auxiliary": 0.08880725502967834, "rec_loss": 1.9521427154541016}
+Attention relation loss: {"block": "blocks.9", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.3930611312389374, "auxiliary": 0.08838383108377457, "rec_loss": 1.9715325832366943}
+Attention relation loss: {"block": "blocks.9", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.3788045048713684, "auxiliary": 0.08517808467149734, "rec_loss": 1.9574384689331055}
+Attention relation loss: {"block": "blocks.9", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.40718603134155273, "auxiliary": 0.09155996143817902, "rec_loss": 2.042020797729492}
+Attention relation result: {"active_steps": 16000, "block": "blocks.9", "cache_bytes": 38731776, "first_training_kl": 0.5733940601348877, "gradient_refreshes": 0, "last_auxiliary": 0.09155996143817902, "last_training_kl": 0.40718603134155273, "mode": "uniform", "protocol": "relation_v1", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.0, "weight_min": 1.0}
+finished reconstructing blocks.9.
+reconstructing blocks.10 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.10", "protocol": "relation_v1", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "uniform", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.10 ...
+Attention relation loss: {"block": "blocks.10", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.9053579568862915, "auxiliary": 0.006751842796802521, "rec_loss": 1.900097370147705}
+Attention relation loss: {"block": "blocks.10", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 0.8632631301879883, "auxiliary": 0.012875827960669994, "rec_loss": 1.892570972442627}
+Attention relation loss: {"block": "blocks.10", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.7925276756286621, "auxiliary": 0.017731182277202606, "rec_loss": 1.9371131658554077}
+Attention relation loss: {"block": "blocks.10", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.7965316772460938, "auxiliary": 0.023761017248034477, "rec_loss": 1.8895175457000732}
+Attention relation loss: {"block": "blocks.10", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 0.74506676197052, "auxiliary": 0.02778223529458046, "rec_loss": 1.9262332916259766}
+Attention relation loss: {"block": "blocks.10", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.752647340297699, "auxiliary": 0.03367788344621658, "rec_loss": 1.8993966579437256}
+Attention relation loss: {"block": "blocks.10", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 0.7824567556381226, "auxiliary": 0.040847018361091614, "rec_loss": 1.9109327793121338}
+Attention relation loss: {"block": "blocks.10", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.6614991426467896, "auxiliary": 0.03946583345532417, "rec_loss": 1.8205453157424927}
+Attention relation loss: {"block": "blocks.10", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.6627224683761597, "auxiliary": 0.050079818814992905, "rec_loss": 1.6536948680877686}
+Attention relation loss: {"block": "blocks.10", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.7198216319084167, "auxiliary": 0.06043846905231476, "rec_loss": 1.7895187139511108}
+Attention relation loss: {"block": "blocks.10", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.667881190776825, "auxiliary": 0.06168512627482414, "rec_loss": 1.7284605503082275}
+Attention relation loss: {"block": "blocks.10", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.6120831966400146, "auxiliary": 0.061670899391174316, "rec_loss": 1.7451748847961426}
+Attention relation loss: {"block": "blocks.10", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.6042937636375427, "auxiliary": 0.06595990061759949, "rec_loss": 1.6674187183380127}
+Attention relation loss: {"block": "blocks.10", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.6284332871437073, "auxiliary": 0.07387129962444305, "rec_loss": 1.7090413570404053}
+Attention relation loss: {"block": "blocks.10", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.5356522798538208, "auxiliary": 0.06746254861354828, "rec_loss": 1.6343908309936523}
+Attention relation loss: {"block": "blocks.10", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.5710877180099487, "auxiliary": 0.07672049105167389, "rec_loss": 1.779414176940918}
+Attention relation loss: {"block": "blocks.10", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.5681195259094238, "auxiliary": 0.10001003742218018, "rec_loss": 1.9885923862457275}
+Attention relation loss: {"block": "blocks.10", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.5381023287773132, "auxiliary": 0.09472590684890747, "rec_loss": 2.031439781188965}
+Attention relation loss: {"block": "blocks.10", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.5498864650726318, "auxiliary": 0.09680034965276718, "rec_loss": 1.9740742444992065}
+Attention relation loss: {"block": "blocks.10", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.5856977105140686, "auxiliary": 0.10310444980859756, "rec_loss": 2.027053117752075}
+Attention relation loss: {"block": "blocks.10", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.5941148996353149, "auxiliary": 0.10458618402481079, "rec_loss": 2.0867221355438232}
+Attention relation loss: {"block": "blocks.10", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.5765684843063354, "auxiliary": 0.10149737447500229, "rec_loss": 2.0568017959594727}
+Attention relation loss: {"block": "blocks.10", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.5847019553184509, "auxiliary": 0.10292916744947433, "rec_loss": 2.075786590576172}
+Attention relation loss: {"block": "blocks.10", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.5531115531921387, "auxiliary": 0.09736808389425278, "rec_loss": 1.9670377969741821}
+Attention relation loss: {"block": "blocks.10", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.5851036906242371, "auxiliary": 0.10491607338190079, "rec_loss": 2.1366841793060303}
+Attention relation loss: {"block": "blocks.10", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.5470883250236511, "auxiliary": 0.09809946268796921, "rec_loss": 2.0022852420806885}
+Attention relation loss: {"block": "blocks.10", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.5300976634025574, "auxiliary": 0.09505283087491989, "rec_loss": 1.9960534572601318}
+Attention relation loss: {"block": "blocks.10", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.5757747888565063, "auxiliary": 0.10324328392744064, "rec_loss": 2.028080463409424}
+Attention relation loss: {"block": "blocks.10", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.567745566368103, "auxiliary": 0.10180355608463287, "rec_loss": 2.009089469909668}
+Attention relation loss: {"block": "blocks.10", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.566936731338501, "auxiliary": 0.10165851563215256, "rec_loss": 2.0684022903442383}
+Attention relation loss: {"block": "blocks.10", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.5658166408538818, "auxiliary": 0.10145767033100128, "rec_loss": 2.086794376373291}
+Attention relation loss: {"block": "blocks.10", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.5134485363960266, "auxiliary": 0.09206744283437729, "rec_loss": 1.9479496479034424}
+Attention relation result: {"active_steps": 16000, "block": "blocks.10", "cache_bytes": 38731776, "first_training_kl": 0.8380656242370605, "gradient_refreshes": 0, "last_auxiliary": 0.09206744283437729, "last_training_kl": 0.5134485363960266, "mode": "uniform", "protocol": "relation_v1", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.0, "weight_min": 1.0}
+finished reconstructing blocks.10.
+reconstructing blocks.11 ...
+initializing raw input and raw output ...
+Attention relation cache: {"block": "blocks.11", "protocol": "relation_v1", "samples": 1024, "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "cache_bytes": 38731776, "mode": "uniform", "weight": 0.1}
+initializing quanted input ...
+adaround training for blocks.11 ...
+Attention relation loss: {"block": "blocks.11", "iteration": 4500, "coefficient": 0.0062499999999999995, "raw_kl": 0.9972588419914246, "auxiliary": 0.00527566485106945, "rec_loss": 1.9157440662384033}
+Attention relation loss: {"block": "blocks.11", "iteration": 5000, "coefficient": 0.012499999999999999, "raw_kl": 1.0237908363342285, "auxiliary": 0.010832048021256924, "rec_loss": 2.239690065383911}
+Attention relation loss: {"block": "blocks.11", "iteration": 5500, "coefficient": 0.018750000000000006, "raw_kl": 0.9102546572685242, "auxiliary": 0.014446196146309376, "rec_loss": 1.9381248950958252}
+Attention relation loss: {"block": "blocks.11", "iteration": 6000, "coefficient": 0.024999999999999998, "raw_kl": 0.9727166891098022, "auxiliary": 0.02058333158493042, "rec_loss": 1.7534621953964233}
+Attention relation loss: {"block": "blocks.11", "iteration": 6500, "coefficient": 0.03125, "raw_kl": 1.043097734451294, "auxiliary": 0.027590801939368248, "rec_loss": 1.8321752548217773}
+Attention relation loss: {"block": "blocks.11", "iteration": 7000, "coefficient": 0.0375, "raw_kl": 0.9129757285118103, "auxiliary": 0.028978761285543442, "rec_loss": 1.6492314338684082}
+Attention relation loss: {"block": "blocks.11", "iteration": 7500, "coefficient": 0.043750000000000004, "raw_kl": 1.1673914194107056, "auxiliary": 0.04322986304759979, "rec_loss": 1.938191533088684}
+Attention relation loss: {"block": "blocks.11", "iteration": 8000, "coefficient": 0.05000000000000002, "raw_kl": 0.9029275178909302, "auxiliary": 0.0382130928337574, "rec_loss": 1.9024661779403687}
+Attention relation loss: {"block": "blocks.11", "iteration": 8500, "coefficient": 0.05625, "raw_kl": 0.8325679302215576, "auxiliary": 0.04695901647210121, "rec_loss": 1.9413957595825195}
+Attention relation loss: {"block": "blocks.11", "iteration": 9000, "coefficient": 0.0625, "raw_kl": 0.9240912199020386, "auxiliary": 0.05791241675615311, "rec_loss": 1.953757882118225}
+Attention relation loss: {"block": "blocks.11", "iteration": 9500, "coefficient": 0.06875, "raw_kl": 0.8438801765441895, "auxiliary": 0.05817418545484543, "rec_loss": 2.078623056411743}
+Attention relation loss: {"block": "blocks.11", "iteration": 10000, "coefficient": 0.07500000000000001, "raw_kl": 0.9071442484855652, "auxiliary": 0.06822042912244797, "rec_loss": 1.919527292251587}
+Attention relation loss: {"block": "blocks.11", "iteration": 10500, "coefficient": 0.08125000000000002, "raw_kl": 0.9401594996452332, "auxiliary": 0.07659522444009781, "rec_loss": 1.767688512802124}
+Attention relation loss: {"block": "blocks.11", "iteration": 11000, "coefficient": 0.08750000000000002, "raw_kl": 0.9263715744018555, "auxiliary": 0.08127745240926743, "rec_loss": 2.030317544937134}
+Attention relation loss: {"block": "blocks.11", "iteration": 11500, "coefficient": 0.09375, "raw_kl": 0.7582367658615112, "auxiliary": 0.07127757370471954, "rec_loss": 1.9912769794464111}
+Attention relation loss: {"block": "blocks.11", "iteration": 12000, "coefficient": 0.1, "raw_kl": 0.8209339380264282, "auxiliary": 0.08231615275144577, "rec_loss": 2.009485960006714}
+Attention relation loss: {"block": "blocks.11", "iteration": 12500, "coefficient": 0.1, "raw_kl": 0.8556815981864929, "auxiliary": 0.09392010420560837, "rec_loss": 1.940181016921997}
+Attention relation loss: {"block": "blocks.11", "iteration": 13000, "coefficient": 0.1, "raw_kl": 0.8126179575920105, "auxiliary": 0.0891934186220169, "rec_loss": 2.0226070880889893}
+Attention relation loss: {"block": "blocks.11", "iteration": 13500, "coefficient": 0.1, "raw_kl": 0.8369592428207397, "auxiliary": 0.09186512976884842, "rec_loss": 1.7814056873321533}
+Attention relation loss: {"block": "blocks.11", "iteration": 14000, "coefficient": 0.1, "raw_kl": 0.8346652984619141, "auxiliary": 0.09161334484815598, "rec_loss": 1.8922154903411865}
+Attention relation loss: {"block": "blocks.11", "iteration": 14500, "coefficient": 0.1, "raw_kl": 0.8734990954399109, "auxiliary": 0.09587576240301132, "rec_loss": 1.893324375152588}
+Attention relation loss: {"block": "blocks.11", "iteration": 15000, "coefficient": 0.1, "raw_kl": 0.7930482625961304, "auxiliary": 0.08704543858766556, "rec_loss": 1.975703477859497}
+Attention relation loss: {"block": "blocks.11", "iteration": 15500, "coefficient": 0.1, "raw_kl": 0.750396728515625, "auxiliary": 0.08236398547887802, "rec_loss": 1.8478885889053345}
+Attention relation loss: {"block": "blocks.11", "iteration": 16000, "coefficient": 0.1, "raw_kl": 0.790989875793457, "auxiliary": 0.08681950718164444, "rec_loss": 1.8802516460418701}
+Attention relation loss: {"block": "blocks.11", "iteration": 16500, "coefficient": 0.1, "raw_kl": 0.8429707288742065, "auxiliary": 0.10863716900348663, "rec_loss": 1.9175275564193726}
+Attention relation loss: {"block": "blocks.11", "iteration": 17000, "coefficient": 0.1, "raw_kl": 0.7473011016845703, "auxiliary": 0.09630782902240753, "rec_loss": 2.013455390930176}
+Attention relation loss: {"block": "blocks.11", "iteration": 17500, "coefficient": 0.1, "raw_kl": 0.7197396159172058, "auxiliary": 0.09275586158037186, "rec_loss": 1.8900611400604248}
+Attention relation loss: {"block": "blocks.11", "iteration": 18000, "coefficient": 0.1, "raw_kl": 0.7296139597892761, "auxiliary": 0.09402840584516525, "rec_loss": 2.069892406463623}
+Attention relation loss: {"block": "blocks.11", "iteration": 18500, "coefficient": 0.1, "raw_kl": 0.797778844833374, "auxiliary": 0.10281310230493546, "rec_loss": 2.0345044136047363}
+Attention relation loss: {"block": "blocks.11", "iteration": 19000, "coefficient": 0.1, "raw_kl": 0.8336488604545593, "auxiliary": 0.10743582248687744, "rec_loss": 2.0971391201019287}
+Attention relation loss: {"block": "blocks.11", "iteration": 19500, "coefficient": 0.1, "raw_kl": 0.8300462961196899, "auxiliary": 0.10697155445814133, "rec_loss": 2.2990617752075195}
+Attention relation loss: {"block": "blocks.11", "iteration": 20000, "coefficient": 0.1, "raw_kl": 0.8189544677734375, "auxiliary": 0.10554210096597672, "rec_loss": 2.272212505340576}
+Attention relation result: {"active_steps": 16000, "block": "blocks.11", "cache_bytes": 38731776, "first_training_kl": 1.181437373161316, "gradient_refreshes": 0, "last_auxiliary": 0.10554210096597672, "last_training_kl": 0.8189544677734375, "mode": "uniform", "protocol": "relation_v1", "query_indices": [0, 1, 15, 29, 43, 57, 71, 85, 98, 112, 126, 140, 154, 168, 182, 196], "refreshes": 5, "teacher_samples": 1024, "weight": 0.1, "weight_max": 1.0, "weight_min": 1.0}
+finished reconstructing blocks.11.
+reconstructing head ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for head ...
+finished reconstructing head.
+Block reconstruction elapsed seconds: 8942.252
+2026-10-21 16:26:00 - fisher_dplr guided block reconstruction finished.
+Saving checkpoint to /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261021_134253_headwise_relation_w3a3_seed3407_uniform_seeded_full_relation_v1/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop.pth
+Validating on calibration set after block reconstruction ...
+Test: [0/32]	Time 1.079 (1.079)	Loss 0.6108 (0.6108)	Prec@1 81.250 (81.250)	Prec@5 100.000 (100.000)
+Test: [10/32]	Time 0.050 (0.158)	Loss 1.0028 (0.6489)	Prec@1 71.875 (83.239)	Prec@5 90.625 (95.170)
+Test: [20/32]	Time 0.049 (0.106)	Loss 1.0920 (0.7300)	Prec@1 75.000 (82.887)	Prec@5 93.750 (94.792)
+Test: [30/32]	Time 0.025 (0.085)	Loss 0.4367 (0.7129)	Prec@1 87.500 (83.367)	Prec@5 100.000 (94.758)
+ * Prec@1 83.496 Prec@5 94.922 Loss 0.705 Time 2.800
+Validating on test set after block reconstruction ...
+Test: [0/782]	Time 1.531 (1.531)	Loss 0.8621 (0.8621)	Prec@1 84.375 (84.375)	Prec@5 92.188 (92.188)
+Test: [10/782]	Time 0.121 (0.281)	Loss 0.3543 (0.8441)	Prec@1 90.625 (79.403)	Prec@5 100.000 (94.176)
+Test: [20/782]	Time 0.117 (0.203)	Loss 1.1887 (0.8692)	Prec@1 65.625 (78.869)	Prec@5 93.750 (93.899)
+Test: [30/782]	Time 0.119 (0.177)	Loss 1.0988 (1.0729)	Prec@1 75.000 (73.992)	Prec@5 87.500 (91.532)
+Test: [40/782]	Time 0.129 (0.164)	Loss 1.0260 (1.1520)	Prec@1 85.938 (71.723)	Prec@5 93.750 (90.663)
+Test: [50/782]	Time 0.114 (0.157)	Loss 1.5115 (1.2517)	Prec@1 57.812 (68.413)	Prec@5 89.062 (90.043)
+Test: [60/782]	Time 0.137 (0.152)	Loss 1.1224 (1.2571)	Prec@1 73.438 (67.725)	Prec@5 89.062 (90.190)
+Test: [70/782]	Time 0.117 (0.148)	Loss 0.5250 (1.2172)	Prec@1 87.500 (69.256)	Prec@5 95.312 (90.273)
+Test: [80/782]	Time 0.115 (0.144)	Loss 1.2518 (1.1645)	Prec@1 73.438 (70.756)	Prec@5 87.500 (90.664)
+Test: [90/782]	Time 0.113 (0.141)	Loss 1.1310 (1.1751)	Prec@1 65.625 (70.690)	Prec@5 95.312 (90.470)
+Test: [100/782]	Time 0.120 (0.138)	Loss 1.3597 (1.1799)	Prec@1 65.625 (70.328)	Prec@5 84.375 (90.424)
+Test: [110/782]	Time 0.121 (0.137)	Loss 0.8637 (1.1483)	Prec@1 78.125 (71.185)	Prec@5 92.188 (90.724)
+Test: [120/782]	Time 0.116 (0.135)	Loss 1.1732 (1.1289)	Prec@1 68.750 (71.668)	Prec@5 87.500 (90.883)
+Test: [130/782]	Time 0.116 (0.134)	Loss 1.7362 (1.1564)	Prec@1 42.188 (70.730)	Prec@5 87.500 (90.697)
+Test: [140/782]	Time 0.117 (0.133)	Loss 1.4585 (1.1664)	Prec@1 54.688 (70.246)	Prec@5 89.062 (90.669)
+Test: [150/782]	Time 0.116 (0.132)	Loss 1.6989 (1.1786)	Prec@1 53.125 (69.805)	Prec@5 85.938 (90.584)
+Test: [160/782]	Time 0.123 (0.131)	Loss 1.5364 (1.1996)	Prec@1 59.375 (68.983)	Prec@5 87.500 (90.528)
+Test: [170/782]	Time 0.129 (0.130)	Loss 0.5569 (1.1949)	Prec@1 90.625 (69.024)	Prec@5 100.000 (90.671)
+Test: [180/782]	Time 0.126 (0.130)	Loss 1.4508 (1.2054)	Prec@1 56.250 (68.776)	Prec@5 85.938 (90.651)
+Test: [190/782]	Time 0.130 (0.130)	Loss 0.8176 (1.2099)	Prec@1 78.125 (68.406)	Prec@5 93.750 (90.666)
+Test: [200/782]	Time 0.129 (0.130)	Loss 1.2840 (1.2064)	Prec@1 68.750 (68.338)	Prec@5 93.750 (90.835)
+Test: [210/782]	Time 0.128 (0.130)	Loss 1.2215 (1.2023)	Prec@1 65.625 (68.313)	Prec@5 93.750 (90.899)
+Test: [220/782]	Time 0.129 (0.130)	Loss 1.9791 (1.2027)	Prec@1 29.688 (68.184)	Prec@5 87.500 (90.971)
+Test: [230/782]	Time 0.131 (0.130)	Loss 0.9749 (1.1929)	Prec@1 78.125 (68.554)	Prec@5 93.750 (91.044)
+Test: [240/782]	Time 0.127 (0.130)	Loss 0.8753 (1.1940)	Prec@1 76.562 (68.504)	Prec@5 93.750 (91.020)
+Test: [250/782]	Time 0.114 (0.129)	Loss 0.8464 (1.1940)	Prec@1 76.562 (68.582)	Prec@5 96.875 (91.067)
+Test: [260/782]	Time 0.115 (0.129)	Loss 0.3919 (1.1774)	Prec@1 90.625 (69.025)	Prec@5 98.438 (91.188)
+Test: [270/782]	Time 0.122 (0.128)	Loss 1.6044 (1.1735)	Prec@1 57.812 (69.269)	Prec@5 85.938 (91.179)
+Test: [280/782]	Time 0.130 (0.128)	Loss 1.5116 (1.1758)	Prec@1 45.312 (69.073)	Prec@5 90.625 (91.175)
+Test: [290/782]	Time 0.111 (0.128)	Loss 1.6149 (1.1751)	Prec@1 57.812 (69.185)	Prec@5 87.500 (91.162)
+Test: [300/782]	Time 0.111 (0.127)	Loss 0.9961 (1.1803)	Prec@1 75.000 (69.082)	Prec@5 93.750 (91.035)
+Test: [310/782]	Time 0.124 (0.127)	Loss 1.0527 (1.1760)	Prec@1 75.000 (69.187)	Prec@5 90.625 (91.047)
+Test: [320/782]	Time 0.112 (0.127)	Loss 1.4927 (1.1855)	Prec@1 65.625 (68.920)	Prec@5 92.188 (90.951)
+Test: [330/782]	Time 0.113 (0.127)	Loss 1.6053 (1.2017)	Prec@1 60.938 (68.627)	Prec@5 87.500 (90.729)
+Test: [340/782]	Time 0.130 (0.127)	Loss 2.2322 (1.2139)	Prec@1 35.938 (68.388)	Prec@5 82.812 (90.616)
+Test: [350/782]	Time 0.111 (0.126)	Loss 1.3847 (1.2309)	Prec@1 67.188 (68.029)	Prec@5 89.062 (90.416)
+Test: [360/782]	Time 0.130 (0.126)	Loss 1.4495 (1.2402)	Prec@1 48.438 (67.871)	Prec@5 92.188 (90.248)
+Test: [370/782]	Time 0.113 (0.126)	Loss 1.9150 (1.2563)	Prec@1 54.688 (67.617)	Prec@5 81.250 (89.989)
+Test: [380/782]	Time 0.117 (0.125)	Loss 1.4035 (1.2660)	Prec@1 68.750 (67.434)	Prec@5 84.375 (89.854)
+Test: [390/782]	Time 0.125 (0.125)	Loss 2.1679 (1.2822)	Prec@1 56.250 (67.108)	Prec@5 70.312 (89.622)
+Test: [400/782]	Time 0.113 (0.125)	Loss 1.5396 (1.2991)	Prec@1 64.062 (66.716)	Prec@5 87.500 (89.417)
+Test: [410/782]	Time 0.117 (0.125)	Loss 1.3435 (1.3047)	Prec@1 67.188 (66.625)	Prec@5 92.188 (89.344)
+Test: [420/782]	Time 0.121 (0.125)	Loss 1.1113 (1.3059)	Prec@1 73.438 (66.672)	Prec@5 85.938 (89.330)
+Test: [430/782]	Time 0.112 (0.125)	Loss 1.5677 (1.3123)	Prec@1 68.750 (66.582)	Prec@5 84.375 (89.240)
+Test: [440/782]	Time 0.116 (0.125)	Loss 1.2198 (1.3187)	Prec@1 64.062 (66.493)	Prec@5 89.062 (89.087)
+Test: [450/782]	Time 0.115 (0.124)	Loss 0.9814 (1.3159)	Prec@1 78.125 (66.623)	Prec@5 87.500 (89.111)
+Test: [460/782]	Time 0.106 (0.124)	Loss 2.5090 (1.3264)	Prec@1 46.875 (66.459)	Prec@5 76.562 (88.957)
+Test: [470/782]	Time 0.109 (0.124)	Loss 1.9807 (1.3363)	Prec@1 45.312 (66.235)	Prec@5 79.688 (88.837)
+Test: [480/782]	Time 0.116 (0.124)	Loss 1.3792 (1.3368)	Prec@1 70.312 (66.333)	Prec@5 81.250 (88.767)
+Test: [490/782]	Time 0.131 (0.124)	Loss 1.0166 (1.3462)	Prec@1 79.688 (66.166)	Prec@5 90.625 (88.607)
+Test: [500/782]	Time 0.113 (0.124)	Loss 1.2798 (1.3521)	Prec@1 65.625 (65.990)	Prec@5 90.625 (88.579)
+Test: [510/782]	Time 0.116 (0.123)	Loss 2.0813 (1.3634)	Prec@1 60.938 (65.815)	Prec@5 75.000 (88.381)
+Test: [520/782]	Time 0.120 (0.123)	Loss 1.5054 (1.3714)	Prec@1 68.750 (65.562)	Prec@5 85.938 (88.298)
+Test: [530/782]	Time 0.111 (0.123)	Loss 1.9250 (1.3782)	Prec@1 54.688 (65.487)	Prec@5 76.562 (88.197)
+Test: [540/782]	Time 0.125 (0.123)	Loss 2.3492 (1.3824)	Prec@1 34.375 (65.388)	Prec@5 78.125 (88.127)
+Test: [550/782]	Time 0.113 (0.123)	Loss 1.3267 (1.3837)	Prec@1 67.188 (65.381)	Prec@5 87.500 (88.087)
+Test: [560/782]	Time 0.106 (0.123)	Loss 2.0666 (1.3910)	Prec@1 42.188 (65.224)	Prec@5 79.688 (87.987)
+Test: [570/782]	Time 0.128 (0.123)	Loss 1.5893 (1.3941)	Prec@1 54.688 (65.198)	Prec@5 92.188 (87.932)
+Test: [580/782]	Time 0.111 (0.123)	Loss 1.8207 (1.4020)	Prec@1 54.688 (65.063)	Prec@5 84.375 (87.796)
+Test: [590/782]	Time 0.111 (0.123)	Loss 0.7492 (1.4067)	Prec@1 82.812 (64.969)	Prec@5 95.312 (87.706)
+Test: [600/782]	Time 0.124 (0.123)	Loss 1.4924 (1.4118)	Prec@1 64.062 (64.910)	Prec@5 84.375 (87.604)
+Test: [610/782]	Time 0.116 (0.123)	Loss 0.8412 (1.4147)	Prec@1 82.812 (64.901)	Prec@5 92.188 (87.533)
+Test: [620/782]	Time 0.116 (0.122)	Loss 1.9487 (1.4213)	Prec@1 60.938 (64.807)	Prec@5 75.000 (87.414)
+Test: [630/782]	Time 0.114 (0.122)	Loss 1.5717 (1.4220)	Prec@1 67.188 (64.828)	Prec@5 84.375 (87.389)
+Test: [640/782]	Time 0.120 (0.122)	Loss 1.7063 (1.4271)	Prec@1 62.500 (64.648)	Prec@5 89.062 (87.351)
+Test: [650/782]	Time 0.130 (0.122)	Loss 0.8945 (1.4297)	Prec@1 79.688 (64.610)	Prec@5 90.625 (87.320)
+Test: [660/782]	Time 0.122 (0.122)	Loss 2.5271 (1.4423)	Prec@1 46.875 (64.358)	Prec@5 71.875 (87.122)
+Test: [670/782]	Time 0.117 (0.122)	Loss 1.9042 (1.4437)	Prec@1 59.375 (64.300)	Prec@5 79.688 (87.106)
+Test: [680/782]	Time 0.132 (0.122)	Loss 1.0850 (1.4453)	Prec@1 59.375 (64.260)	Prec@5 96.875 (87.101)
+Test: [690/782]	Time 0.110 (0.122)	Loss 1.6272 (1.4465)	Prec@1 57.812 (64.289)	Prec@5 87.500 (87.079)
+Test: [700/782]	Time 0.113 (0.122)	Loss 1.2706 (1.4482)	Prec@1 65.625 (64.263)	Prec@5 89.062 (87.070)
+Test: [710/782]	Time 0.118 (0.122)	Loss 2.0703 (1.4556)	Prec@1 37.500 (64.111)	Prec@5 81.250 (86.986)
+Test: [720/782]	Time 0.121 (0.122)	Loss 1.2087 (1.4528)	Prec@1 65.625 (64.180)	Prec@5 96.875 (87.025)
+Test: [730/782]	Time 0.127 (0.122)	Loss 1.5844 (1.4538)	Prec@1 56.250 (64.148)	Prec@5 87.500 (87.043)
+Test: [740/782]	Time 0.107 (0.122)	Loss 1.2351 (1.4489)	Prec@1 57.812 (64.233)	Prec@5 96.875 (87.106)
+Test: [750/782]	Time 0.121 (0.122)	Loss 2.8921 (1.4471)	Prec@1 35.938 (64.306)	Prec@5 68.750 (87.119)
+Test: [760/782]	Time 0.131 (0.122)	Loss 1.0050 (1.4525)	Prec@1 71.875 (64.235)	Prec@5 95.312 (87.022)
+Test: [770/782]	Time 0.136 (0.122)	Loss 0.1804 (1.4486)	Prec@1 100.000 (64.336)	Prec@5 100.000 (87.087)
+Test: [780/782]	Time 0.115 (0.122)	Loss 2.4069 (1.4416)	Prec@1 39.062 (64.493)	Prec@5 75.000 (87.166)
+ * Prec@1 64.488 Prec@5 87.158 Loss 1.442 Time 95.643
+2026-10-21 16:27:39 - finished the process.
