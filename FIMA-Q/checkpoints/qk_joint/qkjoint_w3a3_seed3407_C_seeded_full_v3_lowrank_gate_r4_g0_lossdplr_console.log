@@ -1,0 +1,277 @@
+2026-10-29 16:50:19 - start the process.
+Experiment directory: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261029_165019_qkjoint_w3a3_seed3407_C_seeded_full_v3_lowrank_gate_r4_g0_lossdplr
+Namespace(model='vit_small', config='./configs/3bit/best.py', dataset='../imagenet_fimaq', optim_size=1024, val_batch_size=64, num_workers=8, device='cuda', calibrate=True, load_calibrate_checkpoint=None, test_calibrate_checkpoint=False, optimize=True, load_optimize_checkpoint=None, test_optimize_checkpoint=False, print_freq=10, seed=3407, skip_final_validation=False, headwise_hadamard=True, headwise_mode='all', qk_joint_variant='C', qk_joint_protocol='v3_lowrank_gate', qk_joint_steps=300, qk_joint_batch_size=8, qk_joint_holdout=128, qk_joint_lr=0.003, qk_joint_eval_every=50, qk_joint_rotation_rank=4, qk_joint_min_relative_kl=0.0, qk_joint_reconstruction_loss='dplr', attention_relation='none', relation_protocol='relation_v1', relation_weight=0.1, relation_queries=16, relation_start=0.2, relation_full=0.6, optim_metric='fisher_dplr', optim_mode='qdrop', drop_prob=0.5, p1=1.0, p2=1.0, dis_mode='q', calib_size=128, calib_batch_size=32, optim_batch_size=32, recon_iters=20000, k=5)
+Successfully imported Config class!
+optim_size: 1024
+calib_size: 128
+optim_batch_size: 32
+calib_batch_size: 32
+w_bit: 3
+a_bit: 3
+qconv_a_bit: 8
+qhead_a_bit: 3
+calib_metric: mse
+matmul_head_channel_wise: True
+token_channel_wise: True
+eq_n: 128
+search_round: 3
+keep_gpu: True
+optim_metric: fisher_dplr
+temp: 20
+k: 5
+p1: 1.0
+p2: 1.0
+dis_mode: q
+optim_mode: qdrop
+drop_prob: 0.5
+robust_beta: 0.5
+robust_temperature: 0.5
+recon_iters: 20000
+Python random seeded: 3407
+Building model ...
+No checkpoint found at './checkpoints/vit_raw/vit_small_patch16_224.bin'
+Loading pretrained weights from Hugging Face hub (timm/vit_small_patch16_224.augreg_in21k_ft_in1k)
+[timm/vit_small_patch16_224.augreg_in21k_ft_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+Applied head-wise Hadamard rotation: {'mode': 'all', 'blocks': 12, 'heads': 72, 'head_dims': [64], 'max_logit_abs_error': 2.9206275939941406e-06}
+Building validation dataloader ...
+Wraping quantiztion modules (reparam: True) ...
+2026-10-29 16:50:35 - start mse guided calibration
+Calibration cache: count=128 sample_sha256=05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6 tensor_sha256=4d822ba3ffa61432a9b41f34ff74ddabdb4733ec3f496b4c689a9b7f4c18cb8c
+
+  0%|          | 0/74 [00:00<?, ?it/s]
+calibrating patch_embed.proj:   0%|          | 0/74 [00:00<?, ?it/s]
+calibrating patch_embed.proj:   1%|▏         | 1/74 [00:02<02:26,  2.01s/it]
+calibrating blocks.0.attn.qkv:   1%|▏         | 1/74 [00:02<02:26,  2.01s/it]
+reparaming blocks.0.attn.qkv:   1%|▏         | 1/74 [00:03<02:26,  2.01s/it] 
+reparaming blocks.0.attn.qkv:   3%|▎         | 2/74 [00:08<05:31,  4.61s/it]
+calibrating blocks.0.attn.proj:   3%|▎         | 2/74 [00:08<05:31,  4.61s/it]
+calibrating blocks.0.attn.proj:   4%|▍         | 3/74 [00:11<04:22,  3.70s/it]
+calibrating blocks.0.attn.matmul1:   4%|▍         | 3/74 [00:11<04:22,  3.70s/it]
+calibrating blocks.0.attn.matmul1:   5%|▌         | 4/74 [00:18<06:06,  5.24s/it]
+calibrating blocks.0.attn.matmul2:   5%|▌         | 4/74 [00:18<06:06,  5.24s/it]
+calibrating blocks.0.attn.matmul2:   7%|▋         | 5/74 [00:26<06:56,  6.04s/it]
+calibrating blocks.0.mlp.fc1:   7%|▋         | 5/74 [00:26<06:56,  6.04s/it]     
+reparaming blocks.0.mlp.fc1:   7%|▋         | 5/74 [00:27<06:56,  6.04s/it] 
+reparaming blocks.0.mlp.fc1:   8%|▊         | 6/74 [00:34<07:37,  6.74s/it]
+calibrating blocks.0.mlp.fc2:   8%|▊         | 6/74 [00:34<07:37,  6.74s/it]
+calibrating blocks.0.mlp.fc2:   9%|▉         | 7/74 [00:41<07:51,  7.04s/it]
+calibrating blocks.1.attn.qkv:   9%|▉         | 7/74 [00:41<07:51,  7.04s/it]
+reparaming blocks.1.attn.qkv:   9%|▉         | 7/74 [00:42<07:51,  7.04s/it] 
+reparaming blocks.1.attn.qkv:  11%|█         | 8/74 [00:47<07:19,  6.67s/it]
+calibrating blocks.1.attn.proj:  11%|█         | 8/74 [00:47<07:19,  6.67s/it]
+calibrating blocks.1.attn.proj:  12%|█▏        | 9/74 [00:50<05:49,  5.37s/it]
+calibrating blocks.1.attn.matmul1:  12%|█▏        | 9/74 [00:50<05:49,  5.37s/it]
+calibrating blocks.1.attn.matmul1:  14%|█▎        | 10/74 [00:58<06:35,  6.17s/it]
+calibrating blocks.1.attn.matmul2:  14%|█▎        | 10/74 [00:58<06:35,  6.17s/it]
+calibrating blocks.1.attn.matmul2:  15%|█▍        | 11/74 [01:07<07:21,  7.01s/it]
+calibrating blocks.1.mlp.fc1:  15%|█▍        | 11/74 [01:07<07:21,  7.01s/it]     
+reparaming blocks.1.mlp.fc1:  15%|█▍        | 11/74 [01:08<07:21,  7.01s/it] 
+reparaming blocks.1.mlp.fc1:  16%|█▌        | 12/74 [01:16<08:00,  7.75s/it]
+calibrating blocks.1.mlp.fc2:  16%|█▌        | 12/74 [01:16<08:00,  7.75s/it]
+calibrating blocks.1.mlp.fc2:  18%|█▊        | 13/74 [01:24<08:04,  7.94s/it]
+calibrating blocks.2.attn.qkv:  18%|█▊        | 13/74 [01:24<08:04,  7.94s/it]
+reparaming blocks.2.attn.qkv:  18%|█▊        | 13/74 [01:25<08:04,  7.94s/it] 
+reparaming blocks.2.attn.qkv:  19%|█▉        | 14/74 [01:31<07:24,  7.41s/it]
+calibrating blocks.2.attn.proj:  19%|█▉        | 14/74 [01:31<07:24,  7.41s/it]
+calibrating blocks.2.attn.proj:  20%|██        | 15/74 [01:33<05:54,  6.00s/it]
+calibrating blocks.2.attn.matmul1:  20%|██        | 15/74 [01:33<05:54,  6.00s/it]
+calibrating blocks.2.attn.matmul1:  22%|██▏       | 16/74 [01:41<06:22,  6.60s/it]
+calibrating blocks.2.attn.matmul2:  22%|██▏       | 16/74 [01:41<06:22,  6.60s/it]
+calibrating blocks.2.attn.matmul2:  23%|██▎       | 17/74 [01:50<06:42,  7.07s/it]
+calibrating blocks.2.mlp.fc1:  23%|██▎       | 17/74 [01:50<06:42,  7.07s/it]     
+reparaming blocks.2.mlp.fc1:  23%|██▎       | 17/74 [01:51<06:42,  7.07s/it] 
+reparaming blocks.2.mlp.fc1:  24%|██▍       | 18/74 [01:58<07:04,  7.57s/it]
+calibrating blocks.2.mlp.fc2:  24%|██▍       | 18/74 [01:58<07:04,  7.57s/it]
+calibrating blocks.2.mlp.fc2:  26%|██▌       | 19/74 [02:07<07:09,  7.81s/it]
+calibrating blocks.3.attn.qkv:  26%|██▌       | 19/74 [02:07<07:09,  7.81s/it]
+reparaming blocks.3.attn.qkv:  26%|██▌       | 19/74 [02:08<07:09,  7.81s/it] 
+reparaming blocks.3.attn.qkv:  27%|██▋       | 20/74 [02:14<06:46,  7.53s/it]
+calibrating blocks.3.attn.proj:  27%|██▋       | 20/74 [02:14<06:46,  7.53s/it]
+calibrating blocks.3.attn.proj:  28%|██▊       | 21/74 [02:16<05:26,  6.16s/it]
+calibrating blocks.3.attn.matmul1:  28%|██▊       | 21/74 [02:16<05:26,  6.16s/it]
+calibrating blocks.3.attn.matmul1:  30%|██▉       | 22/74 [02:24<05:46,  6.66s/it]
+calibrating blocks.3.attn.matmul2:  30%|██▉       | 22/74 [02:24<05:46,  6.66s/it]
+calibrating blocks.3.attn.matmul2:  31%|███       | 23/74 [02:32<06:01,  7.09s/it]
+calibrating blocks.3.mlp.fc1:  31%|███       | 23/74 [02:32<06:01,  7.09s/it]     
+reparaming blocks.3.mlp.fc1:  31%|███       | 23/74 [02:33<06:01,  7.09s/it] 
+reparaming blocks.3.mlp.fc1:  32%|███▏      | 24/74 [02:41<06:18,  7.57s/it]
+calibrating blocks.3.mlp.fc2:  32%|███▏      | 24/74 [02:41<06:18,  7.57s/it]
+calibrating blocks.3.mlp.fc2:  34%|███▍      | 25/74 [02:50<06:24,  7.86s/it]
+calibrating blocks.4.attn.qkv:  34%|███▍      | 25/74 [02:50<06:24,  7.86s/it]
+reparaming blocks.4.attn.qkv:  34%|███▍      | 25/74 [02:51<06:24,  7.86s/it] 
+reparaming blocks.4.attn.qkv:  35%|███▌      | 26/74 [02:56<05:54,  7.38s/it]
+calibrating blocks.4.attn.proj:  35%|███▌      | 26/74 [02:56<05:54,  7.38s/it]
+calibrating blocks.4.attn.proj:  36%|███▋      | 27/74 [02:59<04:43,  6.03s/it]
+calibrating blocks.4.attn.matmul1:  36%|███▋      | 27/74 [02:59<04:43,  6.03s/it]
+calibrating blocks.4.attn.matmul1:  38%|███▊      | 28/74 [03:07<05:02,  6.57s/it]
+calibrating blocks.4.attn.matmul2:  38%|███▊      | 28/74 [03:07<05:02,  6.57s/it]
+calibrating blocks.4.attn.matmul2:  39%|███▉      | 29/74 [03:15<05:14,  6.98s/it]
+calibrating blocks.4.mlp.fc1:  39%|███▉      | 29/74 [03:15<05:14,  6.98s/it]     
+reparaming blocks.4.mlp.fc1:  39%|███▉      | 29/74 [03:16<05:14,  6.98s/it] 
+reparaming blocks.4.mlp.fc1:  41%|████      | 30/74 [03:24<05:33,  7.58s/it]
+calibrating blocks.4.mlp.fc2:  41%|████      | 30/74 [03:24<05:33,  7.58s/it]
+calibrating blocks.4.mlp.fc2:  42%|████▏     | 31/74 [03:33<05:45,  8.02s/it]
+calibrating blocks.5.attn.qkv:  42%|████▏     | 31/74 [03:33<05:45,  8.02s/it]
+reparaming blocks.5.attn.qkv:  42%|████▏     | 31/74 [03:33<05:45,  8.02s/it] 
+reparaming blocks.5.attn.qkv:  43%|████▎     | 32/74 [03:39<05:12,  7.45s/it]
+calibrating blocks.5.attn.proj:  43%|████▎     | 32/74 [03:39<05:12,  7.45s/it]
+calibrating blocks.5.attn.proj:  45%|████▍     | 33/74 [03:41<04:07,  6.04s/it]
+calibrating blocks.5.attn.matmul1:  45%|████▍     | 33/74 [03:41<04:07,  6.04s/it]
+calibrating blocks.5.attn.matmul1:  46%|████▌     | 34/74 [03:49<04:21,  6.54s/it]
+calibrating blocks.5.attn.matmul2:  46%|████▌     | 34/74 [03:49<04:21,  6.54s/it]
+calibrating blocks.5.attn.matmul2:  47%|████▋     | 35/74 [03:57<04:28,  6.89s/it]
+calibrating blocks.5.mlp.fc1:  47%|████▋     | 35/74 [03:57<04:28,  6.89s/it]     
+reparaming blocks.5.mlp.fc1:  47%|████▋     | 35/74 [03:58<04:28,  6.89s/it] 
+reparaming blocks.5.mlp.fc1:  49%|████▊     | 36/74 [04:06<04:43,  7.45s/it]
+calibrating blocks.5.mlp.fc2:  49%|████▊     | 36/74 [04:06<04:43,  7.45s/it]
+calibrating blocks.5.mlp.fc2:  50%|█████     | 37/74 [04:14<04:46,  7.73s/it]
+calibrating blocks.6.attn.qkv:  50%|█████     | 37/74 [04:14<04:46,  7.73s/it]
+reparaming blocks.6.attn.qkv:  50%|█████     | 37/74 [04:15<04:46,  7.73s/it] 
+reparaming blocks.6.attn.qkv:  51%|█████▏    | 38/74 [04:20<04:19,  7.22s/it]
+calibrating blocks.6.attn.proj:  51%|█████▏    | 38/74 [04:20<04:19,  7.22s/it]
+calibrating blocks.6.attn.proj:  53%|█████▎    | 39/74 [04:23<03:27,  5.94s/it]
+calibrating blocks.6.attn.matmul1:  53%|█████▎    | 39/74 [04:23<03:27,  5.94s/it]
+calibrating blocks.6.attn.matmul1:  54%|█████▍    | 40/74 [04:31<03:41,  6.53s/it]
+calibrating blocks.6.attn.matmul2:  54%|█████▍    | 40/74 [04:31<03:41,  6.53s/it]
+calibrating blocks.6.attn.matmul2:  55%|█████▌    | 41/74 [04:40<03:56,  7.17s/it]
+calibrating blocks.6.mlp.fc1:  55%|█████▌    | 41/74 [04:40<03:56,  7.17s/it]     
+reparaming blocks.6.mlp.fc1:  55%|█████▌    | 41/74 [04:41<03:56,  7.17s/it] 
+reparaming blocks.6.mlp.fc1:  57%|█████▋    | 42/74 [04:48<04:06,  7.70s/it]
+calibrating blocks.6.mlp.fc2:  57%|█████▋    | 42/74 [04:48<04:06,  7.70s/it]
+calibrating blocks.6.mlp.fc2:  58%|█████▊    | 43/74 [04:57<04:07,  7.99s/it]
+calibrating blocks.7.attn.qkv:  58%|█████▊    | 43/74 [04:57<04:07,  7.99s/it]
+reparaming blocks.7.attn.qkv:  58%|█████▊    | 43/74 [04:58<04:07,  7.99s/it] 
+reparaming blocks.7.attn.qkv:  59%|█████▉    | 44/74 [05:03<03:40,  7.36s/it]
+calibrating blocks.7.attn.proj:  59%|█████▉    | 44/74 [05:03<03:40,  7.36s/it]
+calibrating blocks.7.attn.proj:  61%|██████    | 45/74 [05:06<02:53,  5.99s/it]
+calibrating blocks.7.attn.matmul1:  61%|██████    | 45/74 [05:06<02:53,  5.99s/it]
+calibrating blocks.7.attn.matmul1:  62%|██████▏   | 46/74 [05:14<03:04,  6.60s/it]
+calibrating blocks.7.attn.matmul2:  62%|██████▏   | 46/74 [05:14<03:04,  6.60s/it]
+calibrating blocks.7.attn.matmul2:  64%|██████▎   | 47/74 [05:22<03:09,  7.01s/it]
+calibrating blocks.7.mlp.fc1:  64%|██████▎   | 47/74 [05:22<03:09,  7.01s/it]     
+reparaming blocks.7.mlp.fc1:  64%|██████▎   | 47/74 [05:23<03:09,  7.01s/it] 
+reparaming blocks.7.mlp.fc1:  65%|██████▍   | 48/74 [05:31<03:16,  7.56s/it]
+calibrating blocks.7.mlp.fc2:  65%|██████▍   | 48/74 [05:31<03:16,  7.56s/it]
+calibrating blocks.7.mlp.fc2:  66%|██████▌   | 49/74 [05:39<03:16,  7.85s/it]
+calibrating blocks.8.attn.qkv:  66%|██████▌   | 49/74 [05:39<03:16,  7.85s/it]
+reparaming blocks.8.attn.qkv:  66%|██████▌   | 49/74 [05:40<03:16,  7.85s/it] 
+reparaming blocks.8.attn.qkv:  68%|██████▊   | 50/74 [05:45<02:55,  7.30s/it]
+calibrating blocks.8.attn.proj:  68%|██████▊   | 50/74 [05:45<02:55,  7.30s/it]
+calibrating blocks.8.attn.proj:  69%|██████▉   | 51/74 [05:48<02:16,  5.91s/it]
+calibrating blocks.8.attn.matmul1:  69%|██████▉   | 51/74 [05:48<02:16,  5.91s/it]
+calibrating blocks.8.attn.matmul1:  70%|███████   | 52/74 [05:57<02:30,  6.85s/it]
+calibrating blocks.8.attn.matmul2:  70%|███████   | 52/74 [05:57<02:30,  6.85s/it]
+calibrating blocks.8.attn.matmul2:  72%|███████▏  | 53/74 [06:05<02:29,  7.14s/it]
+calibrating blocks.8.mlp.fc1:  72%|███████▏  | 53/74 [06:05<02:29,  7.14s/it]     
+reparaming blocks.8.mlp.fc1:  72%|███████▏  | 53/74 [06:06<02:29,  7.14s/it] 
+reparaming blocks.8.mlp.fc1:  73%|███████▎  | 54/74 [06:14<02:33,  7.67s/it]
+calibrating blocks.8.mlp.fc2:  73%|███████▎  | 54/74 [06:14<02:33,  7.67s/it]
+calibrating blocks.8.mlp.fc2:  74%|███████▍  | 55/74 [06:22<02:31,  7.98s/it]
+calibrating blocks.9.attn.qkv:  74%|███████▍  | 55/74 [06:22<02:31,  7.98s/it]
+reparaming blocks.9.attn.qkv:  74%|███████▍  | 55/74 [06:23<02:31,  7.98s/it] 
+reparaming blocks.9.attn.qkv:  76%|███████▌  | 56/74 [06:29<02:13,  7.44s/it]
+calibrating blocks.9.attn.proj:  76%|███████▌  | 56/74 [06:29<02:13,  7.44s/it]
+calibrating blocks.9.attn.proj:  77%|███████▋  | 57/74 [06:31<01:43,  6.07s/it]
+calibrating blocks.9.attn.matmul1:  77%|███████▋  | 57/74 [06:31<01:43,  6.07s/it]
+calibrating blocks.9.attn.matmul1:  78%|███████▊  | 58/74 [06:39<01:46,  6.65s/it]
+calibrating blocks.9.attn.matmul2:  78%|███████▊  | 58/74 [06:39<01:46,  6.65s/it]
+calibrating blocks.9.attn.matmul2:  80%|███████▉  | 59/74 [06:47<01:44,  6.98s/it]
+calibrating blocks.9.mlp.fc1:  80%|███████▉  | 59/74 [06:47<01:44,  6.98s/it]     
+reparaming blocks.9.mlp.fc1:  80%|███████▉  | 59/74 [06:48<01:44,  6.98s/it] 
+reparaming blocks.9.mlp.fc1:  81%|████████  | 60/74 [06:56<01:44,  7.46s/it]
+calibrating blocks.9.mlp.fc2:  81%|████████  | 60/74 [06:56<01:44,  7.46s/it]
+calibrating blocks.9.mlp.fc2:  82%|████████▏ | 61/74 [07:04<01:41,  7.82s/it]
+calibrating blocks.10.attn.qkv:  82%|████████▏ | 61/74 [07:04<01:41,  7.82s/it]
+reparaming blocks.10.attn.qkv:  82%|████████▏ | 61/74 [07:05<01:41,  7.82s/it] 
+reparaming blocks.10.attn.qkv:  84%|████████▍ | 62/74 [07:12<01:31,  7.61s/it]
+calibrating blocks.10.attn.proj:  84%|████████▍ | 62/74 [07:12<01:31,  7.61s/it]
+calibrating blocks.10.attn.proj:  85%|████████▌ | 63/74 [07:15<01:09,  6.32s/it]
+calibrating blocks.10.attn.matmul1:  85%|████████▌ | 63/74 [07:15<01:09,  6.32s/it]
+calibrating blocks.10.attn.matmul1:  86%|████████▋ | 64/74 [07:25<01:13,  7.33s/it]
+calibrating blocks.10.attn.matmul2:  86%|████████▋ | 64/74 [07:25<01:13,  7.33s/it]
+calibrating blocks.10.attn.matmul2:  88%|████████▊ | 65/74 [07:34<01:11,  7.95s/it]
+calibrating blocks.10.mlp.fc1:  88%|████████▊ | 65/74 [07:34<01:11,  7.95s/it]     
+reparaming blocks.10.mlp.fc1:  88%|████████▊ | 65/74 [07:35<01:11,  7.95s/it] 
+reparaming blocks.10.mlp.fc1:  89%|████████▉ | 66/74 [07:44<01:08,  8.51s/it]
+calibrating blocks.10.mlp.fc2:  89%|████████▉ | 66/74 [07:44<01:08,  8.51s/it]
+calibrating blocks.10.mlp.fc2:  91%|█████████ | 67/74 [07:53<01:01,  8.75s/it]
+calibrating blocks.11.attn.qkv:  91%|█████████ | 67/74 [07:53<01:01,  8.75s/it]
+reparaming blocks.11.attn.qkv:  91%|█████████ | 67/74 [07:54<01:01,  8.75s/it] 
+reparaming blocks.11.attn.qkv:  92%|█████████▏| 68/74 [08:00<00:49,  8.21s/it]
+calibrating blocks.11.attn.proj:  92%|█████████▏| 68/74 [08:00<00:49,  8.21s/it]
+calibrating blocks.11.attn.proj:  93%|█████████▎| 69/74 [08:03<00:33,  6.75s/it]
+calibrating blocks.11.attn.matmul1:  93%|█████████▎| 69/74 [08:03<00:33,  6.75s/it]
+calibrating blocks.11.attn.matmul1:  95%|█████████▍| 70/74 [08:13<00:30,  7.55s/it]
+calibrating blocks.11.attn.matmul2:  95%|█████████▍| 70/74 [08:13<00:30,  7.55s/it]
+calibrating blocks.11.attn.matmul2:  96%|█████████▌| 71/74 [08:22<00:24,  8.07s/it]
+calibrating blocks.11.mlp.fc1:  96%|█████████▌| 71/74 [08:22<00:24,  8.07s/it]     
+reparaming blocks.11.mlp.fc1:  96%|█████████▌| 71/74 [08:23<00:24,  8.07s/it] 
+reparaming blocks.11.mlp.fc1:  97%|█████████▋| 72/74 [08:33<00:17,  8.83s/it]
+calibrating blocks.11.mlp.fc2:  97%|█████████▋| 72/74 [08:33<00:17,  8.83s/it]
+calibrating blocks.11.mlp.fc2:  99%|█████████▊| 73/74 [08:43<00:09,  9.35s/it]
+calibrating head:  99%|█████████▊| 73/74 [08:43<00:09,  9.35s/it]             
+calibrating head: 100%|██████████| 74/74 [08:44<00:00,  6.83s/it]
+calibrating head: 100%|██████████| 74/74 [08:44<00:00,  7.09s/it]
+2026-10-29 16:59:29 - mse guided calibration finished.
+Saving checkpoint to /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261029_165019_qkjoint_w3a3_seed3407_C_seeded_full_v3_lowrank_gate_r4_g0_lossdplr/vit_small_w3_a3_calibsize_128_mse.pth
+Validating after calibration ...
+Test: [0/782]	Time 1.124 (1.124)	Loss 4.6286 (4.6286)	Prec@1 15.625 (15.625)	Prec@5 26.562 (26.562)
+Test: [10/782]	Time 0.169 (0.253)	Loss 6.3640 (5.8695)	Prec@1 0.000 (5.682)	Prec@5 1.562 (13.920)
+Test: [20/782]	Time 0.168 (0.192)	Loss 4.7714 (5.9842)	Prec@1 10.938 (4.390)	Prec@5 28.125 (10.789)
+Test: [30/782]	Time 0.169 (0.182)	Loss 5.2350 (5.8104)	Prec@1 9.375 (5.696)	Prec@5 26.562 (13.810)
+Test: [40/782]	Time 0.165 (0.178)	Loss 7.5340 (5.7007)	Prec@1 1.562 (6.250)	Prec@5 1.562 (16.159)
+Test: [50/782]	Time 0.163 (0.176)	Loss 4.0290 (5.5969)	Prec@1 12.500 (6.281)	Prec@5 43.750 (17.402)
+Test: [60/782]	Time 0.148 (0.173)	Loss 4.9131 (5.6411)	Prec@1 10.938 (5.712)	Prec@5 23.438 (16.265)
+Test: [70/782]	Time 0.163 (0.171)	Loss 5.5284 (5.7884)	Prec@1 9.375 (5.216)	Prec@5 18.750 (14.789)
+Test: [80/782]	Time 0.117 (0.165)	Loss 6.7840 (5.8139)	Prec@1 0.000 (5.093)	Prec@5 1.562 (14.198)
+Test: [90/782]	Time 0.167 (0.164)	Loss 4.8346 (5.7625)	Prec@1 10.938 (5.048)	Prec@5 25.000 (14.475)
+Test: [100/782]	Time 0.162 (0.164)	Loss 5.2037 (5.7407)	Prec@1 4.688 (5.090)	Prec@5 17.188 (14.403)
+Test: [110/782]	Time 0.165 (0.163)	Loss 5.8241 (5.7035)	Prec@1 1.562 (5.180)	Prec@5 9.375 (14.682)
+Test: [120/782]	Time 0.160 (0.163)	Loss 6.5789 (5.7165)	Prec@1 0.000 (5.191)	Prec@5 1.562 (14.411)
+Test: [130/782]	Time 0.157 (0.162)	Loss 8.8572 (5.8366)	Prec@1 0.000 (4.854)	Prec@5 0.000 (13.430)
+Test: [140/782]	Time 0.125 (0.160)	Loss 6.2749 (5.9110)	Prec@1 0.000 (4.566)	Prec@5 3.125 (12.688)
+Test: [150/782]	Time 0.157 (0.159)	Loss 7.6262 (5.9804)	Prec@1 0.000 (4.284)	Prec@5 0.000 (12.014)
+Test: [160/782]	Time 0.169 (0.160)	Loss 7.1998 (6.0470)	Prec@1 0.000 (4.028)	Prec@5 1.562 (11.355)
+Test: [170/782]	Time 0.170 (0.160)	Loss 5.0654 (6.0862)	Prec@1 9.375 (3.874)	Prec@5 23.438 (10.956)
+Test: [180/782]	Time 0.176 (0.161)	Loss 5.5431 (6.1098)	Prec@1 0.000 (3.738)	Prec@5 7.812 (10.679)
+Test: [190/782]	Time 0.165 (0.161)	Loss 7.9294 (6.1565)	Prec@1 0.000 (3.616)	Prec@5 0.000 (10.308)
+Test: [200/782]	Time 0.120 (0.161)	Loss 7.0207 (6.1843)	Prec@1 0.000 (3.483)	Prec@5 0.000 (9.966)
+Test: [210/782]	Time 0.165 (0.160)	Loss 5.2723 (6.1943)	Prec@1 6.250 (3.399)	Prec@5 18.750 (9.775)
+Test: [220/782]	Time 0.168 (0.160)	Loss 6.7291 (6.1873)	Prec@1 0.000 (3.457)	Prec@5 0.000 (9.884)
+Test: [230/782]	Time 0.165 (0.160)	Loss 5.8288 (6.1564)	Prec@1 1.562 (3.598)	Prec@5 7.812 (10.268)
+Test: [240/782]	Time 0.167 (0.160)	Loss 6.7500 (6.1715)	Prec@1 0.000 (3.501)	Prec@5 0.000 (10.023)
+Test: [250/782]	Time 0.157 (0.160)	Loss 4.5586 (6.1281)	Prec@1 7.812 (3.629)	Prec@5 25.000 (10.464)
+Test: [260/782]	Time 0.167 (0.160)	Loss 6.1428 (6.1027)	Prec@1 0.000 (3.658)	Prec@5 0.000 (10.572)
+Test: [270/782]	Time 0.117 (0.160)	Loss 5.6891 (6.1019)	Prec@1 3.125 (3.690)	Prec@5 12.500 (10.672)
+Test: [280/782]	Time 0.102 (0.158)	Loss 6.4957 (6.1140)	Prec@1 0.000 (3.598)	Prec@5 0.000 (10.504)
+Test: [290/782]	Time 0.157 (0.157)	Loss 5.8577 (6.1108)	Prec@1 0.000 (3.598)	Prec@5 6.250 (10.454)
+Test: [300/782]	Time 0.160 (0.157)	Loss 6.2700 (6.1060)	Prec@1 1.562 (3.587)	Prec@5 3.125 (10.398)
+Test: [310/782]	Time 0.157 (0.157)	Loss 6.3970 (6.0819)	Prec@1 1.562 (3.668)	Prec@5 9.375 (10.747)
+Test: [320/782]	Time 0.160 (0.157)	Loss 6.0136 (6.0882)	Prec@1 6.250 (3.699)	Prec@5 17.188 (10.850)
+Test: [330/782]	Time 0.159 (0.157)	Loss 7.8333 (6.1161)	Prec@1 0.000 (3.611)	Prec@5 0.000 (10.617)
+Test: [340/782]	Time 0.160 (0.157)	Loss 6.4411 (6.1312)	Prec@1 1.562 (3.579)	Prec@5 6.250 (10.557)
+Test: [350/782]	Time 0.158 (0.157)	Loss 6.9818 (6.1380)	Prec@1 1.562 (3.597)	Prec@5 6.250 (10.541)
+Test: [360/782]	Time 0.160 (0.157)	Loss 6.5423 (6.1436)	Prec@1 4.688 (3.601)	Prec@5 10.938 (10.557)
+Test: [370/782]	Time 0.160 (0.157)	Loss 7.4333 (6.1650)	Prec@1 0.000 (3.525)	Prec@5 0.000 (10.373)
+Test: [380/782]	Time 0.160 (0.157)	Loss 6.7609 (6.1740)	Prec@1 0.000 (3.531)	Prec@5 0.000 (10.351)
+Test: [390/782]	Time 0.158 (0.157)	Loss 5.6461 (6.1852)	Prec@1 9.375 (3.589)	Prec@5 15.625 (10.378)
+Test: [400/782]	Time 0.143 (0.157)	Loss 7.1377 (6.2036)	Prec@1 0.000 (3.585)	Prec@5 0.000 (10.302)
+Test: [410/782]	Time 0.144 (0.157)	Loss 5.3796 (6.2287)	Prec@1 4.688 (3.528)	Prec@5 20.312 (10.143)
+Test: [420/782]	Time 0.153 (0.157)	Loss 5.4195 (6.2359)	Prec@1 3.125 (3.522)	Prec@5 14.062 (10.147)
+Test: [430/782]	Time 0.156 (0.157)	Loss 6.9493 (6.2569)	Prec@1 0.000 (3.473)	Prec@5 0.000 (10.006)
+Test: [440/782]	Time 0.153 (0.157)	Loss 6.7986 (6.2623)	Prec@1 1.562 (3.447)	Prec@5 1.562 (9.963)
+Test: [450/782]	Time 0.159 (0.157)	Loss 6.4242 (6.2706)	Prec@1 0.000 (3.492)	Prec@5 4.688 (10.037)
+Test: [460/782]	Time 0.158 (0.157)	Loss 8.8312 (6.2903)	Prec@1 0.000 (3.501)	Prec@5 0.000 (10.012)
+Test: [470/782]	Time 0.163 (0.157)	Loss 8.3881 (6.3112)	Prec@1 0.000 (3.470)	Prec@5 0.000 (9.889)
+Test: [480/782]	Time 0.155 (0.157)	Loss 7.0964 (6.3210)	Prec@1 1.562 (3.456)	Prec@5 1.562 (9.778)
+Test: [490/782]	Time 0.155 (0.157)	Loss 5.8734 (6.3381)	Prec@1 0.000 (3.392)	Prec@5 3.125 (9.642)
+Test: [500/782]	Time 0.153 (0.157)	Loss 6.7804 (6.3470)	Prec@1 0.000 (3.343)	Prec@5 1.562 (9.565)
+Test: [510/782]	Time 0.155 (0.157)	Loss 6.0587 (6.3536)	Prec@1 3.125 (3.345)	Prec@5 7.812 (9.549)
+Test: [520/782]	Time 0.153 (0.157)	Loss 6.4605 (6.3500)	Prec@1 0.000 (3.314)	Prec@5 1.562 (9.507)
+Test: [530/782]	Time 0.153 (0.157)	Loss 7.5782 (6.3619)	Prec@1 0.000 (3.293)	Prec@5 0.000 (9.443)
+Test: [540/782]	Time 0.155 (0.157)	Loss 8.1271 (6.3740)	Prec@1 0.000 (3.319)	Prec@5 3.125 (9.467)
+Test: [550/782]	Time 0.155 (0.157)	Loss 6.2799 (6.3808)	Prec@1 3.125 (3.287)	Prec@5 6.250 (9.386)
+Test: [560/782]	Time 0.155 (0.156)	Loss 4.5616 (6.3776)	Prec@1 14.062 (3.326)	Prec@5 34.375 (9.428)
+Test: [570/782]	Time 0.155 (0.156)	Loss 7.0178 (6.3839)	Prec@1 0.000 (3.306)	Prec@5 1.562 (9.372)
+Test: [580/782]	Time 0.153 (0.156)	Loss 5.5041 (6.3955)	Prec@1 6.250 (3.262)	Prec@5 21.875 (9.289)
+Test: [590/782]	Time 0.164 (0.156)	Loss 6.5780 (6.4075)	Prec@1 4.688 (3.236)	Prec@5 10.938 (9.198)
