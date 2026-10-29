@@ -519,6 +519,13 @@ class BlockReconstructor(QuantCalibrator):
             logging.info('adaround training for {} ...'.format(name))
             self.reconstruct_single_block(name, block, device, iters=self.iters,
                                           quant_act=quant_act, mode=mode, drop_prob=drop_prob)
+            if self.qk_joint_options and name.startswith('blocks.') and hasattr(block, 'attn'):
+                from utils.qk_joint import post_round_teacher_kl
+                result = self.qk_joint_results[-1]
+                result['teacher_kl_post_round'] = post_round_teacher_kl(
+                    self, block, result['holdout_samples'],
+                    self.qk_joint_options['batch_size'], device)
+                logging.info('QK post-round result: %s', json.dumps(result, sort_keys=True))
             self.quanted_blocks.append(name)
             logging.info('finished reconstructing {}.'.format(name))
         for name, module in self.model.named_modules():

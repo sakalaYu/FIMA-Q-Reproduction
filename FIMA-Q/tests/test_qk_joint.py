@@ -16,7 +16,8 @@ from quant_layers.linear import AsymmetricallyBatchingQuantLinear
 from quant_layers.matmul import AsymmetricallyBatchingQuantMatMul
 from quantizers.adaround import AdaRoundQuantizer
 from utils.qk_joint import (QKParameters, make_work_block, calibrate_qk_block,
-                            attention_kl, teacher_attention, dplr_terms)
+                            attention_kl, teacher_attention, dplr_terms,
+                            accept_qk_candidate, post_round_teacher_kl, reconstruction_objective)
 
 
 def linear(inputs, outputs, branches=1):
@@ -144,6 +145,40 @@ class QKJointTests(unittest.TestCase):
             rotation = fit.rotation()
             self.assertTrue(torch.allclose(rotation @ rotation.transpose(-1, -2), fit.eye.expand(2, -1, -1), atol=1e-6))
 
+    def test_low_rank_rotation_is_foldable_and_receives_task_gradient(self):
+        block = copy.deepcopy(self.block)
+        work, fit = make_work_block(block, "C", rotation_rank=1)
+        full = QKParameters(block.attn, "C")
+        self.assertLess(sum(p.numel() for p in fit.parameters() if p.requires_grad),
+                        sum(p.numel() for p in full.parameters() if p.requires_grad))
+        target = block(self.x).detach()
+        gradient = torch.rand(2, target[0].numel())
+        sum(dplr_terms(work(self.x), target, gradient, torch.eye(2))).backward()
+        self.assertGreater(float(fit.rot_b.grad.abs().sum()), 0)
+        with torch.no_grad():
+            fit.rot_b.normal_(0, 0.1)
+            rotation = fit.rotation()
+            self.assertTrue(torch.allclose(rotation @ rotation.transpose(-1, -2),
+                                           fit.eye.expand(2, -1, -1), atol=1e-6))
+            mode(block, "raw")
+            before = block(self.x)
+            work_quant = work(self.x)
+            fit.fold_into(block.attn)
+            self.assertTrue(torch.allclose(block(self.x), before, atol=2e-6, rtol=2e-6))
+            mode(block, "quant_forward")
+            self.assertTrue(torch.allclose(block(self.x), work_quant, atol=2e-6, rtol=2e-6))
+
+    def test_relative_kl_gate_rejects_tiny_improvement(self):
+        self.assertEqual(accept_qk_candidate(0.526376, 0.525862, 0.05)[0], False)
+        self.assertEqual(accept_qk_candidate(0.526376, 0.490, 0.05)[0], True)
+
+    def test_post_round_probe_preserves_modes_and_uses_holdout(self):
+        recon = Reconstructor(self.model, self.x)
+        before = [(module, module.mode) for module in self.model.modules() if hasattr(module, "mode")]
+        measured = post_round_teacher_kl(recon, self.block, 4, 2, torch.device("cpu"))
+        self.assertGreaterEqual(measured, 0)
+        self.assertTrue(all(module.mode == mode_before for module, mode_before in before))
+
     def test_attention_target_and_row_shift_invariance(self):
         target = teacher_attention(self.block, self.x)
         scores = target.log()
@@ -183,6 +218,32 @@ class QKJointTests(unittest.TestCase):
                 self.assertTrue(torch.equal(rng, torch.random.get_rng_state()))
                 self.assertTrue(all(module.mode == "raw" for module in block.modules() if hasattr(module, "mode")))
                 self.assertTrue(torch.isfinite(block.attn.qkv.weight).all())
+
+    def test_low_rank_calibration_reports_protocol_and_preserves_rng(self):
+        recon = Reconstructor(self.model, self.x)
+        rng = torch.random.get_rng_state().clone()
+        result = calibrate_qk_block(recon, "blocks.0", self.block, torch.device("cpu"),
+                                    dict(variant="C", protocol="v3_lowrank_gate",
+                                         rotation_rank=1, min_relative_kl=0.05,
+                                         steps=3, holdout=4, batch_size=4,
+                                         lr=0.003, eval_every=1, seed=3407))
+        self.assertEqual(result["protocol"], "v3_lowrank_gate")
+        self.assertEqual(result["rotation_rank"], 1)
+        self.assertEqual(result["min_relative_kl"], 0.05)
+        self.assertTrue(torch.equal(rng, torch.random.get_rng_state()))
+
+    def test_loss_is_independent_of_rotation_variant(self):
+        self.assertEqual(reconstruction_objective("B"), "mse")
+        self.assertEqual(reconstruction_objective("C"), "dplr")
+        for variant, loss in (("A", "dplr"), ("B", "dplr"), ("C", "mse")):
+            with self.subTest(variant=variant, loss=loss):
+                model = copy.deepcopy(self.model)
+                recon = Reconstructor(model, self.x)
+                result = calibrate_qk_block(recon, "blocks.0", model.blocks[0], torch.device("cpu"),
+                    dict(variant=variant, reconstruction_loss=loss, steps=2,
+                         holdout=4, batch_size=4, lr=0.003, eval_every=1, seed=3407))
+                self.assertEqual(result["reconstruction_loss"], loss)
+                self.assertEqual(result["fisher_rank"], 2 if loss == "dplr" else 0)
 
 
 if __name__ == "__main__":

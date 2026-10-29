@@ -2,7 +2,8 @@
 
 A: joint attention-aware Q/K scale factors.
 B: A + bounded, reciprocal Q/K channel scaling.
-C: B + per-head Cayley rotations, optimized with a task-derived DPLR loss.
+C: B + per-head Cayley rotations.
+The block objective can be selected independently of the transform variant.
 
 This module trains a temporary copy of ONE block. Only ordinary QKV weights,
 biases and quantizer state are committed; no inference module is introduced.
@@ -21,6 +22,7 @@ from torch.nn import functional as F
 
 
 QK_JOINT_PROTOCOL = "v2_integer_zp"
+LOW_RANK_PROTOCOL = "v3_lowrank_gate"
 
 
 def round_ste(x):
@@ -136,6 +138,41 @@ class QKParameters(nn.Module):
             attention.matmul1.B_quantizer.scale.copy_(self.k_scale * self.log_k_scale.exp())
 
 
+class LowRankQKParameters(QKParameters):
+    """A rank-bounded Cayley tangent update on top of the fixed Hadamard."""
+
+    def __init__(self, attention, rank):
+        super().__init__(attention, "C")
+        if not 1 <= rank <= self.dim // 2:
+            raise ValueError("Rotation rank must be between 1 and half the head dimension")
+        del self.skew
+        basis = torch.randn(self.heads, self.dim, rank, device=self.weight.device,
+                            dtype=self.weight.dtype)
+        basis = torch.linalg.qr(basis).Q
+        self.rot_a = nn.Parameter(basis)
+        self.rot_b = nn.Parameter(torch.zeros_like(basis))
+
+    def tangent(self):
+        product = self.rot_a @ self.rot_b.transpose(-1, -2)
+        return product - product.transpose(-1, -2)
+
+    def rotation(self):
+        skew = self.tangent()
+        return torch.linalg.solve(self.eye - 0.5 * skew, self.eye + 0.5 * skew)
+
+    def project(self):
+        with torch.no_grad():
+            self.log_q_scale.clamp_(-math.log(2), math.log(2))
+            self.log_k_scale.clamp_(-math.log(2), math.log(2))
+            self.log_diag.clamp_(-math.log(2), math.log(2))
+            # Bound the actual rotation generator, not its non-unique factors.
+            norms = self.tangent().norm(dim=(-2, -1)).clamp_min(1e-12)
+            self.rot_b.mul_((2.0 / norms).clamp(max=1.0)[:, None, None])
+
+    def penalty(self):
+        return 0.01 * self.log_diag.square().mean() + 0.001 * self.tangent().square().mean()
+
+
 def _quant_weight_bias(qkv):
     fit = qkv._qk_fit
     weight, bias, scale, zero = fit.transformed()
@@ -153,7 +190,7 @@ def _quant_k(matmul, value):
     return fake_quant(value, fit.k_scale * fit.log_k_scale.exp(), fit.k_zero, matmul.B_quantizer)
 
 
-def make_work_block(block, variant):
+def make_work_block(block, variant, rotation_rank=0):
     # Avoid copying the hundreds of MB of reconstruction caches with the block.
     names = ("raw_input", "raw_out", "raw_grad", "quanted_input", "quanted_out",
              "tmp_input", "tmp_out", "tmp_grad", "delta_out", "inverse_B")
@@ -175,7 +212,8 @@ def make_work_block(block, variant):
             module.training_mode = True
         if hasattr(module, "drop_prob"):
             module.drop_prob = 1.0
-    fit = QKParameters(work.attn, variant)
+    fit = (LowRankQKParameters(work.attn, rotation_rank)
+           if variant == "C" and rotation_rank else QKParameters(work.attn, variant))
     work.attn.qkv.add_module("_qk_fit", fit)
     work.attn.qkv.quant_weight_bias = MethodType(_quant_weight_bias, work.attn.qkv)
     work.attn.matmul1.__dict__["_qk_fit_ref"] = fit
@@ -197,6 +235,18 @@ def teacher_attention(block, x):
 
 def attention_kl(scores, target):
     return F.kl_div(F.log_softmax(scores, dim=-1), target, reduction="none").sum(-1).mean()
+
+
+def reconstruction_objective(variant, requested="auto"):
+    """Separate learned-rotation capacity from its pre-calibration objective."""
+    if requested not in ("auto", "mse", "dplr"):
+        raise ValueError("Q/K reconstruction loss must be auto, mse or dplr")
+    return ("dplr" if variant == "C" else "mse") if requested == "auto" else requested
+
+
+def accept_qk_candidate(before_kl, best_kl, min_relative_kl):
+    relative_gain = (before_kl - best_kl) / max(before_kl, 1e-12)
+    return best_kl < before_kl - 1e-8 and relative_gain >= min_relative_kl, relative_gain
 
 
 def dplr_terms(pred, target, gradient, inverse):
@@ -304,8 +354,40 @@ def full_teacher_kl(reconstructor, block, work, indices, batch_size, device):
         _restore_state(state)
 
 
+def post_round_teacher_kl(reconstructor, block, holdout, batch_size, device):
+    """Measure teacher KL after the actual AdaRound stage on the same images."""
+    state = _module_state(reconstructor.model)
+    teacher = torch.cat(reconstructor.raw_pred_softmaxs, dim=0).detach()
+    teacher = (teacher.clamp_min(1e-30).log() * reconstructor.temperature).softmax(-1)
+    indices = list(range(len(teacher) - holdout, len(teacher)))
+    total = 0.0
+    try:
+        _prefix_modes(reconstructor, block)
+        with torch.no_grad():
+            for start in range(0, holdout, batch_size):
+                chosen = indices[start:start + batch_size]
+                pred = reconstructor.model(_images(reconstructor, chosen, device))
+                total += float(F.kl_div(F.log_softmax(pred, -1),
+                                        teacher[chosen].to(device), reduction="sum"))
+        return max(0.0, total / holdout)
+    finally:
+        _restore_state(state)
+
+
 def _calibrate(reconstructor, name, block, device, options):
     variant = options["variant"]
+    rec_objective = reconstruction_objective(variant, options.get("reconstruction_loss", "auto"))
+    protocol = options.get("protocol", QK_JOINT_PROTOCOL)
+    rotation_rank = options.get("rotation_rank", 0)
+    min_relative_kl = options.get("min_relative_kl", 0.0)
+    if protocol not in (QK_JOINT_PROTOCOL, LOW_RANK_PROTOCOL):
+        raise ValueError("Unknown Q/K calibration protocol")
+    if protocol == QK_JOINT_PROTOCOL and (rotation_rank or min_relative_kl):
+        raise ValueError("Low-rank parameters require the low-rank protocol")
+    if protocol == LOW_RANK_PROTOCOL and (variant != "C" or rotation_rank <= 0):
+        raise ValueError("Low-rank protocol requires C and a positive rotation rank")
+    if not 0 <= min_relative_kl < 1:
+        raise ValueError("Relative KL threshold must be in [0, 1)")
     count = len(block.raw_input)
     holdout = options["holdout"]
     if not 1 <= holdout < count:
@@ -315,7 +397,7 @@ def _calibrate(reconstructor, name, block, device, options):
     # images. Reserve the LAST 128, keeping that prefix in the training portion.
     validation = list(range(train_count, count))
     batch_size = options["batch_size"]
-    work, fit = make_work_block(block, variant)
+    work, fit = make_work_block(block, variant, rotation_rank=rotation_rank)
     train_parameters = [parameter for parameter in fit.parameters() if parameter.requires_grad]
     optimizer = torch.optim.Adam(train_parameters, lr=options["lr"])
     generator = torch.Generator().manual_seed(options["seed"] + int(name.split(".")[-1]))
@@ -324,7 +406,7 @@ def _calibrate(reconstructor, name, block, device, options):
         lambda module, inputs, output: scores.__setitem__("value", output * work.attn.scale))
     gradient = inverse = None
     try:
-        if variant == "C":
+        if rec_objective == "dplr":
             gradient, inverse = estimate_dplr(reconstructor, block, train_count, batch_size, device)
 
         def terms(indices):
@@ -364,6 +446,7 @@ def _calibrate(reconstructor, name, block, device, options):
             return total / holdout
 
         initial_local = best_score = local_score()
+        selected_local = initial_local
         best = initial
         before_kl = full_teacher_kl(reconstructor, block, work, validation, batch_size, device)
         best_kl = last_candidate_kl = before_kl
@@ -387,9 +470,10 @@ def _calibrate(reconstructor, name, block, device, options):
                     best_score = candidate
                 if math.isfinite(last_candidate_kl) and last_candidate_kl < best_kl - 1e-8:
                     best_kl = last_candidate_kl
+                    selected_local = candidate
                     best = {key: value.detach().clone() for key, value in fit.named_parameters()}
         restore(best)
-        accepted = best_kl < before_kl - 1e-8
+        accepted, relative_kl_gain = accept_qk_candidate(before_kl, best_kl, min_relative_kl)
         if not accepted:
             restore(initial)
         # Verify both function preservation AND equality of the temporary fake
@@ -421,12 +505,18 @@ def _calibrate(reconstructor, name, block, device, options):
             raise
         finally:
             _restore_state(original_modes)
-        return dict(block=name, variant=variant, protocol=QK_JOINT_PROTOCOL,
+        return dict(block=name, variant=variant, protocol=protocol,
+                    reconstruction_loss=rec_objective,
                     train_samples=train_count, holdout_samples=holdout,
                     steps=options["steps"], trainable_parameters=sum(p.numel() for p in train_parameters),
-                    fisher_rank=reconstructor.k if variant == "C" else 0,
+                    rotation_rank=rotation_rank, min_relative_kl=min_relative_kl,
+                    relative_kl_gain=relative_kl_gain,
+                    fisher_rank=reconstructor.k if rec_objective == "dplr" else 0,
                     initial_local_objective=initial_local, best_local_objective=best_score,
-                    teacher_kl_before=before_kl, teacher_kl_after=best_kl,
+                    selected_local_objective=selected_local if accepted else initial_local,
+                    teacher_kl_before=before_kl,
+                    teacher_kl_after=best_kl if accepted else before_kl,
+                    teacher_kl_best_candidate=best_kl,
                     teacher_kl_last_candidate=last_candidate_kl,
                     accepted=accepted, fp_max_abs_error=fp_max_error)
     finally:

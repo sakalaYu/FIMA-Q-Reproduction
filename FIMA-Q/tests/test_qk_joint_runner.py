@@ -32,11 +32,16 @@ class RunnerTests(unittest.TestCase):
             item.stop()
         self.temp.cleanup()
 
-    def add(self, filename, variant=None, blocks=12, top1=65.15, tensor_hash="b", rotation=True):
+    def add(self, filename, variant=None, blocks=12, top1=65.15, tensor_hash="b", rotation=True,
+            loss=None, protocol=None):
         extra = "num_workers=8, "
         if variant:
             extra += f"qk_joint_variant='{variant}', "
             extra += ", ".join(f"{key}={value!r}" for key, value in runner.DEFAULTS.items()) + ", "
+            if loss is not None:
+                extra += f"qk_joint_reconstruction_loss={loss!r}, "
+            if protocol is not None:
+                extra += f"qk_joint_protocol={protocol!r}, "
         text = log_text(bits=3, rotation=rotation, top1=top1, tensor_hash=tensor_hash)
         text = text.replace("Namespace(", "Namespace(" + extra, 1)
         if variant:
@@ -60,6 +65,15 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(report["count"], 1)
         self.assertAlmostEqual(report["rows"][0]["delta_fixed_pp"], 0.5)
         self.assertAlmostEqual(report["rows"][0]["delta_baseline_pp"], 1.792)
+
+    def test_old_method_uses_the_prior_fixed_run_when_a_later_control_exists(self):
+        self.add("001_headwise_rotation.log", top1=64.650)
+        self.add("002_qkjoint_A.log", variant="A", top1=64.388)
+        self.add("003_headwise_rotation.log", top1=64.524)
+        with redirect_stdout(io.StringIO()):
+            report = runner.summarize(self.args, write=False)
+        self.assertAlmostEqual(report["rows"][0]["delta_fixed_pp"], -0.262)
+        self.assertAlmostEqual(report["rows"][0]["fixed_reference"]["top1"], 64.650)
 
     def test_input_mismatch_does_not_report_a_gain(self):
         self.add("001_headwise_rotation.log", top1=64.650)
@@ -86,6 +100,31 @@ class RunnerTests(unittest.TestCase):
                                 ("--optim-size", "1024"), ("--seed", "3407")):
                 self.assertEqual(cmd[cmd.index(flag) + 1], value)
         self.assertEqual(len({runner.name(variant, 3407) for variant in ("A", "B", "C")}), 3)
+
+    def test_low_rank_run_has_distinct_identity_and_parameters(self):
+        self.args.protocol = "v3_lowrank_gate"
+        self.args.rotation_rank = 4
+        self.args.min_relative_kl = 0.05
+        cmd = runner.command("C", self.args)
+        self.assertEqual(cmd[cmd.index("--qk-joint-protocol") + 1], self.args.protocol)
+        self.assertEqual(cmd[cmd.index("--qk-joint-rotation-rank") + 1], "4")
+        self.assertEqual(cmd[cmd.index("--qk-joint-min-relative-kl") + 1], "0.05")
+        self.assertNotEqual(runner.name("C", 3407),
+                            runner.name("C", 3407, self.args.protocol, 4, 0.05))
+
+    def test_loss_controls_have_distinct_identity_and_resume_matching(self):
+        self.add("001_qkjoint_B.log", variant="B", protocol=runner.PROTOCOL, loss="mse")
+        self.args.reconstruction_loss = "dplr"
+        self.assertIsNone(runner.latest(runner.available_runs(), "B", self.args, runner.PROTOCOL))
+        self.args.reconstruction_loss = "mse"
+        self.assertIsNotNone(runner.latest(runner.available_runs(), "B", self.args, runner.PROTOCOL))
+        self.assertNotEqual(runner.name("C", 3407, reconstruction_loss="mse"),
+                            runner.name("C", 3407, reconstruction_loss="dplr"))
+
+    def test_explicit_dplr_reuses_the_previous_auto_c_protocol(self):
+        self.add("001_qkjoint_C.log", variant="C", protocol=runner.PROTOCOL)
+        self.args.reconstruction_loss = "dplr"
+        self.assertIsNotNone(runner.latest(runner.available_runs(), "C", self.args, runner.PROTOCOL))
 
 
 if __name__ == "__main__":

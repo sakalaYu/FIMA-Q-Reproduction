@@ -118,12 +118,16 @@ def get_args_parser():
     parser.add_argument('--headwise-mode', choices=('all', 'qk', 'vo'), default='all',
                         help='rotation location; requires --headwise-hadamard for qk/vo')
     parser.add_argument('--qk-joint-variant', choices=('none', 'A', 'B', 'C'), default='none')
-    parser.add_argument('--qk-joint-protocol', choices=('v2_integer_zp',), default='v2_integer_zp')
+    parser.add_argument('--qk-joint-protocol', choices=('v2_integer_zp', 'v3_lowrank_gate'), default='v2_integer_zp')
     parser.add_argument('--qk-joint-steps', type=int, default=300)
     parser.add_argument('--qk-joint-batch-size', type=int, default=8)
     parser.add_argument('--qk-joint-holdout', type=int, default=128)
     parser.add_argument('--qk-joint-lr', type=float, default=0.003)
     parser.add_argument('--qk-joint-eval-every', type=int, default=50)
+    parser.add_argument('--qk-joint-rotation-rank', type=int, default=0)
+    parser.add_argument('--qk-joint-min-relative-kl', type=float, default=0.0)
+    parser.add_argument('--qk-joint-reconstruction-loss', choices=('auto', 'mse', 'dplr'), default='auto',
+                        help='pre-calibration block loss; original full reconstruction remains DPLR')
     parser.add_argument('--attention-relation', choices=('none', 'uniform', 'fisher', 'aligned'), default='none')
     parser.add_argument('--relation-protocol', choices=('relation_v1', 'relation_v2_alignment'), default='relation_v1')
     parser.add_argument('--relation-weight', type=float, default=0.1)
@@ -301,7 +305,11 @@ def main(args):
                 raise ValueError('QK joint calibration requires fisher_dplr reconstruction')
             if not 0 < args.qk_joint_holdout < cfg.optim_size:
                 raise ValueError('QK joint holdout must be between 1 and optim_size - 1')
-            qk_options = dict(variant=args.qk_joint_variant, steps=args.qk_joint_steps,
+            qk_options = dict(variant=args.qk_joint_variant, protocol=args.qk_joint_protocol,
+                              reconstruction_loss=args.qk_joint_reconstruction_loss,
+                              rotation_rank=args.qk_joint_rotation_rank,
+                              min_relative_kl=args.qk_joint_min_relative_kl,
+                              steps=args.qk_joint_steps,
                               batch_size=args.qk_joint_batch_size, holdout=args.qk_joint_holdout,
                               lr=args.qk_joint_lr, eval_every=args.qk_joint_eval_every, seed=args.seed)
         relation_options = None
