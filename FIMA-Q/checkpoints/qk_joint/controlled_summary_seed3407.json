@@ -9,7 +9,7 @@
       "rotation_rank": 0,
       "gate": 0.0,
       "run": {
-        "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261029_140109_qkjoint_w3a3_seed3407_C_seeded_full_v2_integer_zp_lossdplr/output.log",
+        "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261029_140109_qkjoint_w3a3_seed3407_C_seeded_full_v2_integer_zp_lossdplr\\output.log",
         "args": {
           "model": "vit_small",
           "config": "./configs/3bit/best.py",
@@ -431,7 +431,7 @@
       "rotation_rank": 0,
       "gate": 0.0,
       "run": {
-        "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261029_140136_qkjoint_w3a3_seed3407_B_seeded_full_v2_integer_zp_lossdplr/output.log",
+        "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261029_140136_qkjoint_w3a3_seed3407_B_seeded_full_v2_integer_zp_lossdplr\\output.log",
         "args": {
           "model": "vit_small",
           "config": "./configs/3bit/best.py",
@@ -853,7 +853,7 @@
       "rotation_rank": 0,
       "gate": 0.0,
       "run": {
-        "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261029_140203_qkjoint_w3a3_seed3407_C_seeded_full_v2_integer_zp_lossmse/output.log",
+        "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261029_140203_qkjoint_w3a3_seed3407_C_seeded_full_v2_integer_zp_lossmse\\output.log",
         "args": {
           "model": "vit_small",
           "config": "./configs/3bit/best.py",
@@ -1275,7 +1275,7 @@
       "rotation_rank": 4,
       "gate": 0.0,
       "run": {
-        "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261029_191328_qkjoint_w3a3_seed3407_C_seeded_full_v3_lowrank_gate_r4_g0_lossdplr/output.log",
+        "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261029_191328_qkjoint_w3a3_seed3407_C_seeded_full_v3_lowrank_gate_r4_g0_lossdplr\\output.log",
         "args": {
           "model": "vit_small",
           "config": "./configs/3bit/best.py",
@@ -1697,7 +1697,7 @@
       "rotation_rank": 0,
       "gate": 0.0,
       "run": {
-        "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261029_191402_qkjoint_w3a3_seed3407_B_seeded_full_v2_integer_zp_lossmse/output.log",
+        "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261029_191402_qkjoint_w3a3_seed3407_B_seeded_full_v2_integer_zp_lossmse\\output.log",
         "args": {
           "model": "vit_small",
           "config": "./configs/3bit/best.py",
@@ -2119,7 +2119,7 @@
       "rotation_rank": 0,
       "gate": 0.0,
       "run": {
-        "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261029_191428_qkjoint_w3a3_seed3407_A_seeded_full_v2_integer_zp_lossdplr/output.log",
+        "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261029_191428_qkjoint_w3a3_seed3407_A_seeded_full_v2_integer_zp_lossdplr\\output.log",
         "args": {
           "model": "vit_small",
           "config": "./configs/3bit/best.py",
@@ -2541,7 +2541,7 @@
       "rotation_rank": 4,
       "gate": 0.05,
       "run": {
-        "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261029_223530_qkjoint_w3a3_seed3407_C_seeded_full_v3_lowrank_gate_r4_g50_lossdplr/output.log",
+        "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261029_223530_qkjoint_w3a3_seed3407_C_seeded_full_v3_lowrank_gate_r4_g50_lossdplr\\output.log",
         "args": {
           "model": "vit_small",
           "config": "./configs/3bit/best.py",
@@ -3012,7 +3012,7 @@
   "rotation_loss_interaction_pp": 0.055999999999997385,
   "fixed_controls": [
     {
-      "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261012_180903_headwise_w3a3_seed3407_rotation_seeded_full/output.log",
+      "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261012_180903_headwise_w3a3_seed3407_rotation_seeded_full\\output.log",
       "args": {
         "model": "vit_small",
         "config": "./configs/3bit/best.py",
@@ -3095,7 +3095,7 @@
       "reconstruction_seconds": 8292.385
     },
     {
-      "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261021_134203_headwise_relation_w3a3_seed3407_control_seeded_full_relation_v1/output.log",
+      "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261021_134203_headwise_relation_w3a3_seed3407_control_seeded_full_relation_v1\\output.log",
       "args": {
         "model": "vit_small",
         "config": "./configs/3bit/best.py",
