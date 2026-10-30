@@ -9,7 +9,8 @@ import sys
 import time
 
 from run_local_teacher import (ROOT, DEFAULT_CONFIG, read_config, resolve_path,
-                               experiment_identity, atomic_json)
+                               experiment_identity, atomic_json, resolve_inputs,
+                               add_source_arguments, apply_source_arguments)
 
 SUITES = {
     "prepare": ["prepare"], "probe": ["probe"],
@@ -57,27 +58,44 @@ def summary(directory):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
-    parser.add_argument("--suite", choices=list(SUITES) + ["summary"], default="screen")
+    parser.add_argument("--suite", choices=list(SUITES) + ["summary", "check"], default="screen")
     parser.add_argument("--worker", type=int, default=1)
     parser.add_argument("--workers", type=int, default=3)
     parser.add_argument("--gpu", default="0")
     parser.add_argument("--gpu-slots", type=int, choices=(1, 2, 3), default=1)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
+    add_source_arguments(parser)
     args = parser.parse_args()
     config_path = args.config.resolve()
-    cfg = read_config(config_path)
     try:
-        jobs = planned_jobs(args.suite, args.worker, args.workers) if args.suite != "summary" else []
+        cfg = apply_source_arguments(read_config(config_path), args)
+        jobs = planned_jobs(args.suite, args.worker, args.workers) if args.suite not in ("summary", "check") else []
     except ValueError as error:
         parser.error(str(error))
     if args.dry_run:
+        print("Student:", resolve_path(cfg["checkpoint"]),
+              "exists=" + str(resolve_path(cfg["checkpoint"]).is_file()))
+        print("Teacher:", cfg["teacher_checkpoint"] or "auto: local FP file, then timm cache/pretrained")
         for arm in jobs:
             print("%s, GPU=%s, slots=%s" % (arm, args.gpu, args.gpu_slots))
-            print(shlex.join(command(config_path, arm, "<computed-after-checkpoint-check>")))
+            print("Launcher will write resolved_config.json and execute:")
+            print(shlex.join(command("<resolved_config.json>", arm, "<computed-after-checkpoint-check>")))
         return
+    cfg = resolve_inputs(cfg, allow_download=args.suite in ("prepare", "check"))
     signature, identity = experiment_identity(cfg)
     directory = resolve_path(cfg["output_root"]) / signature[:16]
+    print("Student:", cfg["checkpoint"], flush=True)
+    print("FP teacher:", cfg["teacher_checkpoint"], flush=True)
+    print("Expected student Top-1:", cfg["expected_baseline_top1"], flush=True)
+    print("Fingerprint:", signature, flush=True)
+    if args.suite == "check":
+        import torch
+        from run_local_teacher import load_models
+        student, teacher = load_models(cfg, torch.device("cpu"))
+        print("Strict teacher/student loading passed; W3A3 blocks=%d; no GPU/data evaluation performed" %
+              len(student.blocks), flush=True)
+        return
     if args.suite == "summary":
         summary(directory)
         return
@@ -87,12 +105,16 @@ def main():
     directory.mkdir(parents=True, exist_ok=True)
     if args.suite != "prepare" and not (directory / "prepared.json").exists():
         parser.error("Run --suite prepare first with this same config")
+    config_path = directory / "resolved_config.json"
+    atomic_json(config_path, cfg)
+    print("Resolved config:", config_path, flush=True)
     atomic_json(directory / ("sources_worker%d.json" % args.worker), identity)
     for arm in jobs:
-        result_path = directory / arm / ("probe.json" if arm == "probe" else "result.json")
+        result_path = (directory / "prepared.json" if arm == "prepare" else
+                       directory / arm / ("probe.json" if arm == "probe" else "result.json"))
         with job_lock("local_teacher_%s_%s" % (signature[:16], arm)):
             if args.resume and result_path.exists():
-                if arm != "probe" and json.loads(result_path.read_text()).get("status") != "completed":
+                if arm not in ("prepare", "probe") and json.loads(result_path.read_text()).get("status") != "completed":
                     raise RuntimeError("Result is marked invalid; inspect it before rerunning")
                 print("Skip completed:", arm, flush=True)
                 continue

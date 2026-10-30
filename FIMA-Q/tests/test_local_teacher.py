@@ -1,6 +1,7 @@
 """CPU numerical and interrupted-resume checks on real W3A3 quantizers."""
 import copy
 import importlib.util
+import json
 from pathlib import Path
 import sys
 import tempfile
@@ -160,6 +161,76 @@ class LocalTeacherTests(unittest.TestCase):
             a = torch.load(full / "model.pth", map_location="cpu")
             b = torch.load(resumed / "model.pth", map_location="cpu")
             self.assertTrue(all(torch.equal(a[key], b[key]) for key in a))
+
+
+class ModelSourceTests(unittest.TestCase):
+    def config(self, root):
+        path = root / "student.pth"
+        torch.save({"weight": torch.ones(2)}, path)
+        return dict(checkpoint=str(path), teacher_checkpoint=None,
+                    teacher_model="vit_small_patch16_224", output_root=str(root / "results"))
+
+    def test_missing_student_and_explicit_missing_teacher_fail_without_substitution(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            cfg = self.config(root)
+            with patch.object(entry, "ROOT", root):
+                cfg["teacher_checkpoint"] = str(root / "missing.safetensors")
+                with self.assertRaisesRegex(FileNotFoundError, "Explicit FP"):
+                    entry.resolve_inputs(cfg)
+                cfg["checkpoint"] = str(root / "missing_student.pth")
+                with self.assertRaisesRegex(FileNotFoundError, "student checkpoint missing"):
+                    entry.resolve_inputs(cfg)
+
+    def test_timm_teacher_is_materialized_once_without_vit_raw(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            cfg = self.config(root)
+            calls = []
+            fake_timm = types.ModuleType("timm")
+            fake_timm.__version__ = "test"
+            def create_model(name, pretrained):
+                calls.append((name, pretrained))
+                return nn.Linear(2, 3)
+            fake_timm.create_model = create_model
+            with patch.object(entry, "ROOT", root), patch.dict(sys.modules, {"timm": fake_timm}):
+                a = entry.resolve_inputs(cfg)
+                b = entry.resolve_inputs(cfg, allow_download=False)
+                self.assertEqual(a, b)
+                self.assertEqual(len(calls), 1)
+                self.assertFalse((root / "checkpoints/vit_raw").exists())
+                self.assertEqual(entry.teacher_state(a["teacher_checkpoint"])["weight"].shape, (3, 2))
+                json.dumps(a)
+
+    def test_safetensors_is_supported_and_quantized_teacher_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            cfg = self.config(root)
+            bad = root / "quantized.pth"
+            torch.save({"a_quantizer.scale": torch.ones(1)}, bad)
+            with self.assertRaisesRegex(ValueError, "cannot serve"):
+                entry.teacher_state(bad)
+            try:
+                from safetensors.torch import save_file
+            except ImportError:
+                self.skipTest("safetensors not installed")
+            path = root / "checkpoints/model.safetensors"
+            path.parent.mkdir()
+            save_file({"head.weight": torch.ones(3, 2)}, str(path))
+            with patch.object(entry, "ROOT", root):
+                resolved = entry.resolve_inputs(cfg, allow_download=False)
+            self.assertEqual(resolved["teacher_checkpoint"], str(path.resolve()))
+            self.assertTrue(torch.equal(entry.teacher_state(path)["head.weight"], torch.ones(3, 2)))
+
+    def test_student_override_requires_corresponding_baseline(self):
+        args = types.SimpleNamespace(checkpoint="B_mse.pth", teacher_checkpoint=None,
+                                     expected_baseline_top1=None)
+        with self.assertRaisesRegex(ValueError, "requires --expected-baseline-top1"):
+            entry.apply_source_arguments({}, args)
+        args.expected_baseline_top1 = 64.726
+        cfg = entry.apply_source_arguments({}, args)
+        self.assertEqual(cfg["checkpoint"], "B_mse.pth")
+        self.assertEqual(cfg["expected_baseline_top1"], 64.726)
 
 
 if __name__ == "__main__":

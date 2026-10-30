@@ -2,7 +2,9 @@
 
 ## 本轮实现范围
 
-从完整 B-MSE W3A3 checkpoint 开始，冻结旋转、权重及其量化尺度、零点、LayerNorm 和分类头。
+默认从本地实际保留的固定全部 Hadamard W3A3 checkpoint 开始，历史 Top-1 为 64.650%。
+本地没有 B-MSE 最终权重，不能把日志当作 checkpoint。服务器保留 B-MSE 时可以显式切换，见下文。
+冻结旋转、权重及其量化尺度、零点、LayerNorm 和分类头。
 逐块更新已有的激活量化尺度，包括线性层输入及两个 attention matmul 的输入尺度。
 每个尺度限制在本块开始时的 `[0.9, 1.1]` 倍范围内。没有新增部署层，没有重新学习旋转，也没有重启 AdaRound。
 
@@ -59,17 +61,37 @@ ImageNet val 只在准备阶段和每项训练结束后评估，不用于早停�
 建议同时同步本说明及 `tests/test_local_teacher.py`。
 沿用服务器已有的 fimaq 环境、quantizers、quant_layers、utils/wrap_net.py 和 run_headwise_experiments.py。
 
-默认 B-MSE checkpoint：
+默认 checkpoint（已在本地确认存在）：
 
 ```
-checkpoints/quant_result/20261029_191402_qkjoint_w3a3_seed3407_B_seeded_full_v2_integer_zp_lossmse/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop.pth
+checkpoints/quant_result/20261012_180903_headwise_w3a3_seed3407_rotation_seeded_full/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop.pth
 ```
 
-本地结果同步没有该大文件，必须使用服务器保留的最终 checkpoint。缺失会报清楚路径，不会回退到别的模型。
-准备阶段完整验证，默认要求 Top-1 与 64.726 相差不超过 0.03 pp；不符合时停止训练，先排查加载和配置。
+准备阶段完整验证，默认要求 Top-1 与 64.650 相差不超过 0.03 pp；不符合时停止训练，先排查加载和配置。
 配置里的 checkpoint、dataset 等相对路径均相对于 `FIMA-Q` 项目根目录。
 
+### 不依赖 vit_raw 目录的教师加载
+
+JSON 的 `teacher_checkpoint` 默认为 `null`。启动器先找项目中的原始浮点 `.safetensors` 或旧 `.bin`；
+本地实际有 `checkpoints/vit_raw/model.safetensors`，不是之前错误写死的 `vit_small_patch16_224.bin`。
+服务器没有该目录也可以运行：找不到本地教师时，使用原 `test_quant.py` 同名的
+`timm.create_model('vit_small_patch16_224', pretrained=True)`，先读 timm/Hugging Face 缓存，缓存缺失才下载。
+只在 prepare/check 时解析一次，保存到 `checkpoints/local_teacher/assets/vit_small_patch16_224_fp.pth`。
+此后所有窗口固定使用解析后的教师文件和 hash，不在每个任务中重新选择教师。
+
+也可以用 `--teacher-checkpoint /实际路径/model.safetensors` 或 `.pth/.bin` 指定教师；显式路径错误会停止，
+不会悄悄换模型。`.safetensors` 需要 fimaq 环境安装 safetensors；缺失时会给出安装提示。
+学生 checkpoint 缺失时直接停止；不会自动替换成其他精度或其他实验的学生。
+
 ## 运行
+
+可先做 CPU 加载检查（不使用 GPU、不评估 ImageNet；首次可能解析/下载教师）：
+
+```bash
+cd ~/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q
+conda activate fimaq
+python -u scripts/run_local_teacher_experiments.py --suite check
+```
 
 先在一个窗口运行一次准备，成功后再启动三个筛选窗口：
 
@@ -124,6 +146,26 @@ python -u scripts/run_local_teacher_experiments.py --suite controls --worker 3 -
 python scripts/run_local_teacher_experiments.py --suite summary
 ```
 
+### 如果服务器保留了 B-MSE 权重
+
+可另外建立一轮 B-MSE 起点的实验。先运行：
+
+```bash
+python -u scripts/run_local_teacher_experiments.py --suite prepare --workers 1 --gpu 0 --gpu-slots 1 --resume \
+  --checkpoint checkpoints/quant_result/20261029_191402_qkjoint_w3a3_seed3407_B_seeded_full_v2_integer_zp_lossmse/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop.pth \
+  --expected-baseline-top1 64.726
+```
+
+启动器会显示 `Resolved config: .../resolved_config.json`。
+后续 probe、screen、controls、summary 全部加 `--config` 指向它，例如：
+
+```bash
+python -u scripts/run_local_teacher_experiments.py --config checkpoints/local_teacher/实际指纹/resolved_config.json --suite screen --worker 1 --workers 3 --gpu 0 --gpu-slots 3 --resume
+```
+
+窗口 2/3 分别改成 `--worker 2` / `--worker 3`。不能只在 prepare 切换 B-MSE，之后却使用默认固定旋转配置。
+不同起点分目录记录，分别计算增益，不能把两种起点混在一次配对比较中。
+
 ## 中断恢复与配置
 
 每 50 步及每块结束原子保存 `progress.pt`：完整模型、当前块位置/步数、优化器、抽样生成器、固定 DPLR 和尺度边界中心。
@@ -157,9 +199,12 @@ state_dict 仍以浮点容器保存 fake-quant 模型，不能把其磁盘大小
 
 ## 验证范围
 
-本地 CPU 七项检查使用真实项目 W3A3 quantizer，覆盖 STE 前向与输入梯度、局部路径差异、标准化 KD、
-固定 DPLR、尺度边界、三窗口任务划分，以及中断恢复后与连续训练参数完全一致。
-本地缺少 timm 和服务器 B-MSE checkpoint，未运行完整 timm/Imagenet/GPU 实验；不能预先宣称提分。
+本地 CPU 十一项检查使用真实项目 W3A3 quantizer，覆盖 STE 前向与输入梯度、局部路径差异、标准化 KD、
+固定 DPLR、尺度边界、三窗口任务划分、中断恢复后与连续训练参数完全一致，以及缺失路径、
+safetensors 加载、无 vit_raw 目录时的教师一次缓存、切换学生时的基线检查。
+另外在临时依赖目录安装 timm 0.9.16，实际严格加载本地 64.650% checkpoint 与原始 safetensors 教师，
+以随机图像验证完整 ViT 的 STE 前向、拆分前向均为零误差，E3/E4/E5 对当前块尺度的梯度均非零且有限。
+未运行服务器 GPU/ImageNet 完整实验，不能预先宣称提分。临时依赖不需要同步到服务器。
 首次准备阶段会检查实际模型拆分、STE 数值和完整基线精度。
 
 ```bash

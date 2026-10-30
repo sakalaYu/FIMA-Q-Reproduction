@@ -34,6 +34,10 @@ def resolve_path(value):
 
 def read_config(path):
     cfg = json.loads(Path(path).read_text(encoding="utf-8"))
+    cfg.setdefault("teacher_checkpoint", None)
+    cfg.setdefault("teacher_model", "vit_small_patch16_224")
+    if cfg["teacher_model"] != "vit_small_patch16_224":
+        raise ValueError("This protocol supports only vit_small_patch16_224")
     for key in ("train_count", "holdout_count", "steps_per_block", "batch_size",
                 "eval_batch_size", "fisher_count", "fisher_rank", "save_every"):
         if not isinstance(cfg[key], int) or cfg[key] < 1:
@@ -52,8 +56,107 @@ def read_config(path):
     return cfg
 
 
+def add_source_arguments(parser):
+    parser.add_argument("--checkpoint", help="Override the final W3A3 student checkpoint")
+    parser.add_argument("--teacher-checkpoint", help="Explicit FP .safetensors/.pth/.bin; no fallback if missing")
+    parser.add_argument("--expected-baseline-top1", type=float,
+                        help="Required when overriding the student; complete validation runs before training")
+
+
+def apply_source_arguments(cfg, args):
+    cfg = dict(cfg)
+    if args.checkpoint:
+        if args.expected_baseline_top1 is None:
+            raise ValueError("--checkpoint requires --expected-baseline-top1 (e.g. 64.726 for B-MSE)")
+        cfg["checkpoint"] = args.checkpoint
+    if args.teacher_checkpoint:
+        cfg["teacher_checkpoint"] = args.teacher_checkpoint
+    if args.expected_baseline_top1 is not None:
+        cfg["expected_baseline_top1"] = args.expected_baseline_top1
+    return cfg
+
+
+def teacher_state(path):
+    """Read original FP tensors, including the safetensors actually synced here."""
+    import torch
+    path = Path(path)
+    if path.suffix.lower() == ".safetensors":
+        try:
+            from safetensors.torch import load_file
+        except ImportError as error:
+            raise RuntimeError("Install safetensors in fimaq: python -m pip install safetensors") from error
+        state = load_file(str(path), device="cpu")
+    else:
+        state = torch.load(path, map_location="cpu")
+    while isinstance(state, dict):
+        nested = next((state[key] for key in ("state_dict", "model")
+                       if key in state and isinstance(state[key], dict)), None)
+        if nested is None:
+            break
+        state = nested
+    if not isinstance(state, dict) or not state or not all(torch.is_tensor(x) for x in state.values()):
+        raise ValueError("Expected original FP teacher state_dict: " + str(path))
+    if all(key.startswith("module.") for key in state):
+        state = {key[7:]: value for key, value in state.items()}
+    if any("quantizer" in key or ".adapter." in key for key in state):
+        raise ValueError("A quantized/adapter checkpoint cannot serve as the original FP teacher")
+    return state
+
+
+def resolve_inputs(cfg, allow_download=True):
+    """Resolve once in the launcher, then pin exact paths/hashes for all workers."""
+    cfg = dict(cfg)
+    student_path = resolve_path(cfg["checkpoint"])
+    if not student_path.is_file():
+        raise FileNotFoundError("Final W3A3 student checkpoint missing: %s. "
+            "Use --checkpoint EXISTING.pth --expected-baseline-top1 VALUE; "
+            "no substitute student is loaded automatically." % student_path)
+    cfg["checkpoint"] = str(student_path)
+    if cfg["teacher_checkpoint"]:
+        path = resolve_path(cfg["teacher_checkpoint"])
+        if not path.is_file():
+            raise FileNotFoundError("Explicit FP teacher checkpoint missing: " + str(path))
+        cfg["teacher_checkpoint"] = str(path)
+        return cfg
+    # No mandatory vit_raw directory. Recognize the locally synced safetensors,
+    # or obtain the same timm pretrained model used by test_quant.py's fallback.
+    candidates = ("checkpoints/model.safetensors", "model.safetensors",
+                  "checkpoints/vit_raw/model.safetensors",
+                  "checkpoints/vit_raw/vit_small_patch16_224.bin")
+    for relative in candidates:
+        path = ROOT / relative
+        if path.is_file():
+            cfg["teacher_checkpoint"] = str(path.resolve())
+            return cfg
+    path = resolve_path(cfg["output_root"]) / "assets" / (cfg["teacher_model"] + "_fp.pth")
+    if not path.is_file():
+        if not allow_download:
+            raise FileNotFoundError("No local/cached FP teacher. Run --suite prepare to resolve "
+                                   "timm pretrained weights, or pass --teacher-checkpoint FILE")
+        with file_lock(path.with_suffix(".lock")):
+            if not path.is_file():
+                import timm
+                print("Resolving FP teacher with timm pretrained=True (cache first): "
+                      + cfg["teacher_model"], flush=True)
+                try:
+                    teacher = timm.create_model(cfg["teacher_model"], pretrained=True).cpu().eval()
+                except Exception as error:
+                    raise RuntimeError("Could not obtain FP teacher from timm/Hugging Face cache. "
+                        "Supply --teacher-checkpoint /path/to/original/model.safetensors "
+                        "or .pth; the original exception follows.") from error
+                atomic_torch(path, teacher.state_dict())
+                atomic_json(path.with_suffix(".json"), dict(
+                    model=cfg["teacher_model"], timm=timm.__version__,
+                    source="timm pretrained=True", pretrained_cfg=getattr(teacher, "pretrained_cfg", {}),
+                    sha256=sha_file(path)))
+                del teacher
+    cfg["teacher_checkpoint"] = str(path.resolve())
+    return cfg
+
+
 def experiment_identity(cfg):
     paths = [Path(__file__), ROOT / "scripts/run_local_teacher_experiments.py",
+             ROOT / "scripts/run_headwise_experiments.py",
              ROOT / "utils/local_teacher.py", ROOT / "utils/wrap_net.py",
              ROOT / "configs/3bit/best.py"]
     for folder in ("quantizers", "quant_layers"):
@@ -86,14 +189,31 @@ def atomic_torch(path, value):
 
 @contextmanager
 def file_lock(path):
-    import fcntl
     Path(path).parent.mkdir(parents=True, exist_ok=True)
-    with Path(path).open("a") as stream:
-        fcntl.flock(stream, fcntl.LOCK_EX)
+    with Path(path).open("a+b") as stream:
+        if os.name == "nt":
+            import msvcrt
+            if stream.seek(0, 2) == 0:
+                stream.write(b"0")
+                stream.flush()
+            stream.seek(0)
+            while True:
+                try:
+                    msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)
+                    break
+                except OSError:
+                    time.sleep(0.1)
+        else:
+            import fcntl
+            fcntl.flock(stream, fcntl.LOCK_EX)
         try:
             yield
         finally:
-            fcntl.flock(stream, fcntl.LOCK_UN)
+            if os.name == "nt":
+                stream.seek(0)
+                msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                fcntl.flock(stream, fcntl.LOCK_UN)
 
 
 def load_models(cfg, device):
@@ -104,8 +224,8 @@ def load_models(cfg, device):
     from utils.wrap_net import wrap_modules_in_net
     from utils.local_teacher import quant_mode
 
-    teacher = timm.create_model("vit_small_patch16_224", pretrained=False,
-                               checkpoint_path=str(resolve_path(cfg["teacher_checkpoint"])))
+    teacher = timm.create_model(cfg.get("teacher_model", "vit_small_patch16_224"), pretrained=False)
+    teacher.load_state_dict(teacher_state(resolve_path(cfg["teacher_checkpoint"])), strict=True)
     # Exact block boundaries are unchanged by Hadamard, Q/K reciprocal scaling
     # and internal LayerNorm reparameterization. Original FP blocks are valid
     # functions on h_Q; do NOT use hard quantized weights as an FP teacher.
@@ -186,6 +306,8 @@ def prepare(directory, cfg, signature, student, teacher, device):
     from utils.local_teacher import quant_state, vit_prefix, vit_suffix
 
     if (directory / "prepared.json").exists():
+        if json.loads((directory / "prepared.json").read_text())["signature"] != signature:
+            raise RuntimeError("Existing preparation has a different fingerprint")
         return
     started = time.perf_counter()
     if device.type == "cuda":
@@ -239,6 +361,9 @@ def prepare(directory, cfg, signature, student, teacher, device):
     atomic_torch(directory / "baseline_predictions.pt", predictions)
     atomic_json(directory / "prepared.json", dict(signature=signature, baseline=baseline,
                 data_sha256=digest.hexdigest(), samples=samples, transform=repr(transform),
+                student_checkpoint=cfg["checkpoint"], teacher_checkpoint=cfg["teacher_checkpoint"],
+                student_sha256=sha_file(resolve_path(cfg["checkpoint"])),
+                teacher_sha256=sha_file(resolve_path(cfg["teacher_checkpoint"])),
                 torch=torch.__version__, cuda=torch.version.cuda,
                 preparation_seconds=time.perf_counter() - started,
                 preparation_peak_allocated_bytes=torch.cuda.max_memory_allocated(device)
