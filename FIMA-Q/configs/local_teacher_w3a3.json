@@ -1,5 +1,5 @@
 {
-  "protocol": "local_teacher_w3a3_scale_v2_sources",
+  "protocol": "local_teacher_w3a3_scale_v3_eval",
   "dataset": "../imagenet_fimaq",
   "checkpoint": "checkpoints/quant_result/20261012_180903_headwise_w3a3_seed3407_rotation_seeded_full/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop.pth",
   "teacher_checkpoint": null,
@@ -13,6 +13,8 @@
   "steps_per_block": 300,
   "batch_size": 8,
   "eval_batch_size": 32,
+  "validation_batch_size": 64,
+  "validation_profile": "legacy",
   "relative_lr": 0.001,
   "scale_radius": 0.1,
   "fisher_count": 128,

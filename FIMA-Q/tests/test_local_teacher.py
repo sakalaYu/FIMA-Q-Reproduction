@@ -233,5 +233,62 @@ class ModelSourceTests(unittest.TestCase):
         self.assertEqual(cfg["expected_baseline_top1"], 64.726)
 
 
+class EvaluationPolicyTests(unittest.TestCase):
+    def test_legacy_validation_is_separate_from_cache_and_restores_backends(self):
+        cfg = dict(eval_batch_size=32, validation_batch_size=64, validation_profile="legacy")
+        original = (torch.backends.cudnn.benchmark, torch.backends.cudnn.deterministic,
+                    torch.backends.cudnn.allow_tf32, torch.backends.cuda.matmul.allow_tf32)
+        with self.assertRaisesRegex(RuntimeError, "interrupted"):
+            with entry.evaluation_backend(cfg) as policy:
+                self.assertEqual(policy["batch_size"], 64)
+                self.assertTrue(torch.backends.cudnn.allow_tf32)
+                self.assertFalse(torch.backends.cudnn.deterministic)
+                self.assertFalse(torch.backends.cuda.matmul.allow_tf32)
+                raise RuntimeError("interrupted")
+        actual = (torch.backends.cudnn.benchmark, torch.backends.cudnn.deterministic,
+                  torch.backends.cudnn.allow_tf32, torch.backends.cuda.matmul.allow_tf32)
+        self.assertEqual(actual, original)
+
+    def test_accuracy_is_integer_counted_and_pairing_is_preserved(self):
+        from torch.utils.data import TensorDataset
+        logits = torch.eye(6)[:5] * 5
+        labels = torch.tensor([0, 1, 0, 3, 4])
+        data = TensorDataset(logits, labels)
+        cfg = dict(dataset="unused", eval_batch_size=32, validation_batch_size=2,
+                   validation_profile="strict", num_workers=0)
+        baseline = dict(labels=labels, correct=torch.tensor([False, True, True, True, True]))
+        with patch("torchvision.datasets.ImageFolder", return_value=data):
+            result, predictions = entry.validation(nn.Identity(), cfg, None, torch.device("cpu"), baseline)
+        self.assertEqual(result["top1"], 80.0)
+        self.assertEqual(result["repaired"], 1)
+        self.assertEqual(result["damaged"], 1)
+        self.assertEqual(result["delta_pp"], 0.0)
+        self.assertTrue(torch.equal(predictions["labels"], labels))
+
+    def test_audit_has_fixed_profiles_and_does_not_choose_highest_score(self):
+        fake_timm = types.ModuleType("timm")
+        fake_data = types.ModuleType("timm.data")
+        fake_data.resolve_data_config = lambda *a, **k: {}
+        fake_data.create_transform = lambda **k: None
+        teacher = types.SimpleNamespace(default_cfg={})
+        calls = []
+        def validate(student, cfg, transform, device, baseline):
+            policy = entry.evaluation_policy(cfg)
+            calls.append((policy["profile"], policy["batch_size"]))
+            prediction = dict(predictions=torch.tensor([0, 1]))
+            return dict(top1=50.0 + len(calls), evaluation_policy=policy), prediction
+        with tempfile.TemporaryDirectory() as temporary:
+            with patch.dict(sys.modules, {"timm": fake_timm, "timm.data": fake_data}), \
+                 patch.object(entry, "validation", validate), \
+                 patch.object(entry, "evaluation_metadata", return_value={}), \
+                 patch.object(entry, "record", lambda *a: None):
+                cfg = dict(validation_profile="legacy", validation_batch_size=64)
+                entry.audit_evaluation(Path(temporary), cfg, "test", None, teacher, torch.device("cpu"))
+                self.assertEqual(cfg["validation_profile"], "legacy")
+                self.assertTrue((Path(temporary) / "evaluation_audit.json").is_file())
+        self.assertEqual(calls, [("legacy", 64), ("strict", 64), ("strict", 32)])
+        self.assertEqual(planned_jobs("audit", 1, 1), ["audit"])
+
+
 if __name__ == "__main__":
     unittest.main()

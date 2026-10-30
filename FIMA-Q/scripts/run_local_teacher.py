@@ -36,10 +36,16 @@ def read_config(path):
     cfg = json.loads(Path(path).read_text(encoding="utf-8"))
     cfg.setdefault("teacher_checkpoint", None)
     cfg.setdefault("teacher_model", "vit_small_patch16_224")
+    # Full validation is distinct from the smaller teacher/cache forward batch.
+    # Match the original run's batch=64 and PyTorch 2.x default backend policy.
+    cfg.setdefault("validation_batch_size", 64)
+    cfg.setdefault("validation_profile", "legacy")
+    if cfg["validation_profile"] not in ("legacy", "strict"):
+        raise ValueError("validation_profile must be legacy or strict")
     if cfg["teacher_model"] != "vit_small_patch16_224":
         raise ValueError("This protocol supports only vit_small_patch16_224")
     for key in ("train_count", "holdout_count", "steps_per_block", "batch_size",
-                "eval_batch_size", "fisher_count", "fisher_rank", "save_every"):
+                "eval_batch_size", "validation_batch_size", "fisher_count", "fisher_rank", "save_every"):
         if not isinstance(cfg[key], int) or cfg[key] < 1:
             raise ValueError(key + " must be a positive integer")
     if cfg["fisher_count"] > cfg["train_count"]:
@@ -265,17 +271,49 @@ def record(directory, event):
     print(json.dumps(event, allow_nan=False), flush=True)
 
 
+def evaluation_policy(cfg):
+    """Explicit policy; never select the profile with the highest accuracy."""
+    profile = cfg.get("validation_profile", "legacy")
+    if profile not in ("legacy", "strict"):
+        raise ValueError("Unknown validation profile: " + profile)
+    return dict(profile=profile,
+                batch_size=cfg.get("validation_batch_size", 64),
+                cudnn_benchmark=False,
+                cudnn_deterministic=profile == "strict",
+                matmul_allow_tf32=False,
+                cudnn_allow_tf32=profile == "legacy")
+
+
+@contextmanager
+def evaluation_backend(cfg):
+    import torch
+    policy = evaluation_policy(cfg)
+    owners = {"cudnn_benchmark": (torch.backends.cudnn, "benchmark"),
+              "cudnn_deterministic": (torch.backends.cudnn, "deterministic"),
+              "matmul_allow_tf32": (torch.backends.cuda.matmul, "allow_tf32"),
+              "cudnn_allow_tf32": (torch.backends.cudnn, "allow_tf32")}
+    saved = {key: getattr(owner, attr) for key, (owner, attr) in owners.items()}
+    try:
+        for key, (owner, attr) in owners.items():
+            setattr(owner, attr, policy[key])
+        yield policy
+    finally:
+        for key, (owner, attr) in owners.items():
+            setattr(owner, attr, saved[key])
+
+
 def validation(student, cfg, transform, device, baseline=None):
     import torch
     from torch.utils.data import DataLoader
     from torchvision.datasets import ImageFolder
     from utils.local_teacher import quant_state
     dataset = ImageFolder(str(resolve_path(cfg["dataset"]) / "val"), transform=transform)
-    loader = DataLoader(dataset, batch_size=cfg["eval_batch_size"], shuffle=False,
+    policy = evaluation_policy(cfg)
+    loader = DataLoader(dataset, batch_size=policy["batch_size"], shuffle=False,
                         num_workers=cfg["num_workers"], pin_memory=device.type == "cuda")
     predictions, correct, labels_all = [], [], []
     top5_count = count = 0
-    with quant_state(student, ste=False), torch.no_grad():
+    with evaluation_backend(cfg), quant_state(student, ste=False), torch.no_grad():
         for images, labels in loader:
             logits = student(images.to(device))
             top = logits.topk(5, -1).indices.cpu()
@@ -286,8 +324,8 @@ def validation(student, cfg, transform, device, baseline=None):
             count += len(labels)
     correct = torch.cat(correct)
     labels_all = torch.cat(labels_all)
-    result = dict(images=count, top1=float(correct.float().mean()) * 100,
-                  top5=100 * top5_count / count)
+    result = dict(images=count, top1=100 * int(correct.sum()) / count,
+                  top5=100 * top5_count / count, evaluation_policy=policy)
     if baseline is not None:
         if not torch.equal(labels_all, baseline["labels"]):
             raise ValueError("Validation order/labels changed; cannot pair predictions")
@@ -296,6 +334,43 @@ def validation(student, cfg, transform, device, baseline=None):
                       damaged=int((old & ~correct).sum()),
                       delta_pp=100 * (int(correct.sum()) - int(old.sum())) / count)
     return result, dict(predictions=torch.cat(predictions), correct=correct, labels=labels_all)
+
+
+def evaluation_metadata(cfg, teacher):
+    import torch
+    import timm
+    import torchvision
+    from timm.data import resolve_data_config
+    return dict(student_sha256=sha_file(resolve_path(cfg["checkpoint"])),
+                teacher_sha256=sha_file(resolve_path(cfg["teacher_checkpoint"])),
+                data_config=resolve_data_config(teacher.default_cfg, model=teacher),
+                torch=torch.__version__, timm=timm.__version__,
+                torchvision=torchvision.__version__, cuda=torch.version.cuda,
+                cudnn_version=torch.backends.cudnn.version())
+
+
+def audit_evaluation(directory, cfg, signature, student, teacher, device):
+    """No training. Pair three prescribed numerical policies on the same state."""
+    import torch
+    from timm.data import resolve_data_config, create_transform
+    transform = create_transform(**resolve_data_config(teacher.default_cfg, model=teacher))
+    baseline = None
+    rows = []
+    for profile, batch_size in (("legacy", 64), ("strict", 64), ("strict", 32)):
+        trial = dict(cfg, validation_profile=profile, validation_batch_size=batch_size)
+        result, predictions = validation(student, trial, transform, device, baseline)
+        if baseline is None:
+            baseline = predictions
+        else:
+            result["prediction_disagreements"] = int(predictions["predictions"].ne(
+                baseline["predictions"]).sum())
+        rows.append(result)
+        record(directory, dict(event="evaluation_audit", **result))
+    report = dict(signature=signature, rows=rows, **evaluation_metadata(cfg, teacher),
+                  note="Diagnostic only. All experiment arms use the configured fixed policy; "
+                       "the best-scoring profile is never selected automatically.")
+    atomic_json(directory / "evaluation_audit.json", report)
+    return report
 
 
 def prepare(directory, cfg, signature, student, teacher, device):
@@ -353,9 +428,14 @@ def prepare(directory, cfg, signature, student, teacher, device):
     baseline, predictions = validation(student, cfg, transform, device)
     expected = cfg.get("expected_baseline_top1")
     record(directory, dict(event="baseline", **baseline))
+    atomic_json(directory / "baseline_check.json", dict(signature=signature,
+                baseline=baseline, expected_top1=expected, transform=repr(transform),
+                **evaluation_metadata(cfg, teacher)))
     if expected is not None and abs(baseline["top1"] - expected) > cfg["baseline_tolerance_pp"]:
         raise RuntimeError("Loaded checkpoint Top-1 %.5f differs from expected %.5f; "
-                           "check checkpoint/config/loading before training" % (baseline["top1"], expected))
+                           "baseline_check.json preserves evaluation policy/versions/hashes. "
+                           "Run launcher --suite audit before changing the baseline or tolerance."
+                           % (baseline["top1"], expected))
     atomic_torch(directory / "data.pt", dict(images=images, labels=torch.tensor(labels),
                  global_logits=torch.cat(logits), signature=signature))
     atomic_torch(directory / "baseline_predictions.pt", predictions)
@@ -364,6 +444,7 @@ def prepare(directory, cfg, signature, student, teacher, device):
                 student_checkpoint=cfg["checkpoint"], teacher_checkpoint=cfg["teacher_checkpoint"],
                 student_sha256=sha_file(resolve_path(cfg["checkpoint"])),
                 teacher_sha256=sha_file(resolve_path(cfg["teacher_checkpoint"])),
+                evaluation_policy=evaluation_policy(cfg),
                 torch=torch.__version__, cuda=torch.version.cuda,
                 preparation_seconds=time.perf_counter() - started,
                 preparation_peak_allocated_bytes=torch.cuda.max_memory_allocated(device)
@@ -595,7 +676,7 @@ def train_arm(directory, root, arm, cfg, signature, student, teacher, data, devi
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
-    parser.add_argument("--arm", choices=("prepare", "probe", "E1", "E2", "E3", "E4", "E5", "E6"), required=True)
+    parser.add_argument("--arm", choices=("prepare", "audit", "probe", "E1", "E2", "E3", "E4", "E5", "E6"), required=True)
     parser.add_argument("--signature", required=True)
     parser.add_argument("--device", default="cuda:0")
     args = parser.parse_args()
@@ -604,7 +685,7 @@ def main():
     if signature != args.signature:
         raise RuntimeError("Source/config/checkpoint changed since launch")
     root = resolve_path(cfg["output_root"]) / signature[:16]
-    directory = root if args.arm == "prepare" else root / args.arm
+    directory = root if args.arm in ("prepare", "audit") else root / args.arm
     directory.mkdir(parents=True, exist_ok=True)
     started = time.perf_counter()
     import numpy as np
@@ -619,6 +700,9 @@ def main():
     torch.backends.cudnn.allow_tf32 = False
     device = torch.device(args.device)
     student, teacher = load_models(cfg, device)
+    if args.arm == "audit":
+        audit_evaluation(root, cfg, signature, student, teacher, device)
+        return
     if args.arm == "prepare":
         with file_lock(root / "prepare.lock"):
             prepare(root, cfg, signature, student, teacher, device)

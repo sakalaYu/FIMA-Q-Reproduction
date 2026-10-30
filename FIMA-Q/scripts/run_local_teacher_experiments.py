@@ -13,7 +13,7 @@ from run_local_teacher import (ROOT, DEFAULT_CONFIG, read_config, resolve_path,
                                add_source_arguments, apply_source_arguments)
 
 SUITES = {
-    "prepare": ["prepare"], "probe": ["probe"],
+    "prepare": ["prepare"], "audit": ["audit"], "probe": ["probe"],
     "screen": ["E3", "E4", "E5"],
     "controls": ["E1", "E2", "E6"],
     "all": ["E1", "E2", "E3", "E4", "E5", "E6"],
@@ -103,7 +103,7 @@ def main():
         parser.error("GPU launcher requires Linux; --dry-run is available on Windows")
     from run_headwise_experiments import gpu_lock, job_lock
     directory.mkdir(parents=True, exist_ok=True)
-    if args.suite != "prepare" and not (directory / "prepared.json").exists():
+    if args.suite not in ("prepare", "audit") and not (directory / "prepared.json").exists():
         parser.error("Run --suite prepare first with this same config")
     config_path = directory / "resolved_config.json"
     atomic_json(config_path, cfg)
@@ -111,10 +111,11 @@ def main():
     atomic_json(directory / ("sources_worker%d.json" % args.worker), identity)
     for arm in jobs:
         result_path = (directory / "prepared.json" if arm == "prepare" else
+                       directory / "evaluation_audit.json" if arm == "audit" else
                        directory / arm / ("probe.json" if arm == "probe" else "result.json"))
         with job_lock("local_teacher_%s_%s" % (signature[:16], arm)):
             if args.resume and result_path.exists():
-                if arm not in ("prepare", "probe") and json.loads(result_path.read_text()).get("status") != "completed":
+                if arm not in ("prepare", "audit", "probe") and json.loads(result_path.read_text()).get("status") != "completed":
                     raise RuntimeError("Result is marked invalid; inspect it before rerunning")
                 print("Skip completed:", arm, flush=True)
                 continue
@@ -149,12 +150,12 @@ def main():
                     raise subprocess.CalledProcessError(status, cmd)
                 after, _ = experiment_identity(cfg)
                 if after != signature:
-                    if result_path.exists() and arm not in ("prepare", "probe"):
+                    if result_path.exists() and arm not in ("prepare", "audit", "probe"):
                         invalid = json.loads(result_path.read_text())
                         invalid["status"] = "invalid_source_change"
                         atomic_json(result_path, invalid)
                     raise RuntimeError("Sources/checkpoint changed during run; exclude this result")
-        if arm not in ("prepare", "probe"):
+        if arm not in ("prepare", "audit", "probe"):
             summary(directory)
 
 

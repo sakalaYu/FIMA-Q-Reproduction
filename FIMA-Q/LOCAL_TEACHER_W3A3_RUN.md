@@ -70,6 +70,29 @@ checkpoints/quant_result/20261012_180903_headwise_w3a3_seed3407_rotation_seeded_
 准备阶段完整验证，默认要求 Top-1 与 64.650 相差不超过 0.03 pp；不符合时停止训练，先排查加载和配置。
 配置里的 checkpoint、dataset 等相对路径均相对于 `FIMA-Q` 项目根目录。
 
+### v3：修复准备阶段的验证设置差异
+
+2026-10-30 服务器以旧版设置（batch 32、确定性 cuDNN、cuDNN TF32 关闭）测得 64.594%，
+与历史 64.650% 相差 0.056 pp，即净少正确 28 张。训练尚未开始，不能把它解释为蒸馏精度下降。
+原日志记录的验证 batch 为 64。旧脚本未记录全部后端旗标，因此不能仅凭设置差异断言已找到全部原因。
+本版把完整验证与缓存前向的 batch 分开：`eval_batch_size=32` 仍用于缓存；
+`validation_batch_size=64` 用于完整 ImageNet 验证，`validation_profile=legacy` 显式设置
+cuDNN benchmark=False、deterministic=False、cuDNN TF32=True、matmul TF32=False。
+全部实验使用同一套预先固定的验证设置；验证完成后恢复训练的严格数值设置。
+
+没有放宽 0.03 pp 阈值，也没有把期望基线改成已测得的较低值。
+准备阶段额外保存 `baseline_check.json`（即使基线不匹配也保存）：评估配置、预处理、版本及教师/学生 hash。
+更新代码后需重新 prepare；新指纹与之前失败的目录分开，已经缓存的浮点教师会复用。
+如果仍不匹配，运行无需训练的对照：
+
+```bash
+python -u scripts/run_local_teacher_experiments.py --suite audit --workers 1 --gpu 0 --gpu-slots 1 --resume
+```
+
+它固定依次比较 legacy/batch64、strict/batch64、strict/batch32，保存 `evaluation_audit.json`；
+后两项记录相对第一项的逐图预测分歧、修复/破坏。不会选择得分最高的配置，也不会自动开始训练。
+若 prepare 成功，直接按下文运行 screen 即可，无需额外 audit。
+
 ### 不依赖 vit_raw 目录的教师加载
 
 JSON 的 `teacher_checkpoint` 默认为 `null`。启动器先找项目中的原始浮点 `.safetensors` 或旧 `.bin`；
@@ -181,6 +204,7 @@ python -u scripts/run_local_teacher_experiments.py --config checkpoints/local_te
 输出目录 `checkpoints/local_teacher/<指纹>/`：
 
 - `prepared.json`：原始完整验证、数据 hash、预处理、准备时间和显存。
+- `baseline_check.json` / 可选 `evaluation_audit.json`：基线不匹配时的独立评估证据。
 - `sources.json` / `sources_worker*.json`：源码、配置、原始教师及学生 checkpoint hash。
 - `probe/probe.json`：两条局部教师路径的修复/破坏、分歧和输出梯度比较；小样本诊断，不代替完整验证。
 - `E*/result.json`：最终完整验证、增益、修复/破坏、耗时、改变的张量、模型参数量。
@@ -199,9 +223,10 @@ state_dict 仍以浮点容器保存 fake-quant 模型，不能把其磁盘大小
 
 ## 验证范围
 
-本地 CPU 十一项检查使用真实项目 W3A3 quantizer，覆盖 STE 前向与输入梯度、局部路径差异、标准化 KD、
+本地 CPU 十四项检查使用真实项目 W3A3 quantizer，覆盖 STE 前向与输入梯度、局部路径差异、标准化 KD、
 固定 DPLR、尺度边界、三窗口任务划分、中断恢复后与连续训练参数完全一致，以及缺失路径、
 safetensors 加载、无 vit_raw 目录时的教师一次缓存、切换学生时的基线检查。
+另覆盖验证后端设置及异常恢复、按整数正确数统计精度、固定三种评估对照不按准确率选择配置。
 另外在临时依赖目录安装 timm 0.9.16，实际严格加载本地 64.650% checkpoint 与原始 safetensors 教师，
 以随机图像验证完整 ViT 的 STE 前向、拆分前向均为零误差，E3/E4/E5 对当前块尺度的梯度均非零且有限。
 未运行服务器 GPU/ImageNet 完整实验，不能预先宣称提分。临时依赖不需要同步到服务器。
