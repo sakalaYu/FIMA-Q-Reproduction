@@ -6,7 +6,7 @@
       "variant": "C",
       "mode": "uniform",
       "run": {
-        "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261102_165520_probekd_w3a3_seed3407_C_uniform_semantic_probe_v1_0p05_2p0_0p1_128_31367d9835/output.log",
+        "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261102_165520_probekd_w3a3_seed3407_C_uniform_semantic_probe_v1_0p05_2p0_0p1_128_31367d9835\\output.log",
         "args": {
           "model": "vit_small",
           "config": "./configs/3bit/best.py",
@@ -633,7 +633,7 @@
         ]
       },
       "reference": {
-        "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261029_140203_qkjoint_w3a3_seed3407_C_seeded_full_v2_integer_zp_lossmse/output.log",
+        "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261029_140203_qkjoint_w3a3_seed3407_C_seeded_full_v2_integer_zp_lossmse\\output.log",
         "args": {
           "model": "vit_small",
           "config": "./configs/3bit/best.py",
@@ -1043,7 +1043,7 @@
       "variant": "C",
       "mode": "reliable",
       "run": {
-        "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261102_165537_probekd_w3a3_seed3407_C_reliable_semantic_probe_v1_0p05_2p0_0p1_128_31367d9835/output.log",
+        "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261102_165537_probekd_w3a3_seed3407_C_reliable_semantic_probe_v1_0p05_2p0_0p1_128_31367d9835\\output.log",
         "args": {
           "model": "vit_small",
           "config": "./configs/3bit/best.py",
@@ -1670,7 +1670,7 @@
         ]
       },
       "reference": {
-        "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261029_140203_qkjoint_w3a3_seed3407_C_seeded_full_v2_integer_zp_lossmse/output.log",
+        "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261029_140203_qkjoint_w3a3_seed3407_C_seeded_full_v2_integer_zp_lossmse\\output.log",
         "args": {
           "model": "vit_small",
           "config": "./configs/3bit/best.py",
@@ -2080,7 +2080,7 @@
       "variant": "B",
       "mode": "reliable",
       "run": {
-        "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261102_165554_probekd_w3a3_seed3407_B_reliable_semantic_probe_v1_0p05_2p0_0p1_128_31367d9835/output.log",
+        "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261102_165554_probekd_w3a3_seed3407_B_reliable_semantic_probe_v1_0p05_2p0_0p1_128_31367d9835\\output.log",
         "args": {
           "model": "vit_small",
           "config": "./configs/3bit/best.py",
@@ -2707,7 +2707,7 @@
         ]
       },
       "reference": {
-        "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261029_191402_qkjoint_w3a3_seed3407_B_seeded_full_v2_integer_zp_lossmse/output.log",
+        "path": "E:\\project\\mode_compression\\FIMA-Q-Reproduction\\FIMA-Q\\checkpoints\\quant_result\\20261029_191402_qkjoint_w3a3_seed3407_B_seeded_full_v2_integer_zp_lossmse\\output.log",
         "args": {
           "model": "vit_small",
           "config": "./configs/3bit/best.py",

@@ -14,6 +14,7 @@ import shutil
 import random
 import json
 import math
+import hashlib
 
 import utils.datasets as mydatasets
 from utils.calibrator import QuantCalibrator
@@ -141,6 +142,22 @@ def get_args_parser():
     parser.add_argument('--probe-kd-ridge', type=float, default=0.1)
     parser.add_argument('--probe-kd-holdout', type=int, default=128)
     parser.add_argument('--probe-kd-code-sha', default='unrecorded')
+    parser.add_argument('--endpoint-task', choices=('none', 'rank10', 'hard-repair', 'qwt', 'soft-control', 'diagnose'), default='none')
+    parser.add_argument('--endpoint-code-sha', default='unrecorded')
+    parser.add_argument('--endpoint-mode', choices=('none', 'hard_scale', 'soft_extra', 'diagnose'), default='none')
+    parser.add_argument('--endpoint-steps', type=int, default=2000)
+    parser.add_argument('--endpoint-lr', type=float, default=0.001,
+                        help='Adam LR for log activation-scale multipliers (hard repair only)')
+    parser.add_argument('--endpoint-bound', type=float, default=1.2)
+    parser.add_argument('--endpoint-holdout', type=int, default=128)
+    parser.add_argument('--endpoint-batch-size', type=int, default=8)
+    parser.add_argument('--endpoint-eval-every', type=int, default=200)
+    parser.add_argument('--qwt', action='store_true')
+    parser.add_argument('--qwt-samples', type=int, default=512)
+    parser.add_argument('--qwt-batch-size', type=int, default=8)
+    parser.add_argument('--qwt-ridge', type=float, default=0.0)
+    parser.add_argument('--qwt-branch-dtype', choices=('fp16', 'fp32'), default='fp16')
+    parser.add_argument('--qwt-solver-threads', type=int, default=4)
     return parser
 
 
@@ -156,7 +173,7 @@ def get_cur_time():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
-def save_model(model, args, cfg, mode='calibrate'):
+def save_model(model, args, cfg, mode='calibrate', tag=''):
     assert mode in ['calibrate', 'optimize']
     if mode == 'calibrate':
         auto_name = '{}_w{}_a{}_calibsize_{}_{}.pth'.format(
@@ -167,16 +184,22 @@ def save_model(model, args, cfg, mode='calibrate'):
             '' if cfg.optim_metric in ['mse', 'mae'] else '_dis_mode_' + cfg.dis_mode, 
             '' if cfg.optim_metric not in['fisher_lr', 'fisher_dplr', 'forward_secant', 'robust_fisher'] else '_rank_' + str(cfg.k),
             cfg.optim_mode)
+    if tag:
+        auto_name = auto_name[:-4] + '_' + tag + '.pth'
     save_path = os.path.join(root_path, auto_name)
 
     logging.info(f"Saving checkpoint to {save_path}")
     torch.save(model.state_dict(), save_path)
+    return save_path
 
 
 def load_model(model, args, device, mode='calibrate'):
     assert mode in ['calibrate', 'optimize']
     ckpt_path = args.load_calibrate_checkpoint if mode == 'calibrate' else args.load_optimize_checkpoint
-    ckpt = torch.load(ckpt_path)
+    ckpt = torch.load(ckpt_path, map_location='cpu')
+    if any('.qwt_weight' in key for key in ckpt):
+        from utils.qwt_compensation import attach_saved_qwt
+        attach_saved_qwt(model, ckpt)
     for name, module in model.named_modules():
         if hasattr(module, 'mode'):
             module.calibrated = True
@@ -262,11 +285,27 @@ def main(args):
     except:
         model = timm.create_model(model_zoo[args.model], pretrained=True)
 
+    if args.endpoint_task != 'none':
+        digest = hashlib.sha256()
+        for name, value in model.state_dict().items():
+            digest.update(name.encode('utf-8'))
+            digest.update(value.detach().cpu().contiguous().numpy().tobytes())
+        model_sha = digest.hexdigest()
+        logging.info('Endpoint FP model SHA256: %s', model_sha)
+    else:
+        model_sha = None
     model.to(device)
     model.eval()
     if args.headwise_hadamard:
         rotation_info = apply_headwise_hadamard(model, verify=True, mode=args.headwise_mode)
         logging.info("Applied head-wise Hadamard rotation: {}".format(rotation_info))
+    qwt_teacher = copy.deepcopy(model).cpu().eval() if args.qwt and not args.load_optimize_checkpoint else None
+    if qwt_teacher is not None:
+        qwt_teacher.requires_grad_(False)
+    endpoint_result = dict(task=args.endpoint_task, code_sha256=args.endpoint_code_sha,
+                           fp_model_sha256=model_sha, args=vars(args), cfg=vars(cfg))
+    if args.endpoint_task != 'none':
+        endpoint_result['launch_identity'] = json.loads(os.environ.get('FIMAQ_ENDPOINT_IDENTITY', 'null'))
     data_path = args.dataset
     g = mydatasets.ViTImageNetLoaderGenerator(data_path, args.val_batch_size, args.num_workers, kwargs={"model":model})
     
@@ -331,12 +370,17 @@ def main(args):
             probe_options = dict(mode=args.probe_kd, weight=args.probe_kd_weight,
                                  temperature=args.probe_kd_temperature, ridge=args.probe_kd_ridge,
                                  holdout=args.probe_kd_holdout, protocol=args.probe_kd_protocol)
+        endpoint_options = None
+        if args.endpoint_mode != 'none':
+            endpoint_options = dict(mode=args.endpoint_mode, steps=args.endpoint_steps,
+                lr=args.endpoint_lr, bound=args.endpoint_bound, holdout=args.endpoint_holdout,
+                batch_size=args.endpoint_batch_size, eval_every=args.endpoint_eval_every, seed=args.seed)
         block_reconstructor = BlockReconstructor(model, cfg.optim_batch_size, calib_loader,
             metric=cfg.optim_metric, temp=cfg.temp, k=cfg.k, dis_mode=cfg.dis_mode,
             p1=cfg.p1, p2=cfg.p2, iters=cfg.recon_iters,
             robust_beta=cfg.robust_beta, robust_temperature=cfg.robust_temperature,
             qk_joint_options=qk_options, attention_relation_options=relation_options,
-            probe_kd_options=probe_options)
+            probe_kd_options=probe_options, endpoint_options=endpoint_options)
         reconstruction_started = time.perf_counter()
         block_reconstructor.reconstruct_model(quant_act=True, mode=cfg.optim_mode, drop_prob=cfg.drop_prob, keep_gpu=cfg.keep_gpu)
         if device.type == 'cuda':
@@ -345,6 +389,7 @@ def main(args):
             time.perf_counter() - reconstruction_started))
         logging.info("{} - {} guided block reconstruction finished.".format(get_cur_time(), cfg.optim_metric))
         if qk_options:
+            endpoint_result['qk_blocks'] = block_reconstructor.qk_joint_results
             with open(os.path.join(root_path, 'qk_joint.json'), 'w', encoding='utf-8') as handle:
                 json.dump(dict(options=qk_options, blocks=block_reconstructor.qk_joint_results), handle, indent=2)
         if relation_options:
@@ -353,7 +398,11 @@ def main(args):
         if probe_options:
             with open(os.path.join(root_path, 'probe_kd.json'), 'w', encoding='utf-8') as handle:
                 json.dump(dict(options=probe_options, blocks=block_reconstructor.probe_kd_results), handle, indent=2)
-        save_model(model, args, cfg, mode='optimize')
+        if endpoint_options:
+            endpoint_result['endpoint'] = dict(options=endpoint_options, blocks=block_reconstructor.endpoint_results)
+            with open(os.path.join(root_path, 'endpoint_blocks.json'), 'w', encoding='utf-8') as handle:
+                json.dump(endpoint_result['endpoint'], handle, indent=2)
+        endpoint_result['baseline_checkpoint'] = save_model(model, args, cfg, mode='optimize')
     if args.load_optimize_checkpoint:
         logging.info('Building calibrator ...')
         calib_loader = g.calib_loader(num=cfg.optim_size, batch_size=cfg.optim_batch_size, seed=args.seed)
@@ -363,6 +412,25 @@ def main(args):
         val_loss, val_prec1, val_prec5 = validate(calib_loader, model, criterion, print_freq=args.print_freq, device=device)
         logging.info('Validating on test set after block reconstruction ...')
         val_loss, val_prec1, val_prec5 = validate(val_loader, model, criterion, print_freq=args.print_freq, device=device)
+        endpoint_result['final'] = dict(top1=float(val_prec1), top5=float(val_prec5), loss=float(val_loss))
+    if args.qwt and not args.load_optimize_checkpoint:
+        from utils.qwt_compensation import fit_qwt
+        endpoint_result['before_qwt'] = endpoint_result.get('final')
+        logging.info('Starting QwT compensation on the frozen reconstructed model ...')
+        qwt_report = fit_qwt(model, qwt_teacher, calib_loader, samples=args.qwt_samples,
+            batch_size=args.qwt_batch_size, ridge=args.qwt_ridge,
+            branch_dtype=args.qwt_branch_dtype, solver_threads=args.qwt_solver_threads)
+        endpoint_result['qwt'] = qwt_report
+        with open(os.path.join(root_path, 'qwt.json'), 'w', encoding='utf-8') as handle:
+            json.dump(qwt_report, handle, indent=2)
+        del qwt_teacher
+        endpoint_result['qwt_checkpoint'] = save_model(model, args, cfg, mode='optimize', tag='qwt')
+        if not args.skip_final_validation:
+            logging.info('Validating on test set after QwT compensation ...')
+            val_loss, val_prec1, val_prec5 = validate(val_loader, model, criterion, print_freq=args.print_freq, device=device)
+            endpoint_result['final'] = dict(top1=float(val_prec1), top5=float(val_prec5), loss=float(val_loss))
+            logging.info('QwT paired Top-1 delta: %+.3f pp',
+                         endpoint_result['final']['top1'] - endpoint_result['before_qwt']['top1'])
     logging.info("{} - finished the process.".format(get_cur_time()))
     for handler in logging.getLogger().handlers:
         handler.flush()
@@ -372,10 +440,38 @@ def main(args):
         os.path.join(root_path, 'output.log'),
         os.path.join(logs_dir, os.path.basename(root_path) + '.log')
     )
+    if args.endpoint_task != 'none':
+        endpoint_result['status'] = 'smoke_complete' if args.skip_final_validation else 'complete'
+        endpoint_result['run_id'] = os.path.basename(root_path)
+        endpoint_result['calibration_hashes'] = re.findall(
+            r'Calibration cache: count=(\d+) sample_sha256=([a-f0-9]+) tensor_sha256=([a-f0-9]+)',
+            open(os.path.join(root_path, 'output.log'), encoding='utf-8').read())
+        target = os.path.join(root_path, 'endpoint_result.json')
+        with open(target + '.tmp', 'w', encoding='utf-8') as handle:
+            json.dump(endpoint_result, handle, indent=2)
+        os.replace(target + '.tmp', target)
  
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(parents=[get_args_parser()])
     args = parser.parse_args()
+    if args.endpoint_mode != 'none' or args.qwt or args.endpoint_task != 'none':
+        if args.endpoint_task == 'none' or args.endpoint_code_sha == 'unrecorded':
+            parser.error('Endpoint experiments require a task and source fingerprint; use run_endpoint_experiments.py')
+        if not args.optimize or args.load_calibrate_checkpoint or args.load_optimize_checkpoint:
+            parser.error('Endpoint experiments currently start from fresh C-MSE reconstruction')
+        if args.qk_joint_variant != 'C' or args.qk_joint_reconstruction_loss != 'mse':
+            parser.error('Endpoint experiments require C-MSE pre-calibration')
+        if args.probe_kd != 'none' or args.attention_relation != 'none':
+            parser.error('Endpoint experiments exclude KD and attention auxiliary losses')
+        if min(args.endpoint_steps, args.endpoint_holdout, args.endpoint_batch_size,
+               args.endpoint_eval_every, args.qwt_samples, args.qwt_batch_size, args.qwt_solver_threads) < 1:
+            parser.error('Endpoint sizes and steps must be positive')
+        if not 0 < args.endpoint_holdout < args.optim_size or (args.qwt and args.qwt_samples > args.optim_size):
+            parser.error('Endpoint holdout/QwT samples exceed calibration size')
+        if not math.isfinite(args.endpoint_lr) or args.endpoint_lr <= 0 or not math.isfinite(args.endpoint_bound) or args.endpoint_bound <= 1:
+            parser.error('Repair LR must be positive and scale bound > 1')
+        if not math.isfinite(args.qwt_ridge) or args.qwt_ridge < 0:
+            parser.error('QwT ridge must be finite and nonnegative')
     if args.probe_kd != 'none':
         if args.qk_joint_variant not in ('B', 'C') or args.attention_relation != 'none':
             parser.error('Probe KD requires the B/C QK reconstruction path without attention relations')

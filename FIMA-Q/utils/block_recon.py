@@ -87,7 +87,7 @@ class BlockReconstructor(QuantCalibrator):
     def __init__(self, model, optim_batch_size,calib_loader, metric="mse", temp=20, k=1,
                  dis_mode='q', p1=1., p2=1., iters=20000,
                  robust_beta=0.5, robust_temperature=0.5, qk_joint_options=None,
-                 attention_relation_options=None, probe_kd_options=None):
+                 attention_relation_options=None, probe_kd_options=None, endpoint_options=None):
         super().__init__(model, calib_loader)
         self.batch_size = optim_batch_size
         self.metric = metric
@@ -102,6 +102,8 @@ class BlockReconstructor(QuantCalibrator):
         self.qk_joint_results = []
         self.probe_kd_options = probe_kd_options
         self.probe_kd_results = []
+        self.endpoint_options = endpoint_options
+        self.endpoint_results = []
         if qk_joint_options and attention_relation_options:
             raise ValueError('Run attention relations separately from QK pre-calibration')
         if attention_relation_options and metric != 'fisher_dplr':
@@ -429,6 +431,7 @@ class BlockReconstructor(QuantCalibrator):
         i_change = max(1, math.floor(iters / self.k))
         if loss_func.rec_loss == 'robust_fisher':
             self.new_fisher_ro(block, device)
+        endpoint = self.endpoint_options if name.startswith('blocks.') else None
         for it in range(iters):
             idx = (balanced_indices(block.robust_groups, batch_size)
                    if loss_func.rec_loss == 'robust_fisher'
@@ -498,6 +501,22 @@ class BlockReconstructor(QuantCalibrator):
             self.probe_kd_results.append(report)
             logging.info('Probe KD result: %s', json.dumps(report, sort_keys=True))
             del probe
+        if endpoint:
+            if endpoint['mode'] == 'hard_scale':
+                from utils.hard_scale_repair import repair_block_scales
+                report = repair_block_scales(block, name, device, endpoint, drop_prob)
+            elif endpoint['mode'] == 'soft_extra':
+                from utils.hard_scale_repair import continue_soft_block
+                report = continue_soft_block(block, name, device, endpoint, loss_func,
+                    w_optimizer, a_optimizer, lr, drop_prob, b_range[-1])
+            else:
+                from utils.hard_scale_repair import path_diagnostics
+                after = path_diagnostics(block,
+                    list(range(len(block.raw_input) - endpoint['holdout'], len(block.raw_input))),
+                    device, endpoint['batch_size'], endpoint['seed'] + 17001 + int(name.split('.')[-1]), drop_prob)
+                report = dict(block=name, mode=endpoint['mode'], diagnostics_after=after)
+            self.endpoint_results.append(report)
+            logging.info('Endpoint block result: %s', json.dumps(report, sort_keys=True))
         torch.cuda.empty_cache()
         # Finish optimization, use hard rounding.
         for name, module in block.named_modules():
