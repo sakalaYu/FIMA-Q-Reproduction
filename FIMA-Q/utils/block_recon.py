@@ -87,7 +87,7 @@ class BlockReconstructor(QuantCalibrator):
     def __init__(self, model, optim_batch_size,calib_loader, metric="mse", temp=20, k=1,
                  dis_mode='q', p1=1., p2=1., iters=20000,
                  robust_beta=0.5, robust_temperature=0.5, qk_joint_options=None,
-                 attention_relation_options=None):
+                 attention_relation_options=None, probe_kd_options=None):
         super().__init__(model, calib_loader)
         self.batch_size = optim_batch_size
         self.metric = metric
@@ -100,6 +100,8 @@ class BlockReconstructor(QuantCalibrator):
         self.robust_temperature = robust_temperature
         self.qk_joint_options = qk_joint_options
         self.qk_joint_results = []
+        self.probe_kd_options = probe_kd_options
+        self.probe_kd_results = []
         if qk_joint_options and attention_relation_options:
             raise ValueError('Run attention relations separately from QK pre-calibration')
         if attention_relation_options and metric != 'fisher_dplr':
@@ -385,6 +387,14 @@ class BlockReconstructor(QuantCalibrator):
                                  batch_size: int = 32, iters: int = 20000, weight: float = 0.01,
                                  b_range: tuple = (20, 2), warmup: float = 0.2, lr: float = 4e-5, p: float = 2.0,
                                  quant_act = False, mode = 'qdrop', drop_prob: float = 1.0):
+        probe = None
+        if self.probe_kd_options and name.startswith('blocks.'):
+            from utils.semantic_probe_kd import SemanticProbeKD
+            if block.raw_out.ndim != 3:
+                raise ValueError('Semantic probe KD requires ViT CLS-token outputs')
+            probe = SemanticProbeKD(block.raw_out[:, 0], torch.cat(self.raw_pred_softmaxs),
+                                    self.temperature, self.probe_kd_options, device)
+            logging.info('Probe KD fitted: %s', json.dumps(dict(block=name, **probe.report()), sort_keys=True))
         self.wrap_quantizers_in_net(block, name)
         self.set_block_mode(block, 'quant_forward')
         for _name, module in block.named_modules():
@@ -476,11 +486,18 @@ class BlockReconstructor(QuantCalibrator):
                     err = loss_func(out_quant, cur_out)
                 if coefficient > 0:
                     err = err + relation.loss(idx, loss_func.last_rec_loss, coefficient, it + 1)
+                if probe is not None:
+                    err = err + probe.loss(out_quant[:, 0], idx, it + 1, iters)
                 err.backward()
             w_optimizer.step()
             if quant_act:
                 a_optimizer.step()
                 a_scheduler.step()
+        if probe is not None:
+            report = dict(block=name, **probe.report())
+            self.probe_kd_results.append(report)
+            logging.info('Probe KD result: %s', json.dumps(report, sort_keys=True))
+            del probe
         torch.cuda.empty_cache()
         # Finish optimization, use hard rounding.
         for name, module in block.named_modules():

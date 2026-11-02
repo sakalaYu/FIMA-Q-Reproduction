@@ -134,6 +134,13 @@ def get_args_parser():
     parser.add_argument('--relation-queries', type=int, default=16)
     parser.add_argument('--relation-start', type=float, default=0.2)
     parser.add_argument('--relation-full', type=float, default=0.6)
+    parser.add_argument('--probe-kd', choices=('none', 'uniform', 'reliable'), default='none')
+    parser.add_argument('--probe-kd-protocol', choices=('semantic_probe_v1',), default='semantic_probe_v1')
+    parser.add_argument('--probe-kd-weight', type=float, default=0.05)
+    parser.add_argument('--probe-kd-temperature', type=float, default=2.0)
+    parser.add_argument('--probe-kd-ridge', type=float, default=0.1)
+    parser.add_argument('--probe-kd-holdout', type=int, default=128)
+    parser.add_argument('--probe-kd-code-sha', default='unrecorded')
     return parser
 
 
@@ -319,11 +326,17 @@ def main(args):
             relation_options = dict(mode=args.attention_relation, weight=args.relation_weight,
                                     rows=args.relation_queries, start=args.relation_start,
                                     full=args.relation_full, protocol=args.relation_protocol)
+        probe_options = None
+        if args.probe_kd != 'none':
+            probe_options = dict(mode=args.probe_kd, weight=args.probe_kd_weight,
+                                 temperature=args.probe_kd_temperature, ridge=args.probe_kd_ridge,
+                                 holdout=args.probe_kd_holdout, protocol=args.probe_kd_protocol)
         block_reconstructor = BlockReconstructor(model, cfg.optim_batch_size, calib_loader,
             metric=cfg.optim_metric, temp=cfg.temp, k=cfg.k, dis_mode=cfg.dis_mode,
             p1=cfg.p1, p2=cfg.p2, iters=cfg.recon_iters,
             robust_beta=cfg.robust_beta, robust_temperature=cfg.robust_temperature,
-            qk_joint_options=qk_options, attention_relation_options=relation_options)
+            qk_joint_options=qk_options, attention_relation_options=relation_options,
+            probe_kd_options=probe_options)
         reconstruction_started = time.perf_counter()
         block_reconstructor.reconstruct_model(quant_act=True, mode=cfg.optim_mode, drop_prob=cfg.drop_prob, keep_gpu=cfg.keep_gpu)
         if device.type == 'cuda':
@@ -337,6 +350,9 @@ def main(args):
         if relation_options:
             with open(os.path.join(root_path, 'attention_relation.json'), 'w', encoding='utf-8') as handle:
                 json.dump(dict(options=relation_options, blocks=block_reconstructor.attention_relation_results), handle, indent=2)
+        if probe_options:
+            with open(os.path.join(root_path, 'probe_kd.json'), 'w', encoding='utf-8') as handle:
+                json.dump(dict(options=probe_options, blocks=block_reconstructor.probe_kd_results), handle, indent=2)
         save_model(model, args, cfg, mode='optimize')
     if args.load_optimize_checkpoint:
         logging.info('Building calibrator ...')
@@ -360,6 +376,16 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(parents=[get_args_parser()])
     args = parser.parse_args()
+    if args.probe_kd != 'none':
+        if args.qk_joint_variant not in ('B', 'C') or args.attention_relation != 'none':
+            parser.error('Probe KD requires the B/C QK reconstruction path without attention relations')
+        if args.model not in ('vit_small', 'vit_base', 'deit_small', 'deit_base', 'deit_tiny', 'vit_tiny'):
+            parser.error('Probe KD requires ViT/DeiT CLS-token models')
+        if not all(math.isfinite(x) and x > 0 for x in
+                   (args.probe_kd_weight, args.probe_kd_temperature, args.probe_kd_ridge)):
+            parser.error('Probe KD weight, temperature and ridge must be finite and positive')
+        if not 0 < args.probe_kd_holdout < args.optim_size:
+            parser.error('Probe KD holdout must be smaller than optim-size')
     if args.headwise_mode != 'all' and not args.headwise_hadamard:
         parser.error('--headwise-mode qk/vo requires --headwise-hadamard')
     if args.qk_joint_variant != 'none':
