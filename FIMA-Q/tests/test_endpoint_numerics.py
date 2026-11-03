@@ -113,6 +113,20 @@ class EndpointNumerics(unittest.TestCase):
         actual = path_mse(block, list(range(48, 64)), torch.device('cpu'), 8)
         self.assertAlmostEqual(actual, report['hard_mse_after'], places=7)
 
+    def test_repair_accepts_mixed_scale_signs_and_preserves_them(self):
+        block = self.block()
+        quantizer = block.linear.a_quantizer
+        original = torch.tensor([0.8, -0.8, 0.8, -0.8, 0.8]).view(1, 5, 1)
+        quantizer.scale = nn.Parameter(original.clone())
+        report = repair_block_scales(block, 'blocks.0', torch.device('cpu'),
+            dict(steps=20, lr=0.02, bound=1.2, holdout=16, batch_size=8, eval_every=5, seed=3407))
+        self.assertEqual(report['active_steps'], 20)
+        self.assertEqual(report['negative_scale_counts'], {'linear.a_quantizer': 2})
+        self.assertTrue(torch.equal(quantizer.scale.sign(), original.sign()))
+        self.assertGreaterEqual(report['ratio_min'], 1 / 1.2 - 1e-6)
+        self.assertLessEqual(report['ratio_max'], 1.2 + 1e-6)
+        self.assertLessEqual(report['hard_mse_after'], report['hard_mse_before'])
+
     def test_hardening_diagnostic_preserves_rng_and_saved_path(self):
         block = self.block()
         rng = torch.random.get_rng_state().clone()

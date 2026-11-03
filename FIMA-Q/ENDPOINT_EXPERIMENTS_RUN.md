@@ -1,5 +1,27 @@
 # C-MSE 后续：rank、硬量化尺度修复与 QwT
 
+## 11 月 3 日后续三窗安排
+
+本轮窗口 2 跑修订后的硬量化尺度修复和额外软训练对照。窗口 1 和 3 分别只替换
+post-Softmax 和 post-GELU 的 3-bit 激活码本。三个窗口都在 `FIMA-Q` 目录中运行，使用同一 GPU 锁。
+
+```bash
+# 窗口 1
+python -u scripts/run_activation_codebook.py --site softmax --gpu 0 --gpu-slots 3
+# 窗口 2
+python -u scripts/run_endpoint_experiments.py --task all --worker 2 --gpu 0 --gpu-slots 3 --resume
+# 窗口 3
+python -u scripts/run_activation_codebook.py --site gelu --gpu 0 --gpu-slots 3
+```
+
+窗口 1 和 3 默认从 `20261103_143115_endpoint_qwt_seed3407_endpoint_v1_9b042e92c4c0`
+的 `endpoint_result.json` 读取 `baseline_checkpoint` 文件名，并从该目录加载补偿前的 `.pth`。
+文件放在其他位置时，用 `--checkpoint` 指定补偿前的模型。每窗先复测同一个基线，
+再用 64 张训练图挑选码本、另 64 张图按全模型教师 KL 筛选，最后全量验证。
+Softmax 码本有一个零和七个对数间隔的正值，GELU 码本在八个值中给负半轴分配一到三个值。
+64 张门控样本从本阶段的码本拟合中留出，最终精度以完整验证集为准。
+结果存于 `checkpoints/quant_result/*_activation_codebook_*/activation_codebook_result.json`。
+
 本轮基于 ViT-S / W3A3 / seed 3407 / C-MSE 预校准。历史参照为 64.758%，
 正式 DPLR 为 rank 5、20000 步。所有任务关闭 probe KD 和额外 attention relation loss。
 本实现尚无服务器完整准确率结果；本地为 CPU 数值及运行器检查。
@@ -132,6 +154,19 @@ python scripts/run_endpoint_experiments.py --task summary
 ```
 
 ## 输出与同步
+
+如果窗口 2 在硬量化修复入口报 `Repair requires finite positive activation scales`，
+同步修订后的 `utils/hard_scale_repair.py` 和 `scripts/run_endpoint_experiments.py`。
+建议等正在运行的旧版窗口 1、3 结束后再同步，因为旧运行器结束时会重新读取磁盘代码指纹。
+用原窗口 2 命令重启。修复将有限非零的原尺度乘以有界正倍数，保留各元素符号，
+并在日志中按量化器记录负尺度个数。零值或非有限值会报告具体的块和量化器。
+
+若窗口 1、3 使用修复前的代码完成，运行以下汇总以纳入它们。此模式只读取经过核对的
+修复前 rank10 和 QwT 结果，仍要求模型、校准数据、运行配置和依赖版本匹配。
+
+```bash
+python scripts/run_endpoint_experiments.py --task summary --include-pre-fix
+```
 
 - `checkpoints/endpoint_experiments/`：启动配置、console 日志、汇总 JSON。
 - 对应 `checkpoints/quant_result/*_endpoint_*/`：`endpoint_result.json`、`qk_joint.json`、

@@ -19,6 +19,8 @@ import run_qk_joint_experiments as qk
 ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL = 'endpoint_v1'
 TASKS = ('rank10', 'hard-repair', 'soft-control', 'qwt')
+PRE_FIX_CODE_SHA = 'facf533c4770b3a9134b4198a0ad316fa05eedfd4e7a6485f6ca6fdc3cea1d13'
+PRE_FIX_REFERENCE_TASKS = ('rank10', 'qwt')
 
 
 def code_fingerprint():
@@ -104,7 +106,9 @@ def valid_result(result, task, args, payload):
     expected_status = 'smoke_complete' if args.smoke else 'complete'
     if result.get('status') != expected_status or result.get('launch_identity') != payload:
         return False
-    if result.get('task') != task or result.get('code_sha256') != code_fingerprint():
+    command_args = payload['command']
+    expected_sha = command_args[command_args.index('--endpoint-code-sha') + 1]
+    if result.get('task') != task or result.get('code_sha256') != expected_sha:
         return False
     cfg = result.get('cfg', {})
     expected_rank = 2 if args.smoke else 10 if task == 'rank10' else 5
@@ -150,7 +154,7 @@ def find_complete(task, args, payload=None):
     return sorted(found, key=lambda r: r['run_id'])[-1] if found else None
 
 
-def comparable(left, right, allow_rank=False):
+def comparable(left, right, allow_rank=False, allow_pre_fix=False):
     if left['fp_model_sha256'] != right['fp_model_sha256'] or left['calibration_hashes'] != right['calibration_hashes']:
         return False
     a, b = dict(left['cfg']), dict(right['cfg'])
@@ -158,11 +162,21 @@ def comparable(left, right, allow_rank=False):
         a.pop('k', None)
         b.pop('k', None)
     versions_equal = left.get('launch_identity', {}).get('dependency_versions') == right.get('launch_identity', {}).get('dependency_versions')
-    return a == b and left['code_sha256'] == right['code_sha256'] and versions_equal
+    same_code = left['code_sha256'] == right['code_sha256']
+    if allow_pre_fix:
+        same_code = same_code or any(run['task'] in PRE_FIX_REFERENCE_TASKS and
+                                     run['code_sha256'] == PRE_FIX_CODE_SHA for run in (left, right))
+    return a == b and same_code and versions_equal
 
 
 def summarize(args, write=True):
     runs = {task: find_complete(task, args) for task in TASKS}
+    if args.include_pre_fix:
+        for task in PRE_FIX_REFERENCE_TASKS:
+            if runs[task] is None:
+                payload = identity(task, args)
+                set_option(payload['command'], '--endpoint-code-sha', PRE_FIX_CODE_SHA)
+                runs[task] = find_complete(task, args, payload)
     reference = runs['qwt']
     if reference is not None and not args.smoke:
         print(f"Current C-MSE baseline (before QwT): {reference['before_qwt']['top1']:.3f}")
@@ -171,14 +185,18 @@ def summarize(args, write=True):
         if run is None:
             print(f'{task}: incomplete')
             continue
-        row = dict(task=task, result_file=run['result_file'], final=run.get('final'))
+        row = dict(task=task, result_file=run['result_file'], final=run.get('final'),
+                   code_sha256=run['code_sha256'])
+        if run['code_sha256'] == PRE_FIX_CODE_SHA:
+            print(f'{task}: using verified pre-fix reference')
         if task == 'qwt':
             row['before_qwt'] = run.get('before_qwt')
             row['qwt_cost'] = {key: run['qwt'].get(key) for key in
                                ('added_parameters', 'added_storage_bytes', 'added_macs_per_image', 'branch_dtype')}
         if not args.smoke:
             row['delta_historical_64p758_pp'] = run['final']['top1'] - 64.758
-            matched = reference is not None and comparable(run, reference, allow_rank=task == 'rank10')
+            matched = reference is not None and comparable(
+                run, reference, allow_rank=task == 'rank10', allow_pre_fix=args.include_pre_fix)
             row['matched_current_C_MSE'] = matched
             row['delta_current_C_MSE_pp'] = run['final']['top1'] - reference['before_qwt']['top1'] if matched else None
             print(f"{task}: Top-1 {run['final']['top1']:.3f}; "
@@ -258,6 +276,8 @@ def get_parser():
     p.add_argument('--scale-bound', type=float, default=1.2)
     p.add_argument('--solver-threads', type=int, default=4)
     p.add_argument('--resume', action='store_true')
+    p.add_argument('--include-pre-fix', action='store_true',
+                   help='Summary only: include verified rank10/QwT results from before the scale-sign fix')
     p.add_argument('--dry-run', action='store_true')
     p.add_argument('--smoke', action='store_true', help='16-image/two-step integration check; NOT an accuracy experiment')
     return p
@@ -273,6 +293,8 @@ def main():
     if args.task == 'summary':
         summarize(args, write=not args.dry_run)
         return
+    if args.include_pre_fix:
+        p.error('--include-pre-fix requires --task summary')
     jobs = {1: ('rank10',), 2: ('hard-repair', 'soft-control'), 3: ('qwt',)}[args.worker] if args.task == 'all' else (args.task,)
     if not args.dry_run:
         if os.name != 'posix':

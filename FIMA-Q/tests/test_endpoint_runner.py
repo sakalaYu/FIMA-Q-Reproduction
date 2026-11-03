@@ -2,9 +2,12 @@
 import copy
 import argparse
 import ast
+import json
 from pathlib import Path
 import sys
+import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 import run_endpoint_experiments as runner
@@ -73,6 +76,28 @@ class EndpointRunnerTests(unittest.TestCase):
         self.args.smoke = True
         self.assertNotEqual(before, runner.run_name('qwt', self.args))
         self.assertFalse(runner.valid_result(result, 'qwt', self.args, runner.identity('qwt', self.args)))
+
+    def test_summary_reuses_completed_pre_fix_qwt_after_source_changes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with patch.object(runner, 'ROOT', root), patch.object(runner, 'code_fingerprint', return_value='fixed'):
+                for task in ('qwt', 'hard-repair'):
+                    result = self.result(task)
+                    payload = result['launch_identity']
+                    if task == 'qwt':
+                        runner.set_option(payload['command'], '--endpoint-code-sha', runner.PRE_FIX_CODE_SHA)
+                        result['code_sha256'] = runner.PRE_FIX_CODE_SHA
+                    result['run_id'] = '20261103_' + runner.run_name(task, self.args, payload)
+                    folder = root / 'checkpoints' / 'quant_result' / result['run_id']
+                    folder.mkdir(parents=True)
+                    (folder / 'endpoint_result.json').write_text(json.dumps(result), encoding='utf-8')
+
+                self.assertIsNone(runner.summarize(self.args, write=False)['current_C_MSE'])
+                self.args.include_pre_fix = True
+                report = runner.summarize(self.args, write=False)
+                self.assertEqual(report['complete_count'], 2)
+                self.assertEqual(report['current_C_MSE']['top1'], 64.7)
+                self.assertAlmostEqual(report['rows'][0]['delta_current_C_MSE_pp'], 0.3)
 
 
 if __name__ == '__main__':

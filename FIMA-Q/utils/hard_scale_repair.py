@@ -124,13 +124,27 @@ def repair_block_scales(block, name, device, options, drop_prob=0.5):
     validation = list(range(train_count, count))
     seed = int(options['seed']) + 17001 + int(name.split('.')[-1])
     batch_size = int(options['batch_size'])
-    diagnostics = path_diagnostics(block, validation, device, batch_size, seed, drop_prob)
     quantizers = activation_quantizers(block)
     if not quantizers:
         raise ValueError('No activation scales to repair')
+    module_names = {id(module): name for name, module in block.named_modules()}
+    negative_scale_counts = {}
     for q in quantizers:
-        if not bool(torch.isfinite(q.scale).all() and (q.scale > 0).all()):
-            raise ValueError('Repair requires finite positive activation scales')
+        scale = q.scale.detach()
+        nonfinite_count = int((~torch.isfinite(scale)).sum())
+        zero_count = int((scale == 0).sum())
+        module_name = module_names[id(q)]
+        if nonfinite_count or zero_count:
+            raise ValueError(f'{name}.{module_name} has {nonfinite_count} non-finite and '
+                             f'{zero_count} zero activation scales before repair')
+        negative_count = int((scale < 0).sum())
+        if negative_count:
+            negative_scale_counts[module_name] = negative_count
+    # The original optimizer updates scales directly. A positive multiplier
+    # preserves the sign and the exact initial quantization path at delta=0.
+    if negative_scale_counts:
+        logging.info('Hard-scale repair %s preserving negative scale signs: %s', name, negative_scale_counts)
+    diagnostics = path_diagnostics(block, validation, device, batch_size, seed, drop_prob)
     initial = [q.scale.detach().clone() for q in quantizers]
     flags = [(p, p.requires_grad) for p in block.parameters()]
     fixed_before = _fixed_digest(block, {id(q.scale) for q in quantizers})
@@ -205,7 +219,8 @@ def repair_block_scales(block, name, device, options, drop_prob=0.5):
                 accepted=selected_step > 0, diagnostics=diagnostics,
                 hard_mse_before=baseline, hard_mse_after=final_score,
                 last_training_mse=last_loss, ratio_min=float(ratios.min()), ratio_max=float(ratios.max()),
-                fixed_parameters_unchanged=True, elapsed_seconds=time.perf_counter() - started)
+                negative_scale_counts=negative_scale_counts, fixed_parameters_unchanged=True,
+                elapsed_seconds=time.perf_counter() - started)
 
 
 def continue_soft_block(block, name, device, options, loss_func, w_optimizer, a_optimizer,

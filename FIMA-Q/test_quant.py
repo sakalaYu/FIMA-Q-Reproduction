@@ -158,6 +158,7 @@ def get_args_parser():
     parser.add_argument('--qwt-ridge', type=float, default=0.0)
     parser.add_argument('--qwt-branch-dtype', choices=('fp16', 'fp32'), default='fp16')
     parser.add_argument('--qwt-solver-threads', type=int, default=4)
+    parser.add_argument('--activation-codebook', choices=('none', 'softmax', 'gelu'), default='none')
     return parser
 
 
@@ -197,9 +198,16 @@ def load_model(model, args, device, mode='calibrate'):
     assert mode in ['calibrate', 'optimize']
     ckpt_path = args.load_calibrate_checkpoint if mode == 'calibrate' else args.load_optimize_checkpoint
     ckpt = torch.load(ckpt_path, map_location='cpu')
-    if any('.qwt_weight' in key for key in ckpt):
+    has_qwt = any('.qwt_weight' in key for key in ckpt)
+    has_codebooks = any(key.endswith('.codebook') for key in ckpt)
+    if getattr(args, 'activation_codebook', 'none') != 'none' and (has_qwt or has_codebooks):
+        raise ValueError('Codebook fitting requires the original C-MSE checkpoint before compensation')
+    if has_qwt:
         from utils.qwt_compensation import attach_saved_qwt
         attach_saved_qwt(model, ckpt)
+    if has_codebooks:
+        from utils.activation_codebook import attach_saved_codebooks
+        attach_saved_codebooks(model, ckpt)
     for name, module in model.named_modules():
         if hasattr(module, 'mode'):
             module.calibrated = True
@@ -208,10 +216,11 @@ def load_model(model, args, device, mode='calibrate'):
             module.bias = nn.Parameter(torch.zeros(module.out_features))
         quantizer_attrs = ['a_quantizer', 'w_quantizer', 'A_quantizer', 'B_quantizer']
         for attr in quantizer_attrs:
-            if hasattr(module, attr):
-                getattr(module, attr).inited = True
+            quantizer = getattr(module, attr, None)
+            if quantizer is not None and hasattr(quantizer, 'scale'):
+                quantizer.inited = True
                 ckpt_name = name + '.' + attr + '.scale'
-                getattr(module, attr).scale.data = ckpt[ckpt_name].clone()
+                quantizer.scale.data = ckpt[ckpt_name].clone()
  
     result = model.load_state_dict(ckpt, strict=False)
     logging.info(str(result))
@@ -296,6 +305,11 @@ def main(args):
         model_sha = None
     model.to(device)
     model.eval()
+    codebook_teacher = None
+    if args.activation_codebook != 'none':
+        if cfg.w_bit != 3 or cfg.a_bit != 3:
+            raise ValueError('Activation codebook experiments require W3A3')
+        codebook_teacher = copy.deepcopy(model).cpu().eval()
     if args.headwise_hadamard:
         rotation_info = apply_headwise_hadamard(model, verify=True, mode=args.headwise_mode)
         logging.info("Applied head-wise Hadamard rotation: {}".format(rotation_info))
@@ -413,6 +427,22 @@ def main(args):
         logging.info('Validating on test set after block reconstruction ...')
         val_loss, val_prec1, val_prec5 = validate(val_loader, model, criterion, print_freq=args.print_freq, device=device)
         endpoint_result['final'] = dict(top1=float(val_prec1), top5=float(val_prec5), loss=float(val_loss))
+    if codebook_teacher is not None:
+        from utils.activation_codebook import fit_activation_codebooks
+        report = fit_activation_codebooks(model, codebook_teacher, calib_loader, args.activation_codebook)
+        del codebook_teacher
+        report['checkpoint_before'] = args.load_optimize_checkpoint
+        report['before'] = endpoint_result['final']
+        logging.info('Validating on test set after activation codebook fitting ...')
+        val_loss, val_prec1, val_prec5 = validate(val_loader, model, criterion, print_freq=args.print_freq, device=device)
+        report['after'] = dict(top1=float(val_prec1), top5=float(val_prec5), loss=float(val_loss))
+        report['top1_delta_pp'] = report['after']['top1'] - report['before']['top1']
+        report['checkpoint_after'] = save_model(model, args, cfg, mode='optimize', tag=args.activation_codebook + '_codebook')
+        path = os.path.join(root_path, 'activation_codebook_result.json')
+        with open(path + '.tmp', 'w', encoding='utf-8') as handle:
+            json.dump(report, handle, indent=2)
+        os.replace(path + '.tmp', path)
+        logging.info('Activation codebook paired Top-1 delta: %+.3f pp', report['top1_delta_pp'])
     if args.qwt and not args.load_optimize_checkpoint:
         from utils.qwt_compensation import fit_qwt
         endpoint_result['before_qwt'] = endpoint_result.get('final')
@@ -454,6 +484,10 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(parents=[get_args_parser()])
     args = parser.parse_args()
+    if args.activation_codebook != 'none' and (
+            args.model != 'vit_small' or not args.load_optimize_checkpoint or not args.test_optimize_checkpoint
+            or args.skip_final_validation or args.optim_size != 128 or args.endpoint_task != 'none'):
+        parser.error('Activation codebook fitting requires ViT-S, an optimized checkpoint, full validation, and --optim-size 128')
     if args.endpoint_mode != 'none' or args.qwt or args.endpoint_task != 'none':
         if args.endpoint_task == 'none' or args.endpoint_code_sha == 'unrecorded':
             parser.error('Endpoint experiments require a task and source fingerprint; use run_endpoint_experiments.py')
