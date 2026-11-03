@@ -1,0 +1,50 @@
+{
+  "protocol": "endpoint_v1",
+  "code_sha256": "facf533c4770b3a9134b4198a0ad316fa05eedfd4e7a6485f6ca6fdc3cea1d13",
+  "seed": 3407,
+  "complete_count": 2,
+  "expected_count": 4,
+  "rows": [
+    {
+      "task": "rank10",
+      "result_file": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261103_143035_endpoint_rank10_seed3407_endpoint_v1_1596b396b0ec/endpoint_result.json",
+      "final": {
+        "top1": 64.336,
+        "top5": 87.104,
+        "loss": 1.4484461467552185
+      },
+      "delta_historical_64p758_pp": -0.42199999999999704,
+      "matched_current_C_MSE": true,
+      "delta_current_C_MSE_pp": -0.1880000000000024
+    },
+    {
+      "task": "qwt",
+      "result_file": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261103_143115_endpoint_qwt_seed3407_endpoint_v1_9b042e92c4c0/endpoint_result.json",
+      "final": {
+        "top1": 52.788,
+        "top5": 77.954,
+        "loss": 2.0569922317123415
+      },
+      "before_qwt": {
+        "top1": 64.524,
+        "top5": 87.332,
+        "loss": 1.43939793094635
+      },
+      "qwt_cost": {
+        "added_parameters": 1774080,
+        "added_storage_bytes": 3548160,
+        "added_macs_per_image": 348585984,
+        "branch_dtype": "fp16"
+      },
+      "delta_historical_64p758_pp": -11.969999999999999,
+      "matched_current_C_MSE": true,
+      "delta_current_C_MSE_pp": -11.736000000000004
+    }
+  ],
+  "current_C_MSE": {
+    "top1": 64.524,
+    "top5": 87.332,
+    "loss": 1.43939793094635
+  },
+  "hard_repair_vs_soft_control_pp": null
+}
