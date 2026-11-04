@@ -9,12 +9,18 @@ from pathlib import Path, PurePosixPath
 import shlex
 import subprocess
 import sys
+import time
 
 import run_qk_joint_experiments as qk
 
 ROOT = Path(__file__).resolve().parents[1]
 REFERENCE = ROOT / 'checkpoints/quant_result/20261103_143115_endpoint_qwt_seed3407_endpoint_v1_9b042e92c4c0/endpoint_result.json'
 WORKER_JOBS = {1: ('kd', 'soft-control'), 2: ('adalog', 'hard-repair'), 3: ('erq', 'lsvit')}
+
+
+def progress(event, method, started=None):
+    elapsed = '' if started is None else f' | elapsed {(time.perf_counter() - started) / 60:.1f} min'
+    print(f'[{time.strftime("%Y-%m-%d %H:%M:%S")}] [{event}] {method}{elapsed}', flush=True)
 
 
 def fingerprint():
@@ -72,7 +78,11 @@ def main():
         data = qk.base.dataset_path(args.dataset)
         if not all((data / split).is_dir() for split in ('train', 'val')):
             p.error(f'Missing train/val under {data}')
-    for method in methods:
+    window_started = time.perf_counter()
+    print('Schedule: ' + ' -> '.join(methods), flush=True)
+    for index, method in enumerate(methods, 1):
+        started = time.perf_counter()
+        progress('DRY-RUN' if args.dry_run else 'START', f'{index}/{len(methods)} {method}')
         if method in ('hard-repair', 'soft-control'):
             cmd = [sys.executable, '-u', 'scripts/run_endpoint_experiments.py', '--task', method,
                    '--gpu', args.gpu, '--gpu-slots', str(args.gpu_slots), '--dataset', args.dataset]
@@ -82,6 +92,7 @@ def main():
                 print(shlex.join(cmd))
             else:
                 subprocess.run(cmd, cwd=ROOT, check=True)
+                progress('DONE', method, started)
             continue
         cmd = command(method, args, checkpoint)
         launch = dict(method=method, command=cmd[1:], code_sha256=fingerprint())
@@ -108,11 +119,14 @@ def main():
                     complete.append(path)
             if args.resume and complete:
                 print(f'Skipping completed {method}: {complete[-1]}', flush=True)
+                progress('SKIPPED', method, started)
                 continue
             with qk.base.gpu_lock(args.gpu, args.gpu_slots) as uuid:
                 env = dict(os.environ, CUDA_VISIBLE_DEVICES=uuid, FIMAQ_RUN_NAME=name,
                            FIMAQ_CAPTURE_CALIBRATION_HASH='1', FIMAQ_METHOD_LAUNCH=json.dumps(launch))
                 subprocess.run(cmd, cwd=ROOT, env=env, check=True)
+            progress('DONE', method, started)
+    progress('DRY-RUN COMPLETE' if args.dry_run else 'WINDOW COMPLETE', ' -> '.join(methods), window_started)
 
 
 if __name__ == '__main__':

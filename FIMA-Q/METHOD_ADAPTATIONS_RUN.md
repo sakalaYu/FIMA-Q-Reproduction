@@ -67,22 +67,25 @@ KD、AdaLog 和 ERQ 默认读取 20261103_143115 那次运行的补偿前 C-MSE 
 窗口 1，KD 完成后自动跑额外软训练对照。
 
 ```bash
-screen -dmS fimaq-w1 bash -c 'exec python -u scripts/run_method_adaptations.py --worker 1 --gpu 0 --gpu-slots 3 --resume > logs/screen_methods_w1.log 2>&1'
+python -u scripts/run_method_adaptations.py --worker 1 --gpu 0 --gpu-slots 3 --resume
 ```
 
 窗口 2，AdaLog 完成后自动跑硬量化尺度修复。
 
 ```bash
-screen -dmS fimaq-w2 bash -c 'exec python -u scripts/run_method_adaptations.py --worker 2 --gpu 0 --gpu-slots 3 --resume > logs/screen_methods_w2.log 2>&1'
+python -u scripts/run_method_adaptations.py --worker 2 --gpu 0 --gpu-slots 3 --resume
 ```
 
 窗口 3，ERQ 完成后自动跑 LS-ViT。
 
 ```bash
-screen -dmS fimaq-w3 bash -c 'exec python -u scripts/run_method_adaptations.py --worker 3 --gpu 0 --gpu-slots 3 --resume > logs/screen_methods_w3.log 2>&1'
+python -u scripts/run_method_adaptations.py --worker 3 --gpu 0 --gpu-slots 3 --resume
 ```
 
-用 `screen -ls` 查看会话，`tail -f logs/screen_methods_w3.log` 查看窗口 3。
+在三个已有 tmux 窗口中分别前台执行，不加后台符号，也不重定向输出。
+终端直接显示训练和验证日志。调度器显示 `[START]`、`[DONE]` 和任务耗时；
+整个窗口的两项任务均成功返回后显示 `[WINDOW COMPLETE]`。匹配的成功结果显示 `[SKIPPED]`。
+出现 traceback 或进程非零退出时，后续任务不会继续，也不会显示窗口完成提示。
 如果某项失败，修正问题后重跑同一命令，已成功且源码/命令/源 checkpoint 指纹匹配的任务会跳过。
 任务内部中断会从该任务开头重新开始。需要单独执行时用 `--method kd`、`--method adalog`、
 `--method erq` 或 `--method lsvit` 替代 `--worker`。
@@ -92,9 +95,19 @@ screen -dmS fimaq-w3 bash -c 'exec python -u scripts/run_method_adaptations.py -
 每个新方法在 `checkpoints/quant_result/*_method_*/method_result.json` 中记录结果。
 KD、AdaLog、ERQ 包括 before、after、top1_delta_pp、门控变化、源码和源 checkpoint 指纹。
 LS-ViT 包括最终准确率、C-MSE 预校准记录和启动配置，用本轮加载成功的 C-MSE 基线作参考。
-这些 JSON、对应 output.log 和 logs/screen_method*.log 可同步供分析。
+这些 JSON 和对应 output.log 可同步供分析，前台运行仍会保存模型内部的日志。
 尺度修复仍写 endpoint_result.json，使用原汇总命令。
 
 本地已经检查小模型的数值行为和原有流程兼容性。完整 ViT-S 的新准确率等待服务器运行。
-按之前共享 GPU 的重建记录，窗口 1 和 2 各预估 2.5–4 小时，窗口 3 预估 2–4 小时。
-新适配尚未实测，ERQ 的 CPU 求解和实际 GPU 竞争会影响耗时，整轮先预留 4–5 小时。
+已有共享 GPU 日志中的完整重建分别为 9955.761 秒和 10134.274 秒，约 2 小时 46 分和 2 小时 49 分。
+这只是原重建阶段的时间，不包含新增步骤及全部加载、校准和验证。
+
+| 窗口 | 短任务预算 | 完整重建任务预算 | 窗口总预算 |
+|---|---|---|---|
+| 1 | KD：15–40 分钟 | 额外软训练对照：约 3–4 小时 | 约 3.5–5 小时 |
+| 2 | AdaLog：10–30 分钟 | 硬量化尺度修复：约 3–4 小时 | 约 3.5–5 小时 |
+| 3 | ERQ：20–60 分钟 | LS-ViT：约 2–4 小时 | 约 2.5–5 小时 |
+
+新适配尚未在服务器实测，表中是排程预算，CPU 求解、I/O 和三任务共享 GPU 会影响耗时。
+整轮先预留 5 小时，无法保证三个窗口同时结束；不要通过增加训练步数填满空闲时间。
+已完成且匹配的任务会被 --resume 跳过，相应窗口的实际剩余时间会更短。
