@@ -1,0 +1,206 @@
+{
+  "method": "erq_projection_grid_preserving",
+  "layers": [
+    {
+      "layer": "blocks.0.attn.proj",
+      "accepted": false,
+      "gate_kl_before": 0.45199521095491946,
+      "gate_kl_trial": 0.5472814314998686
+    },
+    {
+      "layer": "blocks.0.mlp.fc2",
+      "accepted": false,
+      "gate_kl_before": 0.45199521095491946,
+      "gate_kl_trial": 0.7986978236585855
+    },
+    {
+      "layer": "blocks.1.attn.proj",
+      "accepted": true,
+      "gate_kl_before": 0.45199521095491946,
+      "gate_kl_trial": 0.4211960854008794
+    },
+    {
+      "layer": "blocks.1.mlp.fc2",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.5627563577145338
+    },
+    {
+      "layer": "blocks.2.attn.proj",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.45340893929824233
+    },
+    {
+      "layer": "blocks.2.mlp.fc2",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.4876398416236043
+    },
+    {
+      "layer": "blocks.3.attn.proj",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.5176841886714101
+    },
+    {
+      "layer": "blocks.3.mlp.fc2",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.5152814267203212
+    },
+    {
+      "layer": "blocks.4.attn.proj",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.5109019670635462
+    },
+    {
+      "layer": "blocks.4.mlp.fc2",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.4926936086267233
+    },
+    {
+      "layer": "blocks.5.attn.proj",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.42706400295719504
+    },
+    {
+      "layer": "blocks.5.mlp.fc2",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 2.5079905726015568
+    },
+    {
+      "layer": "blocks.6.attn.proj",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.5719166183844209
+    },
+    {
+      "layer": "blocks.6.mlp.fc2",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.8870838731527328
+    },
+    {
+      "layer": "blocks.7.attn.proj",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.7816399615257978
+    },
+    {
+      "layer": "blocks.7.mlp.fc2",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.6659680036827922
+    },
+    {
+      "layer": "blocks.8.attn.proj",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.5203664759173989
+    },
+    {
+      "layer": "blocks.8.mlp.fc2",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.540962646715343
+    },
+    {
+      "layer": "blocks.9.attn.proj",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.4723149836063385
+    },
+    {
+      "layer": "blocks.9.mlp.fc2",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.45364749897271395
+    },
+    {
+      "layer": "blocks.10.attn.proj",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.4486075220629573
+    },
+    {
+      "layer": "blocks.10.mlp.fc2",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.45800214912742376
+    },
+    {
+      "layer": "blocks.11.attn.proj",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.5286604054272175
+    },
+    {
+      "layer": "blocks.11.mlp.fc2",
+      "accepted": false,
+      "gate_kl_before": 0.4211960854008794,
+      "gate_kl_trial": 0.4333595260977745
+    }
+  ],
+  "gate_kl_before": 0.45199521095491946,
+  "gate_kl_after": 0.4211960854008794,
+  "fit_images": 64,
+  "gate_images": 128,
+  "elapsed_seconds": 27.283975340425968,
+  "before": {
+    "top1": 64.524,
+    "top5": 87.332,
+    "loss": 1.43939793094635
+  },
+  "checkpoint_before": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261103_143115_endpoint_qwt_seed3407_endpoint_v1_9b042e92c4c0/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop.pth",
+  "after": {
+    "top1": 63.984,
+    "top5": 86.866,
+    "loss": 1.469830555343628
+  },
+  "top1_delta_pp": -0.5399999999999991,
+  "checkpoint_after": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261104_192600_method_erq_76aae8d1ede8/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop_erq.pth",
+  "launch": {
+    "method": "erq",
+    "command": [
+      "-u",
+      "test_quant.py",
+      "--model",
+      "vit_small",
+      "--config",
+      "./configs/3bit/best.py",
+      "--device",
+      "cuda",
+      "--dataset",
+      "../imagenet_fimaq",
+      "--seed",
+      "3407",
+      "--val-batch-size",
+      "64",
+      "--optim-size",
+      "1024",
+      "--load-optimize-checkpoint",
+      "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261103_143115_endpoint_qwt_seed3407_endpoint_v1_9b042e92c4c0/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop.pth",
+      "--test-optimize-checkpoint",
+      "--method-adaptation",
+      "erq",
+      "--adaptation-steps",
+      "500"
+    ],
+    "code_sha256": "8f57260c6d8ba5c304013878a7c1f1c9137dad8b95340375dc4732401378cbe8",
+    "checkpoint_sha256": "3dcdc082d0502ecb96bcf62080e6b2d62182eedd7e2162e5247429de85a2516c"
+  },
+  "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+  "calibration_hashes": [
+    [
+      "1024",
+      "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+      "a409352202fa88a115395d6df9b6012ab79ecbf36425567f6861d91492b75864"
+    ]
+  ],
+  "status": "complete"
+}

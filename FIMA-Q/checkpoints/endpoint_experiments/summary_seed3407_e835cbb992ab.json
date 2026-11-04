@@ -1,0 +1,37 @@
+{
+  "protocol": "endpoint_v1",
+  "code_sha256": "e835cbb992ab44d41fa0e74baba3292421283a11dc56d0604a0d02a3fd2fd17c",
+  "seed": 3407,
+  "complete_count": 2,
+  "expected_count": 4,
+  "rows": [
+    {
+      "task": "hard-repair",
+      "result_file": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261104_193118_endpoint_hard-repair_seed3407_endpoint_v1_e461e8d6ea2f/endpoint_result.json",
+      "final": {
+        "top1": 63.202,
+        "top5": 86.394,
+        "loss": 1.496744399433136
+      },
+      "code_sha256": "e835cbb992ab44d41fa0e74baba3292421283a11dc56d0604a0d02a3fd2fd17c",
+      "delta_historical_64p758_pp": -1.5559999999999974,
+      "matched_current_C_MSE": false,
+      "delta_current_C_MSE_pp": null
+    },
+    {
+      "task": "soft-control",
+      "result_file": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261104_193203_endpoint_soft-control_seed3407_endpoint_v1_f093e3c3625f/endpoint_result.json",
+      "final": {
+        "top1": 64.076,
+        "top5": 87.016,
+        "loss": 1.4603950355148316
+      },
+      "code_sha256": "e835cbb992ab44d41fa0e74baba3292421283a11dc56d0604a0d02a3fd2fd17c",
+      "delta_historical_64p758_pp": -0.6820000000000022,
+      "matched_current_C_MSE": false,
+      "delta_current_C_MSE_pp": null
+    }
+  ],
+  "current_C_MSE": null,
+  "hard_repair_vs_soft_control_pp": -0.8739999999999952
+}

@@ -1,0 +1,65 @@
+{
+  "method": "end_to_end_hard_scale_KD",
+  "steps": 500,
+  "temperature": 2,
+  "selected_step": 200,
+  "scale_bound": 1.1,
+  "lr": 0.0003,
+  "gate_kl_before": 0.45199514902196825,
+  "gate_kl_after": 0.3988647307269275,
+  "fit_images": 896,
+  "gate_images": 128,
+  "elapsed_seconds": 97.6704173758626,
+  "before": {
+    "top1": 64.524,
+    "top5": 87.332,
+    "loss": 1.43939793094635
+  },
+  "checkpoint_before": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261103_143115_endpoint_qwt_seed3407_endpoint_v1_9b042e92c4c0/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop.pth",
+  "after": {
+    "top1": 64.696,
+    "top5": 87.436,
+    "loss": 1.4311952496910094
+  },
+  "top1_delta_pp": 0.17199999999999704,
+  "checkpoint_after": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261104_192534_method_kd_2d10b80493db/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop_kd.pth",
+  "launch": {
+    "method": "kd",
+    "command": [
+      "-u",
+      "test_quant.py",
+      "--model",
+      "vit_small",
+      "--config",
+      "./configs/3bit/best.py",
+      "--device",
+      "cuda",
+      "--dataset",
+      "../imagenet_fimaq",
+      "--seed",
+      "3407",
+      "--val-batch-size",
+      "64",
+      "--optim-size",
+      "1024",
+      "--load-optimize-checkpoint",
+      "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261103_143115_endpoint_qwt_seed3407_endpoint_v1_9b042e92c4c0/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop.pth",
+      "--test-optimize-checkpoint",
+      "--method-adaptation",
+      "kd",
+      "--adaptation-steps",
+      "500"
+    ],
+    "code_sha256": "8f57260c6d8ba5c304013878a7c1f1c9137dad8b95340375dc4732401378cbe8",
+    "checkpoint_sha256": "3dcdc082d0502ecb96bcf62080e6b2d62182eedd7e2162e5247429de85a2516c"
+  },
+  "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+  "calibration_hashes": [
+    [
+      "1024",
+      "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+      "a409352202fa88a115395d6df9b6012ab79ecbf36425567f6861d91492b75864"
+    ]
+  ],
+  "status": "complete"
+}

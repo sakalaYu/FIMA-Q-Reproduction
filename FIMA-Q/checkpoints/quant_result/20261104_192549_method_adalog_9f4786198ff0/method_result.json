@@ -1,0 +1,326 @@
+{
+  "method": "adalog_head_token_zero_reserved",
+  "blocks": [
+    {
+      "block": 0,
+      "accepted": true,
+      "q_per_head": [
+        50,
+        50,
+        50,
+        50,
+        50,
+        50
+      ],
+      "scale_shape": [
+        1,
+        6,
+        197,
+        1
+      ],
+      "gate_kl_before": 0.45199514902196825,
+      "gate_kl_trial": 0.4173435657285154,
+      "local_sse_before": 45587.56640625,
+      "local_sse_after": 4903.51806640625
+    },
+    {
+      "block": 1,
+      "accepted": false,
+      "q_per_head": [
+        18,
+        50,
+        42,
+        26,
+        50,
+        50
+      ],
+      "scale_shape": [
+        1,
+        6,
+        197,
+        1
+      ],
+      "gate_kl_before": 0.4173435657285154,
+      "gate_kl_trial": 0.438721377402544,
+      "local_sse_before": 19934.89453125,
+      "local_sse_after": 3140.094970703125
+    },
+    {
+      "block": 2,
+      "accepted": false,
+      "q_per_head": [
+        50,
+        26,
+        50,
+        42,
+        42,
+        26
+      ],
+      "scale_shape": [
+        1,
+        6,
+        197,
+        1
+      ],
+      "gate_kl_before": 0.4173435657285154,
+      "gate_kl_trial": 0.5043465886265039,
+      "local_sse_before": 18878.140625,
+      "local_sse_after": 6990.8095703125
+    },
+    {
+      "block": 3,
+      "accepted": true,
+      "q_per_head": [
+        42,
+        50,
+        50,
+        42,
+        42,
+        42
+      ],
+      "scale_shape": [
+        1,
+        6,
+        197,
+        1
+      ],
+      "gate_kl_before": 0.4173435657285154,
+      "gate_kl_trial": 0.4151553828269243,
+      "local_sse_before": 26780.61328125,
+      "local_sse_after": 6514.20947265625
+    },
+    {
+      "block": 4,
+      "accepted": false,
+      "q_per_head": [
+        42,
+        42,
+        42,
+        42,
+        50,
+        42
+      ],
+      "scale_shape": [
+        1,
+        6,
+        197,
+        1
+      ],
+      "gate_kl_before": 0.4151553828269243,
+      "gate_kl_trial": 0.4818170489743352,
+      "local_sse_before": 23548.767578125,
+      "local_sse_after": 6394.89990234375
+    },
+    {
+      "block": 5,
+      "accepted": false,
+      "q_per_head": [
+        42,
+        34,
+        42,
+        50,
+        50,
+        42
+      ],
+      "scale_shape": [
+        1,
+        6,
+        197,
+        1
+      ],
+      "gate_kl_before": 0.4151553828269243,
+      "gate_kl_trial": 0.4506301456131041,
+      "local_sse_before": 25994.9296875,
+      "local_sse_after": 6441.20263671875
+    },
+    {
+      "block": 6,
+      "accepted": false,
+      "q_per_head": [
+        34,
+        42,
+        42,
+        50,
+        42,
+        50
+      ],
+      "scale_shape": [
+        1,
+        6,
+        197,
+        1
+      ],
+      "gate_kl_before": 0.4151553828269243,
+      "gate_kl_trial": 0.43890873342752457,
+      "local_sse_before": 46874.4296875,
+      "local_sse_after": 8826.630859375
+    },
+    {
+      "block": 7,
+      "accepted": false,
+      "q_per_head": [
+        50,
+        42,
+        50,
+        50,
+        42,
+        34
+      ],
+      "scale_shape": [
+        1,
+        6,
+        197,
+        1
+      ],
+      "gate_kl_before": 0.4151553828269243,
+      "gate_kl_trial": 0.42511640139855444,
+      "local_sse_before": 53214.6328125,
+      "local_sse_after": 8463.1875
+    },
+    {
+      "block": 8,
+      "accepted": false,
+      "q_per_head": [
+        50,
+        50,
+        50,
+        50,
+        50,
+        50
+      ],
+      "scale_shape": [
+        1,
+        6,
+        197,
+        1
+      ],
+      "gate_kl_before": 0.4151553828269243,
+      "gate_kl_trial": 0.4406277248635888,
+      "local_sse_before": 76581.84375,
+      "local_sse_after": 9942.8154296875
+    },
+    {
+      "block": 9,
+      "accepted": true,
+      "q_per_head": [
+        50,
+        50,
+        50,
+        50,
+        50,
+        50
+      ],
+      "scale_shape": [
+        1,
+        6,
+        197,
+        1
+      ],
+      "gate_kl_before": 0.4151553828269243,
+      "gate_kl_trial": 0.4047904908657074,
+      "local_sse_before": 87190.703125,
+      "local_sse_after": 12123.4921875
+    },
+    {
+      "block": 10,
+      "accepted": true,
+      "q_per_head": [
+        50,
+        50,
+        50,
+        50,
+        50,
+        50
+      ],
+      "scale_shape": [
+        1,
+        6,
+        197,
+        1
+      ],
+      "gate_kl_before": 0.4047904908657074,
+      "gate_kl_trial": 0.40146666392683983,
+      "local_sse_before": 187120.4375,
+      "local_sse_after": 18652.33984375
+    },
+    {
+      "block": 11,
+      "accepted": false,
+      "q_per_head": [
+        50,
+        50,
+        50,
+        50,
+        50,
+        50
+      ],
+      "scale_shape": [
+        1,
+        6,
+        197,
+        1
+      ],
+      "gate_kl_before": 0.40146666392683983,
+      "gate_kl_trial": 0.4126915126107633,
+      "local_sse_before": 372786.875,
+      "local_sse_after": 37675.5703125
+    }
+  ],
+  "gate_kl_before": 0.45199514902196825,
+  "gate_kl_after": 0.40146666392683983,
+  "fit_images": 64,
+  "gate_images": 128,
+  "elapsed_seconds": 13.94067981094122,
+  "before": {
+    "top1": 64.524,
+    "top5": 87.332,
+    "loss": 1.43939793094635
+  },
+  "checkpoint_before": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261103_143115_endpoint_qwt_seed3407_endpoint_v1_9b042e92c4c0/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop.pth",
+  "after": {
+    "top1": 63.732,
+    "top5": 86.6,
+    "loss": 1.4835779763793946
+  },
+  "top1_delta_pp": -0.7920000000000016,
+  "checkpoint_after": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261104_192549_method_adalog_9f4786198ff0/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop_adalog.pth",
+  "launch": {
+    "method": "adalog",
+    "command": [
+      "-u",
+      "test_quant.py",
+      "--model",
+      "vit_small",
+      "--config",
+      "./configs/3bit/best.py",
+      "--device",
+      "cuda",
+      "--dataset",
+      "../imagenet_fimaq",
+      "--seed",
+      "3407",
+      "--val-batch-size",
+      "64",
+      "--optim-size",
+      "1024",
+      "--load-optimize-checkpoint",
+      "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261103_143115_endpoint_qwt_seed3407_endpoint_v1_9b042e92c4c0/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop.pth",
+      "--test-optimize-checkpoint",
+      "--method-adaptation",
+      "adalog",
+      "--adaptation-steps",
+      "500"
+    ],
+    "code_sha256": "8f57260c6d8ba5c304013878a7c1f1c9137dad8b95340375dc4732401378cbe8",
+    "checkpoint_sha256": "3dcdc082d0502ecb96bcf62080e6b2d62182eedd7e2162e5247429de85a2516c"
+  },
+  "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+  "calibration_hashes": [
+    [
+      "1024",
+      "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+      "a409352202fa88a115395d6df9b6012ab79ecbf36425567f6861d91492b75864"
+    ]
+  ],
+  "status": "complete"
+}
