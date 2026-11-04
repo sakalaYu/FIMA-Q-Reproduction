@@ -102,6 +102,7 @@ def local_fit(layer, attr, inputs, site, device):
     return candidates[index], float(errors[0]), float(errors[index])
 
 
+@torch.no_grad()
 def teacher_kl(model, batches, targets, device):
     total = 0.0
     for images, target in zip(batches, targets):

@@ -227,7 +227,7 @@ class BlockReconstructor(QuantCalibrator):
             hooks.append(block.attn.matmul1.register_forward_hook(self.current_relation.cache_teacher))
         need_calculate_raw_softmax = False
         if self.raw_pred_softmaxs is None and self.metric in ["fisher_brecq", "fisher_lr", "fisher_diag",
-                                                               "fisher_dplr", "forward_secant", "robust_fisher"]:
+                                                               "fisher_dplr", "forward_secant", "robust_fisher", "lsvit"]:
             need_calculate_raw_softmax = True
             self.raw_pred_softmaxs = []
         with torch.no_grad():
@@ -447,7 +447,13 @@ class BlockReconstructor(QuantCalibrator):
             cur_out = block.raw_out[idx].to(device)
             
             loss_func.update_fisher = False
-            if loss_func.rec_loss in ["fisher_lr", "fisher_diag", "fisher_dplr", "robust_fisher"] :
+            if loss_func.rec_loss == 'lsvit':
+                if it == 0:
+                    from utils.lsvit_adapter import estimate_lsvit
+                    estimate_lsvit(self, block, device)
+                    logging.info('LS-ViT curvature initialized for %s', name)
+                cur_grad = None
+            elif loss_func.rec_loss in ["fisher_lr", "fisher_diag", "fisher_dplr", "robust_fisher"] :
                 if self.dis_mode in ['q']:
                     if it % i_change == 0 and (it > 0 or self.metric != 'robust_fisher'):
                         self.new_fisher_ro(block, device)
@@ -536,6 +542,8 @@ class BlockReconstructor(QuantCalibrator):
         del block.raw_input, block.raw_out, block.raw_grad, block.quanted_input
         block.secant_direction = block.secant_kl = None
         block.robust_groups = None
+        if self.metric == 'lsvit':
+            block.ls_diagonal = block.ls_root = None
         torch.cuda.empty_cache()
     
 
@@ -650,6 +658,13 @@ class LossFunction:
             if self.count == 1 or self.update_fisher:
                 self.init_loss_2 = loss_2.detach()
             rec_loss = 2 * loss_2 / self.init_loss_2
+        elif self.rec_loss == 'lsvit':
+            from utils.lsvit_adapter import ls_terms
+            loss_1, loss_2 = ls_terms(pred, tgt, self.block.ls_diagonal, self.block.ls_root)
+            if self.count == 1:
+                self.init_loss_1 = loss_1.detach().clamp_min(1e-30)
+                self.init_loss_2 = loss_2.detach().clamp_min(1e-30)
+            rec_loss = loss_1 / self.init_loss_1 + loss_2 / self.init_loss_2
         elif self.rec_loss == 'fisher_dplr':
             cha = (pred - tgt).abs().reshape(pred.shape[0], -1)
             A = cha.unsqueeze(1) @ grad.abs().transpose(0, 1)

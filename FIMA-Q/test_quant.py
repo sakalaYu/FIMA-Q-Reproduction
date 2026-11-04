@@ -159,6 +159,8 @@ def get_args_parser():
     parser.add_argument('--qwt-branch-dtype', choices=('fp16', 'fp32'), default='fp16')
     parser.add_argument('--qwt-solver-threads', type=int, default=4)
     parser.add_argument('--activation-codebook', choices=('none', 'softmax', 'gelu'), default='none')
+    parser.add_argument('--method-adaptation', choices=('none', 'kd', 'adalog', 'erq', 'lsvit'), default='none')
+    parser.add_argument('--adaptation-steps', type=int, default=500)
     return parser
 
 
@@ -198,6 +200,9 @@ def load_model(model, args, device, mode='calibrate'):
     assert mode in ['calibrate', 'optimize']
     ckpt_path = args.load_calibrate_checkpoint if mode == 'calibrate' else args.load_optimize_checkpoint
     ckpt = torch.load(ckpt_path, map_location='cpu')
+    if any(key.endswith('.adalog_q') for key in ckpt):
+        from utils.method_adaptations import attach_method_quantizers
+        attach_method_quantizers(model, ckpt)
     has_qwt = any('.qwt_weight' in key for key in ckpt)
     has_codebooks = any(key.endswith('.codebook') for key in ckpt)
     if getattr(args, 'activation_codebook', 'none') != 'none' and (has_qwt or has_codebooks):
@@ -260,6 +265,8 @@ def main(args):
                               else getattr(cfg, 'robust_temperature', 0.5))
     cfg.dis_mode = args.dis_mode if hasattr(args, 'dis_mode') else cfg.dis_mode
     cfg.recon_iters = args.recon_iters if hasattr(args, 'recon_iters') else getattr(cfg, 'recon_iters', 20000)
+    if args.method_adaptation == 'lsvit':
+        cfg.optim_metric = 'lsvit'
     for name, value in vars(cfg).items():
         logging.info(f"{name}: {value}")
         
@@ -294,7 +301,7 @@ def main(args):
     except:
         model = timm.create_model(model_zoo[args.model], pretrained=True)
 
-    if args.endpoint_task != 'none':
+    if args.endpoint_task != 'none' or args.method_adaptation != 'none':
         digest = hashlib.sha256()
         for name, value in model.state_dict().items():
             digest.update(name.encode('utf-8'))
@@ -305,6 +312,12 @@ def main(args):
         model_sha = None
     model.to(device)
     model.eval()
+    adaptation_teacher = None
+    if args.method_adaptation in ('kd', 'adalog', 'erq'):
+        adaptation_teacher = copy.deepcopy(model).cpu().eval()
+        adaptation_teacher.requires_grad_(False)
+        if args.method_adaptation == 'erq':
+            apply_headwise_hadamard(adaptation_teacher, verify=True, mode='all')
     codebook_teacher = None
     if args.activation_codebook != 'none':
         if cfg.w_bit != 3 or cfg.a_bit != 3:
@@ -361,7 +374,7 @@ def main(args):
         logging.info("{} - start {} guided block reconstruction".format(get_cur_time(), cfg.optim_metric))
         qk_options = None
         if args.qk_joint_variant != 'none':
-            if cfg.optim_metric != 'fisher_dplr':
+            if cfg.optim_metric not in ('fisher_dplr', 'lsvit'):
                 raise ValueError('QK joint calibration requires fisher_dplr reconstruction')
             if not 0 < args.qk_joint_holdout < cfg.optim_size:
                 raise ValueError('QK joint holdout must be between 1 and optim_size - 1')
@@ -427,6 +440,33 @@ def main(args):
         logging.info('Validating on test set after block reconstruction ...')
         val_loss, val_prec1, val_prec5 = validate(val_loader, model, criterion, print_freq=args.print_freq, device=device)
         endpoint_result['final'] = dict(top1=float(val_prec1), top5=float(val_prec5), loss=float(val_loss))
+    if args.method_adaptation in ('kd', 'adalog', 'erq'):
+        from utils.method_adaptations import adapt_model
+        before = dict(endpoint_result['final'])
+        report = adapt_model(model, adaptation_teacher, calib_loader, args.method_adaptation, args.adaptation_steps)
+        del adaptation_teacher
+        report['before'] = before
+        report['checkpoint_before'] = args.load_optimize_checkpoint
+        logging.info('Validating after method adaptation ...')
+        val_loss, val_prec1, val_prec5 = validate(val_loader, model, criterion, print_freq=args.print_freq, device=device)
+        report['after'] = dict(top1=float(val_prec1), top5=float(val_prec5), loss=float(val_loss))
+        report['top1_delta_pp'] = report['after']['top1'] - before['top1']
+        report['checkpoint_after'] = save_model(model, args, cfg, mode='optimize', tag=args.method_adaptation)
+        report['launch'] = json.loads(os.environ.get('FIMAQ_METHOD_LAUNCH', '{}'))
+        logging.info('Method adaptation result: %s', json.dumps(report))
+    elif args.method_adaptation == 'lsvit':
+        report = dict(method='lsvit_C_mse_streaming_damped', after=endpoint_result['final'],
+                      qk_blocks=block_reconstructor.qk_joint_results,
+                      launch=json.loads(os.environ.get('FIMAQ_METHOD_LAUNCH', '{}')))
+    if args.method_adaptation != 'none':
+        report['fp_model_sha256'] = model_sha
+        report['calibration_hashes'] = re.findall(
+            r'Calibration cache: count=(\d+) sample_sha256=([a-f0-9]+) tensor_sha256=([a-f0-9]+)',
+            open(os.path.join(root_path, 'output.log'), encoding='utf-8').read())
+        report['status'] = 'complete'
+        with open(os.path.join(root_path, 'method_result.json.tmp'), 'w', encoding='utf-8') as handle:
+            json.dump(report, handle, indent=2)
+        os.replace(os.path.join(root_path, 'method_result.json.tmp'), os.path.join(root_path, 'method_result.json'))
     if codebook_teacher is not None:
         from utils.activation_codebook import fit_activation_codebooks
         report = fit_activation_codebooks(model, codebook_teacher, calib_loader, args.activation_codebook)
@@ -484,6 +524,16 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(parents=[get_args_parser()])
     args = parser.parse_args()
+    if args.method_adaptation != 'none':
+        if args.model != 'vit_small' or args.skip_final_validation or args.activation_codebook != 'none':
+            parser.error('Method adaptations require ViT-S and complete validation')
+        if args.adaptation_steps < 1 or args.optim_size != 1024:
+            parser.error('Method adaptations require positive steps and 1024 calibration images')
+        if args.method_adaptation == 'lsvit':
+            if not args.optimize or args.qk_joint_variant != 'C' or args.qk_joint_reconstruction_loss != 'mse':
+                parser.error('LS-ViT adaptation requires fresh C-MSE reconstruction')
+        elif not args.load_optimize_checkpoint or not args.test_optimize_checkpoint:
+            parser.error('KD/AdaLog/ERQ require an optimized C-MSE checkpoint and paired validation')
     if args.activation_codebook != 'none' and (
             args.model != 'vit_small' or not args.load_optimize_checkpoint or not args.test_optimize_checkpoint
             or args.skip_final_validation or args.optim_size != 128 or args.endpoint_task != 'none'):
