@@ -1,0 +1,65 @@
+{
+  "method": "end_to_end_hard_scale_KD",
+  "steps": 500,
+  "temperature": 2,
+  "selected_step": 0,
+  "scale_bound": 1.1,
+  "lr": 0.0003,
+  "gate_kl_before": 0.36314868461340666,
+  "gate_kl_after": 0.36314868461340666,
+  "fit_images": 896,
+  "gate_images": 128,
+  "elapsed_seconds": 79.27932977676392,
+  "before": {
+    "top1": 65.022,
+    "top5": 87.462,
+    "loss": 1.4105829691314697
+  },
+  "checkpoint_before": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261104_193139_method_lsvit_4373e8b51261/vit_small_w3_a3_optimsize_1024_lsvit_dis_mode_q_qdrop.pth",
+  "after": {
+    "top1": 65.022,
+    "top5": 87.462,
+    "loss": 1.4105829691314697
+  },
+  "top1_delta_pp": 0.0,
+  "checkpoint_after": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261105_173310_method_kd_8fd4a60ed08a/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop_kd.pth",
+  "launch": {
+    "method": "kd",
+    "command": [
+      "-u",
+      "test_quant.py",
+      "--model",
+      "vit_small",
+      "--config",
+      "./configs/3bit/best.py",
+      "--device",
+      "cuda",
+      "--dataset",
+      "../imagenet_fimaq",
+      "--seed",
+      "3407",
+      "--val-batch-size",
+      "64",
+      "--optim-size",
+      "1024",
+      "--load-optimize-checkpoint",
+      "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261104_193139_method_lsvit_4373e8b51261/vit_small_w3_a3_optimsize_1024_lsvit_dis_mode_q_qdrop.pth",
+      "--test-optimize-checkpoint",
+      "--method-adaptation",
+      "kd",
+      "--adaptation-steps",
+      "500"
+    ],
+    "code_sha256": "7694b726835ea1e1bdb8868b9be62954fd119de5d067d62abcab30594ffe0f78",
+    "checkpoint_sha256": "c71e8a2f397b05a6887a18e58d11ec9b6f807beed88221a57eab15bae7876cf5"
+  },
+  "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+  "calibration_hashes": [
+    [
+      "1024",
+      "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+      "a409352202fa88a115395d6df9b6012ab79ecbf36425567f6861d91492b75864"
+    ]
+  ],
+  "status": "complete"
+}

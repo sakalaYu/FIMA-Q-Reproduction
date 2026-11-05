@@ -1,0 +1,389 @@
+{
+  "method": "qk_integer_code_then_scale_KD_v1",
+  "codes": {
+    "method": "qk_integer_code_repair_v1",
+    "blocks": [
+      {
+        "block": 0,
+        "accepted": false,
+        "changed_entries": 0,
+        "fit_kl_before": 1.053389422595501,
+        "fit_kl_candidate": 1.053389422595501,
+        "gate_kl_before": 0.36314868461340666,
+        "gate_kl_trial": null,
+        "trials": [
+          {
+            "budget": 8,
+            "count": 8,
+            "fit_kl": 1.1171033941209316
+          },
+          {
+            "budget": 32,
+            "count": 32,
+            "fit_kl": 1.1225244849920273
+          },
+          {
+            "budget": 128,
+            "count": 128,
+            "fit_kl": 1.070574626326561
+          }
+        ]
+      },
+      {
+        "block": 1,
+        "accepted": false,
+        "changed_entries": 0,
+        "fit_kl_before": 1.053389422595501,
+        "fit_kl_candidate": 1.053389422595501,
+        "gate_kl_before": 0.36314868461340666,
+        "gate_kl_trial": null,
+        "trials": [
+          {
+            "budget": 8,
+            "count": 8,
+            "fit_kl": 1.1375207025557756
+          },
+          {
+            "budget": 32,
+            "count": 32,
+            "fit_kl": 1.1504144296050072
+          },
+          {
+            "budget": 128,
+            "count": 128,
+            "fit_kl": 1.0813987031579018
+          }
+        ]
+      },
+      {
+        "block": 2,
+        "accepted": false,
+        "changed_entries": 0,
+        "fit_kl_before": 1.053389422595501,
+        "fit_kl_candidate": 1.053389422595501,
+        "gate_kl_before": 0.36314868461340666,
+        "gate_kl_trial": null,
+        "trials": [
+          {
+            "budget": 8,
+            "count": 8,
+            "fit_kl": 1.0944130830466747
+          },
+          {
+            "budget": 32,
+            "count": 32,
+            "fit_kl": 1.0978028178215027
+          },
+          {
+            "budget": 128,
+            "count": 128,
+            "fit_kl": 1.1405851878225803
+          }
+        ]
+      },
+      {
+        "block": 3,
+        "accepted": false,
+        "changed_entries": 0,
+        "fit_kl_before": 1.053389422595501,
+        "fit_kl_candidate": 1.053389422595501,
+        "gate_kl_before": 0.36314868461340666,
+        "gate_kl_trial": null,
+        "trials": [
+          {
+            "budget": 8,
+            "count": 8,
+            "fit_kl": 1.1262809224426746
+          },
+          {
+            "budget": 32,
+            "count": 32,
+            "fit_kl": 1.1292249076068401
+          },
+          {
+            "budget": 128,
+            "count": 128,
+            "fit_kl": 1.0749866925179958
+          }
+        ]
+      },
+      {
+        "block": 4,
+        "accepted": false,
+        "changed_entries": 0,
+        "fit_kl_before": 1.053389422595501,
+        "fit_kl_candidate": 0.9872505646198988,
+        "gate_kl_before": 0.36314868461340666,
+        "gate_kl_trial": 0.3976171426475048,
+        "trials": [
+          {
+            "budget": 8,
+            "count": 8,
+            "fit_kl": 1.0144353955984116
+          },
+          {
+            "budget": 32,
+            "count": 32,
+            "fit_kl": 1.0860606394708157
+          },
+          {
+            "budget": 128,
+            "count": 128,
+            "fit_kl": 0.9872505646198988
+          }
+        ]
+      },
+      {
+        "block": 5,
+        "accepted": true,
+        "changed_entries": 32,
+        "fit_kl_before": 1.053389422595501,
+        "fit_kl_candidate": 1.0098681524395943,
+        "gate_kl_before": 0.36314868461340666,
+        "gate_kl_trial": 0.3590460973791778,
+        "trials": [
+          {
+            "budget": 8,
+            "count": 8,
+            "fit_kl": 1.0751366652548313
+          },
+          {
+            "budget": 32,
+            "count": 32,
+            "fit_kl": 1.0098681524395943
+          },
+          {
+            "budget": 128,
+            "count": 128,
+            "fit_kl": 1.0330301076173782
+          }
+        ]
+      },
+      {
+        "block": 6,
+        "accepted": true,
+        "changed_entries": 32,
+        "fit_kl_before": 1.0098681524395943,
+        "fit_kl_candidate": 0.9646290130913258,
+        "gate_kl_before": 0.3590460973791778,
+        "gate_kl_trial": 0.35534484311938286,
+        "trials": [
+          {
+            "budget": 8,
+            "count": 8,
+            "fit_kl": 1.0793758891522884
+          },
+          {
+            "budget": 32,
+            "count": 32,
+            "fit_kl": 0.9646290130913258
+          },
+          {
+            "budget": 128,
+            "count": 128,
+            "fit_kl": 1.0567122716456652
+          }
+        ]
+      },
+      {
+        "block": 7,
+        "accepted": false,
+        "changed_entries": 0,
+        "fit_kl_before": 0.9646290130913258,
+        "fit_kl_candidate": 0.9646290130913258,
+        "gate_kl_before": 0.35534484311938286,
+        "gate_kl_trial": null,
+        "trials": [
+          {
+            "budget": 8,
+            "count": 8,
+            "fit_kl": 1.025432601571083
+          },
+          {
+            "budget": 32,
+            "count": 32,
+            "fit_kl": 1.097812406718731
+          },
+          {
+            "budget": 128,
+            "count": 128,
+            "fit_kl": 1.0157853458076715
+          }
+        ]
+      },
+      {
+        "block": 8,
+        "accepted": false,
+        "changed_entries": 0,
+        "fit_kl_before": 0.9646290130913258,
+        "fit_kl_candidate": 0.9646290130913258,
+        "gate_kl_before": 0.35534484311938286,
+        "gate_kl_trial": null,
+        "trials": [
+          {
+            "budget": 8,
+            "count": 8,
+            "fit_kl": 1.0447814427316189
+          },
+          {
+            "budget": 32,
+            "count": 32,
+            "fit_kl": 1.0037939585745335
+          },
+          {
+            "budget": 128,
+            "count": 128,
+            "fit_kl": 0.9660654570907354
+          }
+        ]
+      },
+      {
+        "block": 9,
+        "accepted": false,
+        "changed_entries": 0,
+        "fit_kl_before": 0.9646290130913258,
+        "fit_kl_candidate": 0.9646290130913258,
+        "gate_kl_before": 0.35534484311938286,
+        "gate_kl_trial": null,
+        "trials": [
+          {
+            "budget": 8,
+            "count": 8,
+            "fit_kl": 1.0029943697154522
+          },
+          {
+            "budget": 32,
+            "count": 32,
+            "fit_kl": 1.0001535434275866
+          },
+          {
+            "budget": 128,
+            "count": 128,
+            "fit_kl": 1.0080137830227613
+          }
+        ]
+      },
+      {
+        "block": 10,
+        "accepted": false,
+        "changed_entries": 0,
+        "fit_kl_before": 0.9646290130913258,
+        "fit_kl_candidate": 0.9646290130913258,
+        "gate_kl_before": 0.35534484311938286,
+        "gate_kl_trial": null,
+        "trials": [
+          {
+            "budget": 8,
+            "count": 8,
+            "fit_kl": 0.9843743089586496
+          },
+          {
+            "budget": 32,
+            "count": 32,
+            "fit_kl": 0.9950978420674801
+          },
+          {
+            "budget": 128,
+            "count": 128,
+            "fit_kl": 1.0082296095788479
+          }
+        ]
+      },
+      {
+        "block": 11,
+        "accepted": false,
+        "changed_entries": 0,
+        "fit_kl_before": 0.9646290130913258,
+        "fit_kl_candidate": 0.9376985803246498,
+        "gate_kl_before": 0.35534484311938286,
+        "gate_kl_trial": 0.36419004388153553,
+        "trials": [
+          {
+            "budget": 8,
+            "count": 8,
+            "fit_kl": 0.9771575089544058
+          },
+          {
+            "budget": 32,
+            "count": 32,
+            "fit_kl": 0.951349601149559
+          },
+          {
+            "budget": 128,
+            "count": 128,
+            "fit_kl": 0.9376985803246498
+          }
+        ]
+      }
+    ],
+    "fit_images": 64,
+    "gate_kl_before": 0.36314868461340666,
+    "gate_kl_after": 0.35534484311938286,
+    "changed_entries": 64
+  },
+  "kd": {
+    "method": "end_to_end_hard_scale_KD",
+    "steps": 500,
+    "temperature": 2,
+    "selected_step": 0,
+    "scale_bound": 1.1,
+    "lr": 0.0003,
+    "gate_kl_before": 0.35534484311938286,
+    "gate_kl_after": 0.35534484311938286
+  },
+  "fit_images": 896,
+  "gate_images": 128,
+  "elapsed_seconds": 116.53876830637455,
+  "before": {
+    "top1": 65.022,
+    "top5": 87.462,
+    "loss": 1.4105829691314697
+  },
+  "checkpoint_before": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261104_193139_method_lsvit_4373e8b51261/vit_small_w3_a3_optimsize_1024_lsvit_dis_mode_q_qdrop.pth",
+  "after": {
+    "top1": 64.744,
+    "top5": 87.496,
+    "loss": 1.4127824953937531
+  },
+  "top1_delta_pp": -0.2780000000000058,
+  "checkpoint_after": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261105_173334_method_qkcode_kd_8af04d4e994e/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop_qkcode_kd.pth",
+  "launch": {
+    "method": "qkcode_kd",
+    "command": [
+      "-u",
+      "test_quant.py",
+      "--model",
+      "vit_small",
+      "--config",
+      "./configs/3bit/best.py",
+      "--device",
+      "cuda",
+      "--dataset",
+      "../imagenet_fimaq",
+      "--seed",
+      "3407",
+      "--val-batch-size",
+      "64",
+      "--optim-size",
+      "1024",
+      "--load-optimize-checkpoint",
+      "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261104_193139_method_lsvit_4373e8b51261/vit_small_w3_a3_optimsize_1024_lsvit_dis_mode_q_qdrop.pth",
+      "--test-optimize-checkpoint",
+      "--method-adaptation",
+      "qkcode_kd",
+      "--adaptation-steps",
+      "500"
+    ],
+    "code_sha256": "7694b726835ea1e1bdb8868b9be62954fd119de5d067d62abcab30594ffe0f78",
+    "checkpoint_sha256": "c71e8a2f397b05a6887a18e58d11ec9b6f807beed88221a57eab15bae7876cf5"
+  },
+  "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+  "calibration_hashes": [
+    [
+      "1024",
+      "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+      "a409352202fa88a115395d6df9b6012ab79ecbf36425567f6861d91492b75864"
+    ]
+  ],
+  "status": "complete"
+}

@@ -1,0 +1,228 @@
+2026-11-05 17:33:34 - start the process.
+Experiment directory: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261105_173334_method_qkcode_kd_8af04d4e994e
+Namespace(model='vit_small', config='./configs/3bit/best.py', dataset='../imagenet_fimaq', optim_size=1024, val_batch_size=64, num_workers=8, device='cuda', calibrate=False, load_calibrate_checkpoint=None, test_calibrate_checkpoint=False, optimize=False, load_optimize_checkpoint='/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261104_193139_method_lsvit_4373e8b51261/vit_small_w3_a3_optimsize_1024_lsvit_dis_mode_q_qdrop.pth', test_optimize_checkpoint=True, print_freq=10, seed=3407, skip_final_validation=False, headwise_hadamard=False, headwise_mode='all', qk_joint_variant='none', qk_joint_protocol='v2_integer_zp', qk_joint_steps=300, qk_joint_batch_size=8, qk_joint_holdout=128, qk_joint_lr=0.003, qk_joint_eval_every=50, qk_joint_rotation_rank=0, qk_joint_min_relative_kl=0.0, qk_joint_reconstruction_loss='auto', attention_relation='none', relation_protocol='relation_v1', relation_weight=0.1, relation_queries=16, relation_start=0.2, relation_full=0.6, probe_kd='none', probe_kd_protocol='semantic_probe_v1', probe_kd_weight=0.05, probe_kd_temperature=2.0, probe_kd_ridge=0.1, probe_kd_holdout=128, probe_kd_code_sha='unrecorded', endpoint_task='none', endpoint_code_sha='unrecorded', endpoint_mode='none', endpoint_steps=2000, endpoint_lr=0.001, endpoint_bound=1.2, endpoint_holdout=128, endpoint_batch_size=8, endpoint_eval_every=200, qwt=False, qwt_samples=512, qwt_batch_size=8, qwt_ridge=0.0, qwt_branch_dtype='fp16', qwt_solver_threads=4, activation_codebook='none', method_adaptation='qkcode_kd', adaptation_steps=500)
+Successfully imported Config class!
+optim_size: 1024
+calib_size: 128
+optim_batch_size: 32
+calib_batch_size: 32
+w_bit: 3
+a_bit: 3
+qconv_a_bit: 8
+qhead_a_bit: 3
+calib_metric: mse
+matmul_head_channel_wise: True
+token_channel_wise: True
+eq_n: 128
+search_round: 3
+keep_gpu: True
+optim_metric: fisher_dplr
+temp: 20
+k: 5
+p1: 1.0
+p2: 1.0
+dis_mode: q
+optim_mode: qdrop
+drop_prob: 0.5
+robust_beta: 0.5
+robust_temperature: 0.5
+recon_iters: 20000
+Python random seeded: 3407
+Building model ...
+No checkpoint found at './checkpoints/vit_raw/vit_small_patch16_224.bin'
+Loading pretrained weights from Hugging Face hub (timm/vit_small_patch16_224.augreg_in21k_ft_in1k)
+[timm/vit_small_patch16_224.augreg_in21k_ft_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+Endpoint FP model SHA256: a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c
+Building validation dataloader ...
+Wraping quantiztion modules (reparam: False) ...
+Building calibrator ...
+Calibration cache: count=1024 sample_sha256=51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b tensor_sha256=a409352202fa88a115395d6df9b6012ab79ecbf36425567f6861d91492b75864
+<All keys matched successfully>
+Validating on calibration set after block reconstruction ...
+Test: [0/32]	Time 1.272 (1.272)	Loss 0.8558 (0.8558)	Prec@1 81.250 (81.250)	Prec@5 93.750 (93.750)
+Test: [10/32]	Time 0.083 (0.183)	Loss 1.2463 (0.9675)	Prec@1 68.750 (74.716)	Prec@5 90.625 (91.477)
+Test: [20/32]	Time 0.076 (0.130)	Loss 1.5968 (1.0314)	Prec@1 65.625 (73.958)	Prec@5 87.500 (91.220)
+Test: [30/32]	Time 0.074 (0.112)	Loss 0.6987 (0.9991)	Prec@1 81.250 (75.000)	Prec@5 100.000 (92.036)
+ * Prec@1 75.000 Prec@5 92.285 Loss 0.991 Time 3.590
+Validating on test set after block reconstruction ...
+Test: [0/782]	Time 1.326 (1.326)	Loss 0.8316 (0.8316)	Prec@1 84.375 (84.375)	Prec@5 90.625 (90.625)
+Test: [10/782]	Time 0.181 (0.288)	Loss 0.5289 (0.8297)	Prec@1 89.062 (77.983)	Prec@5 95.312 (93.892)
+Test: [20/782]	Time 0.174 (0.234)	Loss 1.1749 (0.8902)	Prec@1 62.500 (76.860)	Prec@5 93.750 (93.080)
+Test: [30/782]	Time 0.181 (0.217)	Loss 1.1175 (1.0758)	Prec@1 76.562 (72.631)	Prec@5 89.062 (90.423)
+Test: [40/782]	Time 0.181 (0.208)	Loss 0.9711 (1.1475)	Prec@1 82.812 (71.151)	Prec@5 93.750 (90.130)
+Test: [50/782]	Time 0.176 (0.202)	Loss 1.3936 (1.2553)	Prec@1 64.062 (68.015)	Prec@5 92.188 (89.277)
+Test: [60/782]	Time 0.177 (0.198)	Loss 1.2293 (1.2508)	Prec@1 59.375 (67.316)	Prec@5 95.312 (89.421)
+Test: [70/782]	Time 0.182 (0.195)	Loss 0.5444 (1.2025)	Prec@1 89.062 (69.190)	Prec@5 93.750 (89.679)
+Test: [80/782]	Time 0.182 (0.192)	Loss 1.2374 (1.1506)	Prec@1 68.750 (70.583)	Prec@5 87.500 (90.123)
+Test: [90/782]	Time 0.181 (0.191)	Loss 1.1353 (1.1575)	Prec@1 68.750 (70.536)	Prec@5 93.750 (89.921)
+Test: [100/782]	Time 0.185 (0.190)	Loss 1.0954 (1.1554)	Prec@1 78.125 (70.699)	Prec@5 87.500 (90.022)
+Test: [110/782]	Time 0.182 (0.190)	Loss 0.8713 (1.1199)	Prec@1 76.562 (71.608)	Prec@5 89.062 (90.358)
+Test: [120/782]	Time 0.183 (0.190)	Loss 1.0384 (1.0965)	Prec@1 65.625 (72.133)	Prec@5 90.625 (90.586)
+Test: [130/782]	Time 0.175 (0.189)	Loss 1.7966 (1.1161)	Prec@1 35.938 (71.302)	Prec@5 89.062 (90.565)
+Test: [140/782]	Time 0.177 (0.188)	Loss 1.5669 (1.1274)	Prec@1 53.125 (70.911)	Prec@5 87.500 (90.570)
+Test: [150/782]	Time 0.181 (0.188)	Loss 1.9165 (1.1397)	Prec@1 48.438 (70.437)	Prec@5 76.562 (90.490)
+Test: [160/782]	Time 0.184 (0.187)	Loss 1.1901 (1.1563)	Prec@1 67.188 (69.769)	Prec@5 93.750 (90.489)
+Test: [170/782]	Time 0.176 (0.187)	Loss 0.6594 (1.1547)	Prec@1 81.250 (69.865)	Prec@5 96.875 (90.552)
+Test: [180/782]	Time 0.177 (0.186)	Loss 1.2369 (1.1669)	Prec@1 59.375 (69.544)	Prec@5 89.062 (90.504)
+Test: [190/782]	Time 0.179 (0.186)	Loss 0.7297 (1.1721)	Prec@1 81.250 (69.208)	Prec@5 93.750 (90.551)
+Test: [200/782]	Time 0.181 (0.186)	Loss 1.2698 (1.1690)	Prec@1 65.625 (69.216)	Prec@5 93.750 (90.664)
+Test: [210/782]	Time 0.186 (0.186)	Loss 1.0433 (1.1637)	Prec@1 70.312 (69.268)	Prec@5 92.188 (90.781)
+Test: [220/782]	Time 0.181 (0.185)	Loss 2.0888 (1.1695)	Prec@1 25.000 (69.019)	Prec@5 84.375 (90.766)
+Test: [230/782]	Time 0.184 (0.185)	Loss 0.7757 (1.1576)	Prec@1 79.688 (69.413)	Prec@5 96.875 (90.896)
+Test: [240/782]	Time 0.175 (0.185)	Loss 1.0877 (1.1624)	Prec@1 75.000 (69.327)	Prec@5 95.312 (90.878)
+Test: [250/782]	Time 0.163 (0.185)	Loss 0.7201 (1.1601)	Prec@1 82.812 (69.453)	Prec@5 96.875 (90.949)
+Test: [260/782]	Time 0.170 (0.184)	Loss 0.3879 (1.1438)	Prec@1 95.312 (69.899)	Prec@5 98.438 (91.080)
+Test: [270/782]	Time 0.183 (0.184)	Loss 1.2911 (1.1445)	Prec@1 65.625 (70.030)	Prec@5 90.625 (91.057)
+Test: [280/782]	Time 0.188 (0.184)	Loss 1.6818 (1.1463)	Prec@1 32.812 (69.873)	Prec@5 93.750 (91.103)
+Test: [290/782]	Time 0.166 (0.184)	Loss 1.5641 (1.1447)	Prec@1 67.188 (69.980)	Prec@5 82.812 (91.103)
+Test: [300/782]	Time 0.172 (0.184)	Loss 1.0004 (1.1505)	Prec@1 71.875 (69.887)	Prec@5 90.625 (90.973)
+Test: [310/782]	Time 0.186 (0.184)	Loss 1.1447 (1.1476)	Prec@1 70.312 (69.946)	Prec@5 92.188 (90.992)
+Test: [320/782]	Time 0.185 (0.184)	Loss 1.2101 (1.1576)	Prec@1 62.500 (69.616)	Prec@5 98.438 (90.902)
+Test: [330/782]	Time 0.173 (0.184)	Loss 1.4627 (1.1718)	Prec@1 62.500 (69.335)	Prec@5 81.250 (90.762)
+Test: [340/782]	Time 0.179 (0.183)	Loss 2.2073 (1.1836)	Prec@1 39.062 (69.089)	Prec@5 84.375 (90.652)
+Test: [350/782]	Time 0.188 (0.183)	Loss 1.4516 (1.2007)	Prec@1 65.625 (68.692)	Prec@5 82.812 (90.442)
+Test: [360/782]	Time 0.175 (0.183)	Loss 1.2417 (1.2077)	Prec@1 54.688 (68.577)	Prec@5 95.312 (90.344)
+Test: [370/782]	Time 0.179 (0.183)	Loss 1.6185 (1.2236)	Prec@1 59.375 (68.341)	Prec@5 89.062 (90.090)
+Test: [380/782]	Time 0.172 (0.183)	Loss 1.2705 (1.2355)	Prec@1 68.750 (68.032)	Prec@5 85.938 (89.895)
+Test: [390/782]	Time 0.175 (0.183)	Loss 2.2480 (1.2525)	Prec@1 50.000 (67.739)	Prec@5 73.438 (89.714)
+Test: [400/782]	Time 0.170 (0.183)	Loss 1.5610 (1.2702)	Prec@1 57.812 (67.355)	Prec@5 85.938 (89.495)
+Test: [410/782]	Time 0.180 (0.183)	Loss 1.3649 (1.2767)	Prec@1 62.500 (67.184)	Prec@5 85.938 (89.378)
+Test: [420/782]	Time 0.165 (0.182)	Loss 0.9461 (1.2814)	Prec@1 76.562 (67.154)	Prec@5 92.188 (89.326)
+Test: [430/782]	Time 0.183 (0.182)	Loss 1.7179 (1.2864)	Prec@1 56.250 (67.104)	Prec@5 81.250 (89.251)
+Test: [440/782]	Time 0.179 (0.182)	Loss 1.0706 (1.2909)	Prec@1 70.312 (67.063)	Prec@5 95.312 (89.162)
+Test: [450/782]	Time 0.178 (0.182)	Loss 0.8210 (1.2886)	Prec@1 84.375 (67.163)	Prec@5 90.625 (89.166)
+Test: [460/782]	Time 0.182 (0.182)	Loss 2.1816 (1.2980)	Prec@1 48.438 (66.971)	Prec@5 75.000 (89.056)
+Test: [470/782]	Time 0.175 (0.182)	Loss 1.8628 (1.3086)	Prec@1 53.125 (66.740)	Prec@5 87.500 (88.933)
+Test: [480/782]	Time 0.179 (0.182)	Loss 1.2029 (1.3078)	Prec@1 75.000 (66.820)	Prec@5 87.500 (88.874)
+Test: [490/782]	Time 0.182 (0.182)	Loss 0.9594 (1.3184)	Prec@1 76.562 (66.640)	Prec@5 89.062 (88.703)
+Test: [500/782]	Time 0.184 (0.182)	Loss 1.0888 (1.3250)	Prec@1 73.438 (66.427)	Prec@5 93.750 (88.676)
+Test: [510/782]	Time 0.180 (0.182)	Loss 2.3642 (1.3348)	Prec@1 56.250 (66.350)	Prec@5 73.438 (88.518)
+Test: [520/782]	Time 0.179 (0.182)	Loss 1.5088 (1.3431)	Prec@1 64.062 (66.057)	Prec@5 85.938 (88.445)
+Test: [530/782]	Time 0.179 (0.182)	Loss 1.7378 (1.3496)	Prec@1 64.062 (65.996)	Prec@5 79.688 (88.336)
+Test: [540/782]	Time 0.181 (0.182)	Loss 2.2147 (1.3535)	Prec@1 45.312 (65.902)	Prec@5 79.688 (88.277)
+Test: [550/782]	Time 0.115 (0.181)	Loss 1.0946 (1.3553)	Prec@1 71.875 (65.894)	Prec@5 90.625 (88.234)
+Test: [560/782]	Time 0.122 (0.180)	Loss 2.0272 (1.3629)	Prec@1 42.188 (65.709)	Prec@5 79.688 (88.168)
+Test: [570/782]	Time 0.162 (0.180)	Loss 1.6680 (1.3645)	Prec@1 62.500 (65.718)	Prec@5 87.500 (88.127)
+Test: [580/782]	Time 0.126 (0.179)	Loss 1.4763 (1.3724)	Prec@1 56.250 (65.595)	Prec@5 85.938 (88.022)
+Test: [590/782]	Time 0.147 (0.178)	Loss 0.8731 (1.3777)	Prec@1 81.250 (65.501)	Prec@5 95.312 (87.928)
+Test: [600/782]	Time 0.117 (0.178)	Loss 1.1163 (1.3835)	Prec@1 73.438 (65.409)	Prec@5 89.062 (87.828)
+Test: [610/782]	Time 0.122 (0.177)	Loss 0.8999 (1.3853)	Prec@1 82.812 (65.415)	Prec@5 95.312 (87.786)
+Test: [620/782]	Time 0.146 (0.176)	Loss 2.0873 (1.3913)	Prec@1 64.062 (65.348)	Prec@5 75.000 (87.704)
+Test: [630/782]	Time 0.096 (0.175)	Loss 1.6238 (1.3928)	Prec@1 65.625 (65.340)	Prec@5 85.938 (87.691)
+Test: [640/782]	Time 0.097 (0.173)	Loss 1.5742 (1.3965)	Prec@1 71.875 (65.237)	Prec@5 84.375 (87.663)
+Test: [650/782]	Time 0.132 (0.173)	Loss 0.7666 (1.3993)	Prec@1 82.812 (65.222)	Prec@5 89.062 (87.613)
+Test: [660/782]	Time 0.118 (0.172)	Loss 2.4804 (1.4111)	Prec@1 48.438 (64.980)	Prec@5 65.625 (87.427)
+Test: [670/782]	Time 0.100 (0.171)	Loss 1.6510 (1.4127)	Prec@1 60.938 (64.896)	Prec@5 82.812 (87.400)
+Test: [680/782]	Time 0.117 (0.170)	Loss 0.8842 (1.4148)	Prec@1 65.625 (64.838)	Prec@5 93.750 (87.394)
+Test: [690/782]	Time 0.111 (0.169)	Loss 1.6010 (1.4155)	Prec@1 62.500 (64.827)	Prec@5 87.500 (87.407)
+Test: [700/782]	Time 0.113 (0.169)	Loss 1.2265 (1.4176)	Prec@1 67.188 (64.798)	Prec@5 89.062 (87.360)
+Test: [710/782]	Time 0.118 (0.168)	Loss 2.1180 (1.4249)	Prec@1 40.625 (64.656)	Prec@5 81.250 (87.258)
+Test: [720/782]	Time 0.119 (0.167)	Loss 1.1381 (1.4216)	Prec@1 70.312 (64.730)	Prec@5 92.188 (87.314)
+Test: [730/782]	Time 0.113 (0.166)	Loss 1.5145 (1.4230)	Prec@1 60.938 (64.685)	Prec@5 84.375 (87.299)
+Test: [740/782]	Time 0.113 (0.166)	Loss 1.0767 (1.4176)	Prec@1 59.375 (64.777)	Prec@5 96.875 (87.371)
+Test: [750/782]	Time 0.126 (0.165)	Loss 3.0158 (1.4154)	Prec@1 31.250 (64.864)	Prec@5 68.750 (87.408)
+Test: [760/782]	Time 0.132 (0.164)	Loss 1.1962 (1.4210)	Prec@1 68.750 (64.763)	Prec@5 92.188 (87.330)
+Test: [770/782]	Time 0.105 (0.164)	Loss 0.1259 (1.4170)	Prec@1 100.000 (64.859)	Prec@5 100.000 (87.395)
+Test: [780/782]	Time 0.118 (0.163)	Loss 2.4046 (1.4101)	Prec@1 32.812 (65.027)	Prec@5 76.562 (87.468)
+ * Prec@1 65.022 Prec@5 87.462 Loss 1.411 Time 127.524
+Q/K integer-code repair 1/12: {'block': 0, 'accepted': False, 'changed_entries': 0, 'fit_kl_before': 1.053389422595501, 'fit_kl_candidate': 1.053389422595501, 'gate_kl_before': 0.36314868461340666, 'gate_kl_trial': None, 'trials': [{'budget': 8, 'count': 8, 'fit_kl': 1.1171033941209316}, {'budget': 32, 'count': 32, 'fit_kl': 1.1225244849920273}, {'budget': 128, 'count': 128, 'fit_kl': 1.070574626326561}]}
+Q/K integer-code repair 2/12: {'block': 1, 'accepted': False, 'changed_entries': 0, 'fit_kl_before': 1.053389422595501, 'fit_kl_candidate': 1.053389422595501, 'gate_kl_before': 0.36314868461340666, 'gate_kl_trial': None, 'trials': [{'budget': 8, 'count': 8, 'fit_kl': 1.1375207025557756}, {'budget': 32, 'count': 32, 'fit_kl': 1.1504144296050072}, {'budget': 128, 'count': 128, 'fit_kl': 1.0813987031579018}]}
+Q/K integer-code repair 3/12: {'block': 2, 'accepted': False, 'changed_entries': 0, 'fit_kl_before': 1.053389422595501, 'fit_kl_candidate': 1.053389422595501, 'gate_kl_before': 0.36314868461340666, 'gate_kl_trial': None, 'trials': [{'budget': 8, 'count': 8, 'fit_kl': 1.0944130830466747}, {'budget': 32, 'count': 32, 'fit_kl': 1.0978028178215027}, {'budget': 128, 'count': 128, 'fit_kl': 1.1405851878225803}]}
+Q/K integer-code repair 4/12: {'block': 3, 'accepted': False, 'changed_entries': 0, 'fit_kl_before': 1.053389422595501, 'fit_kl_candidate': 1.053389422595501, 'gate_kl_before': 0.36314868461340666, 'gate_kl_trial': None, 'trials': [{'budget': 8, 'count': 8, 'fit_kl': 1.1262809224426746}, {'budget': 32, 'count': 32, 'fit_kl': 1.1292249076068401}, {'budget': 128, 'count': 128, 'fit_kl': 1.0749866925179958}]}
+Q/K integer-code repair 5/12: {'block': 4, 'accepted': False, 'changed_entries': 0, 'fit_kl_before': 1.053389422595501, 'fit_kl_candidate': 0.9872505646198988, 'gate_kl_before': 0.36314868461340666, 'gate_kl_trial': 0.3976171426475048, 'trials': [{'budget': 8, 'count': 8, 'fit_kl': 1.0144353955984116}, {'budget': 32, 'count': 32, 'fit_kl': 1.0860606394708157}, {'budget': 128, 'count': 128, 'fit_kl': 0.9872505646198988}]}
+Q/K integer-code repair 6/12: {'block': 5, 'accepted': True, 'changed_entries': 32, 'fit_kl_before': 1.053389422595501, 'fit_kl_candidate': 1.0098681524395943, 'gate_kl_before': 0.36314868461340666, 'gate_kl_trial': 0.3590460973791778, 'trials': [{'budget': 8, 'count': 8, 'fit_kl': 1.0751366652548313}, {'budget': 32, 'count': 32, 'fit_kl': 1.0098681524395943}, {'budget': 128, 'count': 128, 'fit_kl': 1.0330301076173782}]}
+Q/K integer-code repair 7/12: {'block': 6, 'accepted': True, 'changed_entries': 32, 'fit_kl_before': 1.0098681524395943, 'fit_kl_candidate': 0.9646290130913258, 'gate_kl_before': 0.3590460973791778, 'gate_kl_trial': 0.35534484311938286, 'trials': [{'budget': 8, 'count': 8, 'fit_kl': 1.0793758891522884}, {'budget': 32, 'count': 32, 'fit_kl': 0.9646290130913258}, {'budget': 128, 'count': 128, 'fit_kl': 1.0567122716456652}]}
+Q/K integer-code repair 8/12: {'block': 7, 'accepted': False, 'changed_entries': 0, 'fit_kl_before': 0.9646290130913258, 'fit_kl_candidate': 0.9646290130913258, 'gate_kl_before': 0.35534484311938286, 'gate_kl_trial': None, 'trials': [{'budget': 8, 'count': 8, 'fit_kl': 1.025432601571083}, {'budget': 32, 'count': 32, 'fit_kl': 1.097812406718731}, {'budget': 128, 'count': 128, 'fit_kl': 1.0157853458076715}]}
+Q/K integer-code repair 9/12: {'block': 8, 'accepted': False, 'changed_entries': 0, 'fit_kl_before': 0.9646290130913258, 'fit_kl_candidate': 0.9646290130913258, 'gate_kl_before': 0.35534484311938286, 'gate_kl_trial': None, 'trials': [{'budget': 8, 'count': 8, 'fit_kl': 1.0447814427316189}, {'budget': 32, 'count': 32, 'fit_kl': 1.0037939585745335}, {'budget': 128, 'count': 128, 'fit_kl': 0.9660654570907354}]}
+Q/K integer-code repair 10/12: {'block': 9, 'accepted': False, 'changed_entries': 0, 'fit_kl_before': 0.9646290130913258, 'fit_kl_candidate': 0.9646290130913258, 'gate_kl_before': 0.35534484311938286, 'gate_kl_trial': None, 'trials': [{'budget': 8, 'count': 8, 'fit_kl': 1.0029943697154522}, {'budget': 32, 'count': 32, 'fit_kl': 1.0001535434275866}, {'budget': 128, 'count': 128, 'fit_kl': 1.0080137830227613}]}
+Q/K integer-code repair 11/12: {'block': 10, 'accepted': False, 'changed_entries': 0, 'fit_kl_before': 0.9646290130913258, 'fit_kl_candidate': 0.9646290130913258, 'gate_kl_before': 0.35534484311938286, 'gate_kl_trial': None, 'trials': [{'budget': 8, 'count': 8, 'fit_kl': 0.9843743089586496}, {'budget': 32, 'count': 32, 'fit_kl': 0.9950978420674801}, {'budget': 128, 'count': 128, 'fit_kl': 1.0082296095788479}]}
+Q/K integer-code repair 12/12: {'block': 11, 'accepted': False, 'changed_entries': 0, 'fit_kl_before': 0.9646290130913258, 'fit_kl_candidate': 0.9376985803246498, 'gate_kl_before': 0.35534484311938286, 'gate_kl_trial': 0.36419004388153553, 'trials': [{'budget': 8, 'count': 8, 'fit_kl': 0.9771575089544058}, {'budget': 32, 'count': 32, 'fit_kl': 0.951349601149559}, {'budget': 128, 'count': 128, 'fit_kl': 0.9376985803246498}]}
+End-to-end KD step 100/500 loss 2.12495 gate KL 0.415653
+End-to-end KD step 200/500 loss 0.676309 gate KL 0.385433
+End-to-end KD step 300/500 loss 1.2915 gate KL 0.399572
+End-to-end KD step 400/500 loss 1.25496 gate KL 0.441346
+End-to-end KD step 500/500 loss 1.00172 gate KL 0.403483
+Validating after method adaptation ...
+Test: [0/782]	Time 0.871 (0.871)	Loss 0.7163 (0.7163)	Prec@1 85.938 (85.938)	Prec@5 92.188 (92.188)
+Test: [10/782]	Time 0.120 (0.224)	Loss 0.5128 (0.8274)	Prec@1 84.375 (78.409)	Prec@5 96.875 (94.318)
+Test: [20/782]	Time 0.116 (0.173)	Loss 1.1357 (0.8765)	Prec@1 60.938 (77.902)	Prec@5 92.188 (93.378)
+Test: [30/782]	Time 0.114 (0.154)	Loss 1.2704 (1.0860)	Prec@1 70.312 (72.681)	Prec@5 87.500 (90.776)
+Test: [40/782]	Time 0.116 (0.145)	Loss 0.9378 (1.1575)	Prec@1 81.250 (70.694)	Prec@5 92.188 (90.130)
+Test: [50/782]	Time 0.122 (0.140)	Loss 1.2985 (1.2581)	Prec@1 68.750 (67.923)	Prec@5 89.062 (89.246)
+Test: [60/782]	Time 0.114 (0.136)	Loss 1.1523 (1.2521)	Prec@1 62.500 (67.136)	Prec@5 93.750 (89.370)
+Test: [70/782]	Time 0.117 (0.133)	Loss 0.4792 (1.2032)	Prec@1 87.500 (69.036)	Prec@5 95.312 (89.657)
+Test: [80/782]	Time 0.118 (0.131)	Loss 1.2955 (1.1510)	Prec@1 76.562 (70.505)	Prec@5 89.062 (90.143)
+Test: [90/782]	Time 0.129 (0.131)	Loss 1.0635 (1.1575)	Prec@1 73.438 (70.639)	Prec@5 100.000 (90.007)
+Test: [100/782]	Time 0.110 (0.130)	Loss 1.0679 (1.1522)	Prec@1 76.562 (70.622)	Prec@5 87.500 (90.099)
+Test: [110/782]	Time 0.114 (0.129)	Loss 0.7841 (1.1194)	Prec@1 81.250 (71.453)	Prec@5 93.750 (90.484)
+Test: [120/782]	Time 0.135 (0.128)	Loss 0.9846 (1.0962)	Prec@1 78.125 (72.030)	Prec@5 92.188 (90.819)
+Test: [130/782]	Time 0.133 (0.129)	Loss 1.7647 (1.1169)	Prec@1 42.188 (71.171)	Prec@5 90.625 (90.768)
+Test: [140/782]	Time 0.117 (0.128)	Loss 1.5269 (1.1254)	Prec@1 53.125 (70.800)	Prec@5 87.500 (90.725)
+Test: [150/782]	Time 0.118 (0.128)	Loss 2.0783 (1.1398)	Prec@1 39.062 (70.240)	Prec@5 73.438 (90.615)
+Test: [160/782]	Time 0.124 (0.127)	Loss 1.2705 (1.1585)	Prec@1 65.625 (69.565)	Prec@5 92.188 (90.567)
+Test: [170/782]	Time 0.118 (0.127)	Loss 0.7862 (1.1567)	Prec@1 76.562 (69.664)	Prec@5 98.438 (90.662)
+Test: [180/782]	Time 0.118 (0.126)	Loss 1.2080 (1.1698)	Prec@1 64.062 (69.294)	Prec@5 90.625 (90.565)
+Test: [190/782]	Time 0.119 (0.126)	Loss 0.8012 (1.1757)	Prec@1 82.812 (68.897)	Prec@5 93.750 (90.568)
+Test: [200/782]	Time 0.132 (0.126)	Loss 1.2565 (1.1743)	Prec@1 60.938 (68.789)	Prec@5 90.625 (90.679)
+Test: [210/782]	Time 0.110 (0.126)	Loss 1.0896 (1.1704)	Prec@1 70.312 (68.676)	Prec@5 93.750 (90.795)
+Test: [220/782]	Time 0.120 (0.126)	Loss 2.0753 (1.1755)	Prec@1 26.562 (68.467)	Prec@5 85.938 (90.844)
+Test: [230/782]	Time 0.130 (0.125)	Loss 0.9373 (1.1642)	Prec@1 79.688 (68.845)	Prec@5 92.188 (90.977)
+Test: [240/782]	Time 0.124 (0.126)	Loss 1.1964 (1.1694)	Prec@1 70.312 (68.731)	Prec@5 95.312 (90.962)
+Test: [250/782]	Time 0.116 (0.125)	Loss 0.6801 (1.1676)	Prec@1 84.375 (68.762)	Prec@5 93.750 (90.999)
+Test: [260/782]	Time 0.131 (0.125)	Loss 0.3699 (1.1515)	Prec@1 95.312 (69.193)	Prec@5 98.438 (91.134)
+Test: [270/782]	Time 0.120 (0.125)	Loss 1.4605 (1.1510)	Prec@1 59.375 (69.373)	Prec@5 89.062 (91.144)
+Test: [280/782]	Time 0.117 (0.125)	Loss 1.5235 (1.1517)	Prec@1 43.750 (69.289)	Prec@5 96.875 (91.209)
+Test: [290/782]	Time 0.114 (0.125)	Loss 1.5556 (1.1506)	Prec@1 65.625 (69.448)	Prec@5 87.500 (91.178)
+Test: [300/782]	Time 0.126 (0.125)	Loss 1.0152 (1.1561)	Prec@1 70.312 (69.311)	Prec@5 92.188 (91.061)
+Test: [310/782]	Time 0.072 (0.123)	Loss 1.1155 (1.1534)	Prec@1 75.000 (69.428)	Prec@5 92.188 (91.062)
+Test: [320/782]	Time 0.071 (0.122)	Loss 1.2817 (1.1644)	Prec@1 56.250 (69.091)	Prec@5 96.875 (90.966)
+Test: [330/782]	Time 0.070 (0.120)	Loss 1.4168 (1.1793)	Prec@1 67.188 (68.788)	Prec@5 89.062 (90.800)
+Test: [340/782]	Time 0.071 (0.119)	Loss 2.3586 (1.1918)	Prec@1 39.062 (68.553)	Prec@5 78.125 (90.662)
+Test: [350/782]	Time 0.071 (0.118)	Loss 1.3981 (1.2088)	Prec@1 67.188 (68.194)	Prec@5 84.375 (90.451)
+Test: [360/782]	Time 0.072 (0.116)	Loss 1.2994 (1.2165)	Prec@1 50.000 (68.075)	Prec@5 95.312 (90.318)
+Test: [370/782]	Time 0.071 (0.115)	Loss 1.6197 (1.2319)	Prec@1 57.812 (67.823)	Prec@5 89.062 (90.120)
+Test: [380/782]	Time 0.071 (0.114)	Loss 1.3104 (1.2431)	Prec@1 75.000 (67.606)	Prec@5 87.500 (89.948)
+Test: [390/782]	Time 0.071 (0.113)	Loss 2.1120 (1.2605)	Prec@1 45.312 (67.239)	Prec@5 76.562 (89.754)
+Test: [400/782]	Time 0.070 (0.112)	Loss 1.5849 (1.2770)	Prec@1 59.375 (66.802)	Prec@5 82.812 (89.542)
+Test: [410/782]	Time 0.073 (0.111)	Loss 1.3214 (1.2830)	Prec@1 62.500 (66.629)	Prec@5 90.625 (89.473)
+Test: [420/782]	Time 0.071 (0.110)	Loss 1.0210 (1.2874)	Prec@1 76.562 (66.616)	Prec@5 89.062 (89.445)
+Test: [430/782]	Time 0.071 (0.109)	Loss 1.6840 (1.2926)	Prec@1 56.250 (66.564)	Prec@5 82.812 (89.345)
+Test: [440/782]	Time 0.070 (0.108)	Loss 1.1176 (1.2975)	Prec@1 68.750 (66.539)	Prec@5 92.188 (89.247)
+Test: [450/782]	Time 0.073 (0.107)	Loss 0.7744 (1.2947)	Prec@1 85.938 (66.678)	Prec@5 90.625 (89.270)
+Test: [460/782]	Time 0.070 (0.107)	Loss 2.1010 (1.3041)	Prec@1 54.688 (66.479)	Prec@5 76.562 (89.174)
+Test: [470/782]	Time 0.071 (0.106)	Loss 1.8896 (1.3150)	Prec@1 51.562 (66.262)	Prec@5 87.500 (89.066)
+Test: [480/782]	Time 0.070 (0.105)	Loss 1.1723 (1.3138)	Prec@1 71.875 (66.359)	Prec@5 89.062 (89.040)
+Test: [490/782]	Time 0.072 (0.105)	Loss 0.9021 (1.3249)	Prec@1 81.250 (66.166)	Prec@5 90.625 (88.856)
+Test: [500/782]	Time 0.071 (0.104)	Loss 1.1399 (1.3315)	Prec@1 75.000 (65.981)	Prec@5 90.625 (88.813)
+Test: [510/782]	Time 0.070 (0.103)	Loss 2.3009 (1.3409)	Prec@1 51.562 (65.857)	Prec@5 71.875 (88.647)
+Test: [520/782]	Time 0.073 (0.103)	Loss 1.3443 (1.3496)	Prec@1 65.625 (65.586)	Prec@5 87.500 (88.529)
+Test: [530/782]	Time 0.073 (0.102)	Loss 1.6668 (1.3558)	Prec@1 64.062 (65.548)	Prec@5 79.688 (88.409)
+Test: [540/782]	Time 0.070 (0.101)	Loss 2.3370 (1.3597)	Prec@1 43.750 (65.501)	Prec@5 75.000 (88.352)
+Test: [550/782]	Time 0.072 (0.101)	Loss 0.9539 (1.3608)	Prec@1 73.438 (65.509)	Prec@5 92.188 (88.322)
+Test: [560/782]	Time 0.073 (0.100)	Loss 1.9949 (1.3676)	Prec@1 40.625 (65.391)	Prec@5 82.812 (88.252)
+Test: [570/782]	Time 0.072 (0.100)	Loss 1.5618 (1.3696)	Prec@1 64.062 (65.376)	Prec@5 87.500 (88.220)
+Test: [580/782]	Time 0.071 (0.099)	Loss 1.4419 (1.3775)	Prec@1 56.250 (65.254)	Prec@5 87.500 (88.076)
+Test: [590/782]	Time 0.072 (0.099)	Loss 0.9459 (1.3821)	Prec@1 75.000 (65.157)	Prec@5 95.312 (87.997)
+Test: [600/782]	Time 0.071 (0.098)	Loss 1.2096 (1.3874)	Prec@1 75.000 (65.095)	Prec@5 87.500 (87.908)
+Test: [610/782]	Time 0.070 (0.098)	Loss 0.9359 (1.3887)	Prec@1 78.125 (65.085)	Prec@5 93.750 (87.876)
+Test: [620/782]	Time 0.072 (0.098)	Loss 2.0434 (1.3934)	Prec@1 65.625 (65.004)	Prec@5 76.562 (87.787)
+Test: [630/782]	Time 0.071 (0.097)	Loss 1.6149 (1.3947)	Prec@1 64.062 (64.996)	Prec@5 85.938 (87.765)
+Test: [640/782]	Time 0.071 (0.097)	Loss 1.5022 (1.3991)	Prec@1 71.875 (64.877)	Prec@5 87.500 (87.719)
+Test: [650/782]	Time 0.071 (0.096)	Loss 0.7332 (1.4021)	Prec@1 84.375 (64.850)	Prec@5 89.062 (87.666)
+Test: [660/782]	Time 0.071 (0.096)	Loss 2.4467 (1.4140)	Prec@1 53.125 (64.630)	Prec@5 68.750 (87.455)
+Test: [670/782]	Time 0.072 (0.096)	Loss 1.6376 (1.4155)	Prec@1 60.938 (64.556)	Prec@5 81.250 (87.435)
+Test: [680/782]	Time 0.080 (0.095)	Loss 0.9687 (1.4181)	Prec@1 70.312 (64.494)	Prec@5 90.625 (87.411)
+Test: [690/782]	Time 0.071 (0.095)	Loss 1.5964 (1.4191)	Prec@1 62.500 (64.483)	Prec@5 85.938 (87.398)
+Test: [700/782]	Time 0.071 (0.095)	Loss 1.3431 (1.4216)	Prec@1 62.500 (64.435)	Prec@5 89.062 (87.351)
+Test: [710/782]	Time 0.070 (0.094)	Loss 1.9412 (1.4285)	Prec@1 48.438 (64.284)	Prec@5 79.688 (87.274)
+Test: [720/782]	Time 0.078 (0.094)	Loss 1.0719 (1.4250)	Prec@1 73.438 (64.390)	Prec@5 95.312 (87.344)
+Test: [730/782]	Time 0.070 (0.094)	Loss 1.5398 (1.4260)	Prec@1 64.062 (64.390)	Prec@5 85.938 (87.359)
+Test: [740/782]	Time 0.071 (0.093)	Loss 1.0889 (1.4207)	Prec@1 59.375 (64.480)	Prec@5 96.875 (87.430)
+Test: [750/782]	Time 0.072 (0.093)	Loss 3.0755 (1.4187)	Prec@1 32.812 (64.566)	Prec@5 68.750 (87.442)
+Test: [760/782]	Time 0.071 (0.093)	Loss 1.1224 (1.4238)	Prec@1 68.750 (64.471)	Prec@5 95.312 (87.371)
+Test: [770/782]	Time 0.073 (0.093)	Loss 0.1144 (1.4196)	Prec@1 100.000 (64.579)	Prec@5 100.000 (87.425)
+Test: [780/782]	Time 0.070 (0.092)	Loss 2.4564 (1.4124)	Prec@1 28.125 (64.751)	Prec@5 75.000 (87.502)
+ * Prec@1 64.744 Prec@5 87.496 Loss 1.413 Time 72.178
+Saving checkpoint to /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261105_173334_method_qkcode_kd_8af04d4e994e/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop_qkcode_kd.pth
+Method adaptation result: {"method": "qk_integer_code_then_scale_KD_v1", "codes": {"method": "qk_integer_code_repair_v1", "blocks": [{"block": 0, "accepted": false, "changed_entries": 0, "fit_kl_before": 1.053389422595501, "fit_kl_candidate": 1.053389422595501, "gate_kl_before": 0.36314868461340666, "gate_kl_trial": null, "trials": [{"budget": 8, "count": 8, "fit_kl": 1.1171033941209316}, {"budget": 32, "count": 32, "fit_kl": 1.1225244849920273}, {"budget": 128, "count": 128, "fit_kl": 1.070574626326561}]}, {"block": 1, "accepted": false, "changed_entries": 0, "fit_kl_before": 1.053389422595501, "fit_kl_candidate": 1.053389422595501, "gate_kl_before": 0.36314868461340666, "gate_kl_trial": null, "trials": [{"budget": 8, "count": 8, "fit_kl": 1.1375207025557756}, {"budget": 32, "count": 32, "fit_kl": 1.1504144296050072}, {"budget": 128, "count": 128, "fit_kl": 1.0813987031579018}]}, {"block": 2, "accepted": false, "changed_entries": 0, "fit_kl_before": 1.053389422595501, "fit_kl_candidate": 1.053389422595501, "gate_kl_before": 0.36314868461340666, "gate_kl_trial": null, "trials": [{"budget": 8, "count": 8, "fit_kl": 1.0944130830466747}, {"budget": 32, "count": 32, "fit_kl": 1.0978028178215027}, {"budget": 128, "count": 128, "fit_kl": 1.1405851878225803}]}, {"block": 3, "accepted": false, "changed_entries": 0, "fit_kl_before": 1.053389422595501, "fit_kl_candidate": 1.053389422595501, "gate_kl_before": 0.36314868461340666, "gate_kl_trial": null, "trials": [{"budget": 8, "count": 8, "fit_kl": 1.1262809224426746}, {"budget": 32, "count": 32, "fit_kl": 1.1292249076068401}, {"budget": 128, "count": 128, "fit_kl": 1.0749866925179958}]}, {"block": 4, "accepted": false, "changed_entries": 0, "fit_kl_before": 1.053389422595501, "fit_kl_candidate": 0.9872505646198988, "gate_kl_before": 0.36314868461340666, "gate_kl_trial": 0.3976171426475048, "trials": [{"budget": 8, "count": 8, "fit_kl": 1.0144353955984116}, {"budget": 32, "count": 32, "fit_kl": 1.0860606394708157}, {"budget": 128, "count": 128, "fit_kl": 0.9872505646198988}]}, {"block": 5, "accepted": true, "changed_entries": 32, "fit_kl_before": 1.053389422595501, "fit_kl_candidate": 1.0098681524395943, "gate_kl_before": 0.36314868461340666, "gate_kl_trial": 0.3590460973791778, "trials": [{"budget": 8, "count": 8, "fit_kl": 1.0751366652548313}, {"budget": 32, "count": 32, "fit_kl": 1.0098681524395943}, {"budget": 128, "count": 128, "fit_kl": 1.0330301076173782}]}, {"block": 6, "accepted": true, "changed_entries": 32, "fit_kl_before": 1.0098681524395943, "fit_kl_candidate": 0.9646290130913258, "gate_kl_before": 0.3590460973791778, "gate_kl_trial": 0.35534484311938286, "trials": [{"budget": 8, "count": 8, "fit_kl": 1.0793758891522884}, {"budget": 32, "count": 32, "fit_kl": 0.9646290130913258}, {"budget": 128, "count": 128, "fit_kl": 1.0567122716456652}]}, {"block": 7, "accepted": false, "changed_entries": 0, "fit_kl_before": 0.9646290130913258, "fit_kl_candidate": 0.9646290130913258, "gate_kl_before": 0.35534484311938286, "gate_kl_trial": null, "trials": [{"budget": 8, "count": 8, "fit_kl": 1.025432601571083}, {"budget": 32, "count": 32, "fit_kl": 1.097812406718731}, {"budget": 128, "count": 128, "fit_kl": 1.0157853458076715}]}, {"block": 8, "accepted": false, "changed_entries": 0, "fit_kl_before": 0.9646290130913258, "fit_kl_candidate": 0.9646290130913258, "gate_kl_before": 0.35534484311938286, "gate_kl_trial": null, "trials": [{"budget": 8, "count": 8, "fit_kl": 1.0447814427316189}, {"budget": 32, "count": 32, "fit_kl": 1.0037939585745335}, {"budget": 128, "count": 128, "fit_kl": 0.9660654570907354}]}, {"block": 9, "accepted": false, "changed_entries": 0, "fit_kl_before": 0.9646290130913258, "fit_kl_candidate": 0.9646290130913258, "gate_kl_before": 0.35534484311938286, "gate_kl_trial": null, "trials": [{"budget": 8, "count": 8, "fit_kl": 1.0029943697154522}, {"budget": 32, "count": 32, "fit_kl": 1.0001535434275866}, {"budget": 128, "count": 128, "fit_kl": 1.0080137830227613}]}, {"block": 10, "accepted": false, "changed_entries": 0, "fit_kl_before": 0.9646290130913258, "fit_kl_candidate": 0.9646290130913258, "gate_kl_before": 0.35534484311938286, "gate_kl_trial": null, "trials": [{"budget": 8, "count": 8, "fit_kl": 0.9843743089586496}, {"budget": 32, "count": 32, "fit_kl": 0.9950978420674801}, {"budget": 128, "count": 128, "fit_kl": 1.0082296095788479}]}, {"block": 11, "accepted": false, "changed_entries": 0, "fit_kl_before": 0.9646290130913258, "fit_kl_candidate": 0.9376985803246498, "gate_kl_before": 0.35534484311938286, "gate_kl_trial": 0.36419004388153553, "trials": [{"budget": 8, "count": 8, "fit_kl": 0.9771575089544058}, {"budget": 32, "count": 32, "fit_kl": 0.951349601149559}, {"budget": 128, "count": 128, "fit_kl": 0.9376985803246498}]}], "fit_images": 64, "gate_kl_before": 0.36314868461340666, "gate_kl_after": 0.35534484311938286, "changed_entries": 64}, "kd": {"method": "end_to_end_hard_scale_KD", "steps": 500, "temperature": 2, "selected_step": 0, "scale_bound": 1.1, "lr": 0.0003, "gate_kl_before": 0.35534484311938286, "gate_kl_after": 0.35534484311938286}, "fit_images": 896, "gate_images": 128, "elapsed_seconds": 116.53876830637455, "before": {"top1": 65.022, "top5": 87.462, "loss": 1.4105829691314697}, "checkpoint_before": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261104_193139_method_lsvit_4373e8b51261/vit_small_w3_a3_optimsize_1024_lsvit_dis_mode_q_qdrop.pth", "after": {"top1": 64.744, "top5": 87.496, "loss": 1.4127824953937531}, "top1_delta_pp": -0.2780000000000058, "checkpoint_after": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261105_173334_method_qkcode_kd_8af04d4e994e/vit_small_w3_a3_optimsize_1024_fisher_dplr_dis_mode_q_rank_5_qdrop_qkcode_kd.pth", "launch": {"method": "qkcode_kd", "command": ["-u", "test_quant.py", "--model", "vit_small", "--config", "./configs/3bit/best.py", "--device", "cuda", "--dataset", "../imagenet_fimaq", "--seed", "3407", "--val-batch-size", "64", "--optim-size", "1024", "--load-optimize-checkpoint", "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261104_193139_method_lsvit_4373e8b51261/vit_small_w3_a3_optimsize_1024_lsvit_dis_mode_q_qdrop.pth", "--test-optimize-checkpoint", "--method-adaptation", "qkcode_kd", "--adaptation-steps", "500"], "code_sha256": "7694b726835ea1e1bdb8868b9be62954fd119de5d067d62abcab30594ffe0f78", "checkpoint_sha256": "c71e8a2f397b05a6887a18e58d11ec9b6f807beed88221a57eab15bae7876cf5"}}
+2026-11-05 17:39:49 - finished the process.
