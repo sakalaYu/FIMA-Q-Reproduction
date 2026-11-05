@@ -286,12 +286,18 @@ def adapt_model(model, teacher, loader, method, steps):
     device = next(model.parameters()).device
     if method == 'kd':
         result = kd_refine(model, images, logits, gate, targets, steps, device)
+    elif method in ('qkcode', 'qkcode_kd'):
+        from utils.qk_code_repair import refine_qk_codes
+        result = refine_qk_codes(model, images, logits, gate, targets, device)
+        if method == 'qkcode_kd':
+            result = dict(method='qk_integer_code_then_scale_KD_v1', codes=result,
+                          kd=kd_refine(model, images, logits, gate, targets, steps, device))
     elif method == 'adalog':
         result = adalog_refine(model, fit, gate, targets, device)
     elif method == 'erq':
         result = erq_refine(model, teacher, fit, gate, targets, device)
     else:
         raise ValueError(method)
-    result.update(fit_images=896 if method == 'kd' else 64, gate_images=128,
+    result.update(fit_images=896 if method in ('kd', 'qkcode_kd') else 64, gate_images=128,
                   elapsed_seconds=time.perf_counter() - started)
     return result

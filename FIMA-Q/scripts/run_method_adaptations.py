@@ -50,7 +50,7 @@ def command(method, args, checkpoint):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--worker', type=int, choices=(1, 2, 3))
-    p.add_argument('--method', choices=('kd', 'adalog', 'erq', 'lsvit'))
+    p.add_argument('--method', choices=('kd', 'adalog', 'erq', 'lsvit', 'qkcode', 'qkcode_kd'))
     p.add_argument('--checkpoint', type=Path)
     p.add_argument('--dataset', default='../imagenet_fimaq')
     p.add_argument('--gpu', default='0')

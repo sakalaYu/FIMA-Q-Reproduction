@@ -159,7 +159,7 @@ def get_args_parser():
     parser.add_argument('--qwt-branch-dtype', choices=('fp16', 'fp32'), default='fp16')
     parser.add_argument('--qwt-solver-threads', type=int, default=4)
     parser.add_argument('--activation-codebook', choices=('none', 'softmax', 'gelu'), default='none')
-    parser.add_argument('--method-adaptation', choices=('none', 'kd', 'adalog', 'erq', 'lsvit'), default='none')
+    parser.add_argument('--method-adaptation', choices=('none', 'kd', 'adalog', 'erq', 'lsvit', 'qkcode', 'qkcode_kd'), default='none')
     parser.add_argument('--adaptation-steps', type=int, default=500)
     return parser
 
@@ -313,7 +313,7 @@ def main(args):
     model.to(device)
     model.eval()
     adaptation_teacher = None
-    if args.method_adaptation in ('kd', 'adalog', 'erq'):
+    if args.method_adaptation in ('kd', 'adalog', 'erq', 'qkcode', 'qkcode_kd'):
         adaptation_teacher = copy.deepcopy(model).cpu().eval()
         adaptation_teacher.requires_grad_(False)
         if args.method_adaptation == 'erq':
@@ -440,7 +440,7 @@ def main(args):
         logging.info('Validating on test set after block reconstruction ...')
         val_loss, val_prec1, val_prec5 = validate(val_loader, model, criterion, print_freq=args.print_freq, device=device)
         endpoint_result['final'] = dict(top1=float(val_prec1), top5=float(val_prec5), loss=float(val_loss))
-    if args.method_adaptation in ('kd', 'adalog', 'erq'):
+    if args.method_adaptation in ('kd', 'adalog', 'erq', 'qkcode', 'qkcode_kd'):
         from utils.method_adaptations import adapt_model
         before = dict(endpoint_result['final'])
         report = adapt_model(model, adaptation_teacher, calib_loader, args.method_adaptation, args.adaptation_steps)
