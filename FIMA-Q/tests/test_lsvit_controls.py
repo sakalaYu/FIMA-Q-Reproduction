@@ -28,11 +28,11 @@ class ControlTests(unittest.TestCase):
         return self.parser.parse_args(runner.command(variant, self.args)[3:])
 
     def test_actual_cli_recipes_are_disjoint_and_preserve_common_settings(self):
-        for variant in ('plain', 'fixed', 'b', 'c'):
+        for variant in ('plain', 'fixed', 'b', 'c', *runner.MIX_VARIANTS):
             a = self.recipe(variant)
             validate_lsvit_control(a)
             self.assertEqual(a.headwise_hadamard, variant != 'plain')
-            self.assertEqual(a.qk_joint_variant, {'plain': 'none', 'fixed': 'none', 'b': 'B', 'c': 'C'}[variant])
+            self.assertEqual(a.qk_joint_variant, {'b': 'B', 'c': 'C'}.get(variant, 'none'))
             self.assertEqual((a.k, a.recon_iters, a.optim_size, a.optim_batch_size), (1, 20000, 1024, 32))
             self.assertEqual((a.seed, a.method_adaptation), (3407, 'lsvit'))
             self.assertFalse(a.load_optimize_checkpoint)
@@ -106,6 +106,24 @@ class ControlTests(unittest.TestCase):
         plain['qk_blocks'] = [dict(block='blocks.0')]
         self.assertFalse(runner.valid_result(plain, payload))
 
+    def test_mix_completion_requires_all_probes_and_the_correct_applied_weights(self):
+        for variant, weight in (('mix-equal', 0.5), ('mix-adaptive', 0.75)):
+            result, payload = self.result(variant)
+            result['ls_mix_blocks'] = [dict(block=f'blocks.{i}', step=10000, probe_samples=128,
+                applied_weight=weight, suggested_weight=0.75) for i in range(12)]
+            self.assertTrue(runner.valid_result(result, payload))
+            result['ls_mix_blocks'][0]['applied_weight'] = 0.625
+            self.assertFalse(runner.valid_result(result, payload))
+
+    def test_mix_recovers_known_weight_and_keeps_equal_when_components_are_redundant(self):
+        import torch
+        from utils.lsvit_adapter import fit_ls_mix
+
+        diag = torch.tensor([1., 2., 3., 4., 1., 2., 3., 4.])
+        rank_one = torch.tensor([4., 1., 2., 3., 4., 1., 2., 3.])
+        self.assertEqual(fit_ls_mix(diag, rank_one, 2 * (0.25 * diag + 0.75 * rank_one))[0], 0.75)
+        self.assertEqual(fit_ls_mix(diag, 2 * diag, 3 * diag)[0], 0.5)
+
     def test_minimal_LS_controls_reconstruct_real_quantized_blocks(self):
         import torch
         from torch import nn
@@ -123,16 +141,18 @@ class ControlTests(unittest.TestCase):
         class Mini(nn.Module):
             def __init__(self):
                 super().__init__()
-                self.blocks = nn.ModuleList([Block()])
-                b = self.blocks[0]
-                b.ls1 = b.ls2 = b.drop_path1 = b.drop_path2 = nn.Identity()
+                self.blocks = nn.ModuleList([Block(), Block()])
+                for block in self.blocks:
+                    block.ls1 = block.ls2 = block.drop_path1 = block.drop_path2 = nn.Identity()
                 self.readout = nn.Linear(8, 4)
             def forward(self, x):
-                return self.readout(self.blocks[0](x).mean(1))
+                for block in self.blocks:
+                    x = block(x)
+                return self.readout(x.mean(1))
         original_threads = torch.get_num_threads()
         torch.set_num_threads(1)
         try:
-            for variant in ('plain', 'fixed', 'b'):
+            for variant in ('plain', 'fixed', 'b', *runner.MIX_VARIANTS):
                 torch.manual_seed(14)
                 model = Mini().eval()
                 if variant != 'plain':
@@ -145,10 +165,24 @@ class ControlTests(unittest.TestCase):
                 qk = (dict(variant='B', reconstruction_loss='mse', protocol='v2_integer_zp',
                      steps=2, batch_size=4, holdout=4, lr=0.003, eval_every=1, seed=3407)
                      if variant == 'b' else None)
-                recon = cls(model, 4, loader, metric='lsvit', k=1, iters=2, qk_joint_options=qk)
+                mix = dict(mode=variant, seed=3407) if variant in runner.MIX_VARIANTS else None
+                recon = cls(model, 4, loader, metric='lsvit', k=1, iters=2,
+                            qk_joint_options=qk, ls_mix_options=mix)
                 recon.reconstruct_model(quant_act=True, mode='qdrop', drop_prob=0.5, keep_gpu=False)
                 self.assertTrue(bool(torch.isfinite(model(x)).all()))
-                self.assertEqual(len(recon.qk_joint_results), 1 if variant == 'b' else 0)
+                self.assertEqual(len(recon.qk_joint_results), 2 if variant == 'b' else 0)
+                self.assertEqual(len(recon.ls_mix_results), 2 if mix else 0)
+                if mix:
+                    for probe in recon.ls_mix_results:
+                        self.assertGreater(probe['mean_kl'], 0)
+                        self.assertEqual(probe['step'], 1)
+                        weight = 0.5 if variant == 'mix-equal' else probe['suggested_weight']
+                        self.assertEqual(probe['applied_weight'], weight)
+                if variant == 'fixed':
+                    baseline = model.state_dict()
+                if variant == 'mix-equal':
+                    for name, value in model.state_dict().items():
+                        self.assertTrue(torch.equal(value, baseline[name]), name)
         finally:
             torch.set_num_threads(original_threads)
 

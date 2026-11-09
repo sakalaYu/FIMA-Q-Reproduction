@@ -87,7 +87,8 @@ class BlockReconstructor(QuantCalibrator):
     def __init__(self, model, optim_batch_size,calib_loader, metric="mse", temp=20, k=1,
                  dis_mode='q', p1=1., p2=1., iters=20000,
                  robust_beta=0.5, robust_temperature=0.5, qk_joint_options=None,
-                 attention_relation_options=None, probe_kd_options=None, endpoint_options=None):
+                 attention_relation_options=None, probe_kd_options=None, endpoint_options=None,
+                 ls_mix_options=None):
         super().__init__(model, calib_loader)
         self.batch_size = optim_batch_size
         self.metric = metric
@@ -104,6 +105,8 @@ class BlockReconstructor(QuantCalibrator):
         self.probe_kd_results = []
         self.endpoint_options = endpoint_options
         self.endpoint_results = []
+        self.ls_mix_options = ls_mix_options
+        self.ls_mix_results = []
         if qk_joint_options and attention_relation_options:
             raise ValueError('Run attention relations separately from QK pre-calibration')
         if attention_relation_options and metric != 'fisher_dplr':
@@ -432,7 +435,16 @@ class BlockReconstructor(QuantCalibrator):
         if loss_func.rec_loss == 'robust_fisher':
             self.new_fisher_ro(block, device)
         endpoint = self.endpoint_options if name.startswith('blocks.') else None
+        ls_mix = self.ls_mix_options if name.startswith('blocks.') and loss_func.rec_loss == 'lsvit' else None
         for it in range(iters):
+            if ls_mix and it == iters // 2:
+                from utils.lsvit_adapter import probe_ls_mix
+                report = probe_ls_mix(self, block, device, loss_func, ls_mix['seed'])
+                if ls_mix['mode'] == 'mix-adaptive':
+                    loss_func.ls_mix_weight = report['suggested_weight']
+                report.update(block=name, step=it, applied_weight=loss_func.ls_mix_weight)
+                self.ls_mix_results.append(report)
+                logging.info('LS mixture probe: %s', json.dumps(report, sort_keys=True))
             idx = (balanced_indices(block.robust_groups, batch_size)
                    if loss_func.rec_loss == 'robust_fisher'
                    else torch.randperm(block.raw_input.size(0))[:batch_size])
@@ -613,6 +625,7 @@ class LossFunction:
                                           start_b=b_range[0], end_b=b_range[1])
         self.count = 0
         self.update_fisher = False
+        self.ls_mix_weight = 0.5
     
     @staticmethod
     def lp_loss(pred, tgt, p=2.0, reduction='none'):
@@ -664,7 +677,11 @@ class LossFunction:
             if self.count == 1:
                 self.init_loss_1 = loss_1.detach().clamp_min(1e-30)
                 self.init_loss_2 = loss_2.detach().clamp_min(1e-30)
-            rec_loss = loss_1 / self.init_loss_1 + loss_2 / self.init_loss_2
+            diagonal, rank_one = loss_1 / self.init_loss_1, loss_2 / self.init_loss_2
+            if self.ls_mix_weight == 0.5:
+                rec_loss = diagonal + rank_one
+            else:
+                rec_loss = 2 * ((1 - self.ls_mix_weight) * diagonal + self.ls_mix_weight * rank_one)
         elif self.rec_loss == 'fisher_dplr':
             cha = (pred - tgt).abs().reshape(pred.shape[0], -1)
             A = cha.unsqueeze(1) @ grad.abs().transpose(0, 1)

@@ -1,4 +1,4 @@
-"""Fresh W3A3 LS controls: no rotation, fixed Hadamard, and B-MSE."""
+"""Fresh W3A3 LS controls and matched hard-path adaptive mixture runs."""
 import argparse
 import hashlib
 import importlib.metadata
@@ -15,6 +15,7 @@ import run_qk_joint_experiments as qk
 
 ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL = 'ls_controls_v1'
+MIX_VARIANTS = ('mix-equal', 'mix-adaptive')
 # Tensor fingerprint from the completed 20261104 C-MSE + LS reference.
 REFERENCE_FP_SHA = 'a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c'
 
@@ -23,7 +24,7 @@ def get_parser():
     p = argparse.ArgumentParser(description=__doc__)
     select = p.add_mutually_exclusive_group(required=True)
     select.add_argument('--worker', type=int, choices=(1, 2, 3))
-    select.add_argument('--variant', choices=('plain', 'fixed', 'b', 'c', 'summary'))
+    select.add_argument('--variant', choices=('plain', 'fixed', 'b', 'c', 'summary', *MIX_VARIANTS, 'mix-summary'))
     p.add_argument('--dataset', default='../imagenet_fimaq')
     p.add_argument('--fp-checkpoint', type=Path, help='Explicit path to the original ViT-S FP weights')
     p.add_argument('--seed', type=int, default=3407)
@@ -53,7 +54,7 @@ def command(variant, args):
               '--dataset', args.dataset, '--seed', str(args.seed), '--num-workers', str(args.num_workers)])
         cmd = qk.command(variant.upper(), qa)
     else:
-        cmd = qk.base.command(3, args.seed, variant == 'fixed', args.dataset, args.num_workers)
+        cmd = qk.base.command(3, args.seed, variant != 'plain', args.dataset, args.num_workers)
     # --method-adaptation lsvit sets cfg.optim_metric. Omit the inherited
     # fisher_dplr CLI override to avoid misleading the console recipe.
     metric_index = cmd.index('--optim-metric')
@@ -119,6 +120,15 @@ def valid_result(result, payload):
             optim_mode='qdrop', drop_prob=0.5, w_bit=3, a_bit=3).items()):
         return False
     blocks = result.get('qk_blocks', [])
+    if payload['control'] in MIX_VARIANTS:
+        probes = result.get('ls_mix_blocks', [])
+        return (not blocks and len(probes) == 12
+                and {p.get('block') for p in probes} == {f'blocks.{i}' for i in range(12)}
+                and all(p.get('step') == 10000 and p.get('probe_samples') == 128
+                        and p.get('applied_weight') == (0.5 if payload['control'] == 'mix-equal'
+                                                        else p.get('suggested_weight'))
+                        and p.get('applied_weight') in (0.25, 0.375, 0.5, 0.625, 0.75)
+                        for p in probes))
     if payload['control'] in ('plain', 'fixed'):
         return not blocks
     variant = payload['control'].upper()
@@ -140,14 +150,17 @@ def find_complete(payload, seed):
     return None
 
 
-def summarize(args):
+def summarize(args, mix=False):
     rows = []
-    for variant in ('plain', 'fixed', 'b', 'c'):
+    variants = MIX_VARIANTS if mix else ('plain', 'fixed', 'b', 'c')
+    for variant in variants:
         found = find_complete(identity(variant, args), args.seed)
         if found:
             path, result = found
             row = dict(control=variant, result_file=str(path), metrics=result['after'],
                        fp_model_sha256=result['fp_model_sha256'], calibration_hashes=result['calibration_hashes'])
+            if mix:
+                row['applied_weights'] = {p['block']: p['applied_weight'] for p in result['ls_mix_blocks']}
             rows.append(row)
             print(f'{variant}: Top-1 {result["after"]["top1"]:.3f}; {path}', flush=True)
         else:
@@ -155,13 +168,22 @@ def summarize(args):
     matched = len(rows) > 1 and all((r['fp_model_sha256'], r['calibration_hashes']) ==
                                   (rows[0]['fp_model_sha256'], rows[0]['calibration_hashes']) for r in rows)
     print(f'FP/data hashes matched across available controls: {matched}', flush=True)
-    print('Historical C-MSE+LS = 65.022 (cross-run reference; NOT automatically a matched control).', flush=True)
+    delta = rows[1]['metrics']['top1'] - rows[0]['metrics']['top1'] if mix and matched else None
+    if delta is not None:
+        print(f'Adaptive minus equal Top-1: {delta:+.3f} pp', flush=True)
+    if not mix:
+        print('Historical C-MSE+LS = 65.022 (cross-run reference; NOT automatically a matched control).', flush=True)
     if not args.dry_run:
         folder = ROOT / 'checkpoints/lsvit_controls'
         folder.mkdir(parents=True, exist_ok=True)
-        target = folder / f'summary_seed{args.seed}_{identity("plain", args)["code_sha256"][:12]}.json'
+        name = (f'mix_summary_{run_name(identity(MIX_VARIANTS[0], args), args.seed)}' if mix
+                else f'summary_seed{args.seed}_{identity("plain", args)["code_sha256"][:12]}')
+        target = folder / f'{name}.json'
         temp = target.with_suffix(f'.{os.getpid()}.tmp')
-        temp.write_text(json.dumps(dict(protocol=PROTOCOL, rows=rows, hashes_matched=matched), indent=2), encoding='utf-8')
+        summary = dict(protocol=PROTOCOL, rows=rows, hashes_matched=matched)
+        if mix:
+            summary['top1_delta_pp'] = delta
+        temp.write_text(json.dumps(summary, indent=2), encoding='utf-8')
         temp.replace(target)
         print(f'Summary: {target}', flush=True)
 
@@ -172,8 +194,8 @@ def main():
     if args.num_workers < 0:
         p.error('num-workers must be nonnegative')
     variant = args.variant or {1: 'plain', 2: 'fixed', 3: 'b'}[args.worker]
-    if variant == 'summary':
-        summarize(args)
+    if variant in ('summary', 'mix-summary'):
+        summarize(args, mix=variant == 'mix-summary')
         return
     payload = identity(variant, args)
     cmd = command(variant, args)

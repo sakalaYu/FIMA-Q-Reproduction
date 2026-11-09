@@ -160,8 +160,8 @@ def get_args_parser():
     parser.add_argument('--qwt-solver-threads', type=int, default=4)
     parser.add_argument('--activation-codebook', choices=('none', 'softmax', 'gelu'), default='none')
     parser.add_argument('--method-adaptation', choices=('none', 'kd', 'adalog', 'erq', 'lsvit', 'qkcode', 'qkcode_kd'), default='none')
-    parser.add_argument('--lsvit-control', choices=('c', 'plain', 'fixed', 'b'), default='c',
-                        help='LS recipe: legacy C-MSE, no rotation, fixed rotation, or B-MSE')
+    parser.add_argument('--lsvit-control', choices=('c', 'plain', 'fixed', 'b', 'mix-equal', 'mix-adaptive'),
+                        default='c', help='LS reconstruction recipe')
     parser.add_argument('--fp-checkpoint', help='Path to the floating-point model weights')
     parser.add_argument('--expected-fp-model-sha256', help='Require this floating-point tensor fingerprint')
     parser.add_argument('--adaptation-steps', type=int, default=500)
@@ -412,12 +412,14 @@ def main(args):
             endpoint_options = dict(mode=args.endpoint_mode, steps=args.endpoint_steps,
                 lr=args.endpoint_lr, bound=args.endpoint_bound, holdout=args.endpoint_holdout,
                 batch_size=args.endpoint_batch_size, eval_every=args.endpoint_eval_every, seed=args.seed)
+        ls_mix_options = (dict(mode=args.lsvit_control, seed=args.seed)
+                          if args.lsvit_control.startswith('mix-') else None)
         block_reconstructor = BlockReconstructor(model, cfg.optim_batch_size, calib_loader,
             metric=cfg.optim_metric, temp=cfg.temp, k=cfg.k, dis_mode=cfg.dis_mode,
             p1=cfg.p1, p2=cfg.p2, iters=cfg.recon_iters,
             robust_beta=cfg.robust_beta, robust_temperature=cfg.robust_temperature,
             qk_joint_options=qk_options, attention_relation_options=relation_options,
-            probe_kd_options=probe_options, endpoint_options=endpoint_options)
+            probe_kd_options=probe_options, endpoint_options=endpoint_options, ls_mix_options=ls_mix_options)
         reconstruction_started = time.perf_counter()
         block_reconstructor.reconstruct_model(quant_act=True, mode=cfg.optim_mode, drop_prob=cfg.drop_prob, keep_gpu=cfg.keep_gpu)
         if device.type == 'cuda':
@@ -472,6 +474,8 @@ def main(args):
                       after=endpoint_result['final'],
                       qk_blocks=block_reconstructor.qk_joint_results,
                       launch=json.loads(os.environ.get('FIMAQ_METHOD_LAUNCH', '{}')))
+        if args.lsvit_control.startswith('mix-'):
+            report['ls_mix_blocks'] = block_reconstructor.ls_mix_results
     if args.method_adaptation != 'none':
         report['fp_model_sha256'] = model_sha
         report['calibration_hashes'] = re.findall(

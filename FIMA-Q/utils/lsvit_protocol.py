@@ -12,10 +12,14 @@ def validate_lsvit_control(args):
     if (args.endpoint_task != 'none' or args.endpoint_mode != 'none' or args.qwt
             or args.probe_kd != 'none' or args.attention_relation != 'none'):
         raise ValueError('LS controls exclude endpoint, QwT, probe KD and attention auxiliaries')
-    expected_variant = {'plain': 'none', 'fixed': 'none', 'b': 'B', 'c': 'C'}[control]
+    expected_variant = {'plain': 'none', 'fixed': 'none', 'b': 'B', 'c': 'C',
+                        'mix-equal': 'none', 'mix-adaptive': 'none'}[control]
     expected_rotation = control != 'plain'
     if (args.qk_joint_variant != expected_variant or args.headwise_hadamard != expected_rotation
             or args.headwise_mode != 'all'):
         raise ValueError(f'LS control {control} requires rotation={expected_rotation}, QK={expected_variant}')
     if expected_variant != 'none' and args.qk_joint_reconstruction_loss != 'mse':
         raise ValueError('B/C LS controls require explicit MSE pre-calibration')
+    if control.startswith('mix-') and (args.recon_iters != 20000 or args.optim_size != 1024
+                                       or args.optim_mode != 'qdrop' or args.drop_prob != 0.5):
+        raise ValueError('LS mixture controls require 20000 steps, 1024 images and QDrop 0.5')

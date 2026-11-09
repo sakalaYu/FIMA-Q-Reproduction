@@ -36,7 +36,7 @@ def activation_quantizers(block):
 
 
 @contextmanager
-def quantization_path(block, soft, probability):
+def quantization_path(block, soft, probability, *, training=True):
     saved = []
     for module in block.modules():
         state = {key: getattr(module, key) for key in ('mode', 'training_mode', 'drop_prob', 'soft_targets')
@@ -45,7 +45,7 @@ def quantization_path(block, soft, probability):
         if 'mode' in state:
             module.mode = 'quant_forward'
         if 'training_mode' in state:
-            module.training_mode = True  # STE forward values equal inference when p=1.
+            module.training_mode = training
         if 'drop_prob' in state:
             module.drop_prob = probability
         if 'soft_targets' in state:
