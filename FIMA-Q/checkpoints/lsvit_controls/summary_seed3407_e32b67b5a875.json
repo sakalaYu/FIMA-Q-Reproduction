@@ -1,0 +1,72 @@
+{
+  "protocol": "ls_controls_v1",
+  "rows": [
+    {
+      "control": "plain",
+      "result_file": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261109_133342_lscontrol_plain_seed3407_27d2d8e7e396/method_result.json",
+      "metrics": {
+        "top1": 64.404,
+        "top5": 87.1,
+        "loss": 1.4415523562049866
+      },
+      "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+      "calibration_hashes": [
+        [
+          "128",
+          "05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6",
+          "4d822ba3ffa61432a9b41f34ff74ddabdb4733ec3f496b4c689a9b7f4c18cb8c"
+        ],
+        [
+          "1024",
+          "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+          "65a35d17aee6c729c0ac21d93b467f9fba2c3b14e80425926b91270caf5a25c5"
+        ]
+      ]
+    },
+    {
+      "control": "fixed",
+      "result_file": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261109_133350_lscontrol_fixed_seed3407_34ba0d1de39c/method_result.json",
+      "metrics": {
+        "top1": 65.56,
+        "top5": 87.796,
+        "loss": 1.3976920658493042
+      },
+      "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+      "calibration_hashes": [
+        [
+          "128",
+          "05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6",
+          "4d822ba3ffa61432a9b41f34ff74ddabdb4733ec3f496b4c689a9b7f4c18cb8c"
+        ],
+        [
+          "1024",
+          "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+          "65a35d17aee6c729c0ac21d93b467f9fba2c3b14e80425926b91270caf5a25c5"
+        ]
+      ]
+    },
+    {
+      "control": "b",
+      "result_file": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261109_133330_lscontrol_b_seed3407_f3b75010ffb2/method_result.json",
+      "metrics": {
+        "top1": 65.314,
+        "top5": 87.914,
+        "loss": 1.3881815414333343
+      },
+      "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+      "calibration_hashes": [
+        [
+          "128",
+          "05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6",
+          "4d822ba3ffa61432a9b41f34ff74ddabdb4733ec3f496b4c689a9b7f4c18cb8c"
+        ],
+        [
+          "1024",
+          "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+          "65a35d17aee6c729c0ac21d93b467f9fba2c3b14e80425926b91270caf5a25c5"
+        ]
+      ]
+    }
+  ],
+  "hashes_matched": true
+}
