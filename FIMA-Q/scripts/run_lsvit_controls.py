@@ -15,6 +15,8 @@ import run_qk_joint_experiments as qk
 
 ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL = 'ls_controls_v1'
+# Tensor fingerprint from the completed 20261104 C-MSE + LS reference.
+REFERENCE_FP_SHA = 'a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c'
 
 
 def get_parser():
@@ -23,6 +25,7 @@ def get_parser():
     select.add_argument('--worker', type=int, choices=(1, 2, 3))
     select.add_argument('--variant', choices=('plain', 'fixed', 'b', 'c', 'summary'))
     p.add_argument('--dataset', default='../imagenet_fimaq')
+    p.add_argument('--fp-checkpoint', type=Path, help='Explicit path to the original ViT-S FP weights')
     p.add_argument('--seed', type=int, default=3407)
     p.add_argument('--num-workers', type=int, default=8)
     p.add_argument('--gpu', default='0')
@@ -30,6 +33,18 @@ def get_parser():
     p.add_argument('--resume', action='store_true')
     p.add_argument('--dry-run', action='store_true')
     return p
+
+
+def fp_checkpoint(args):
+    if args.fp_checkpoint is not None:
+        path = args.fp_checkpoint.expanduser()
+        return (path if path.is_absolute() else ROOT / path).resolve()
+    directory = ROOT / 'checkpoints/vit_raw'
+    for name in ('model.safetensors', 'vit_small_patch16_224.bin'):
+        path = directory / name
+        if path.is_file():
+            return path
+    return None
 
 
 def command(variant, args):
@@ -44,7 +59,12 @@ def command(variant, args):
     metric_index = cmd.index('--optim-metric')
     del cmd[metric_index:metric_index + 2]
     cmd[cmd.index('--k') + 1] = '1'
-    return cmd + ['--method-adaptation', 'lsvit', '--lsvit-control', variant]
+    cmd += ['--method-adaptation', 'lsvit', '--lsvit-control', variant,
+            '--expected-fp-model-sha256', REFERENCE_FP_SHA]
+    weight = fp_checkpoint(args)
+    if weight is not None:
+        cmd += ['--fp-checkpoint', str(weight)]
+    return cmd
 
 
 def identity(variant, args):
@@ -54,9 +74,9 @@ def identity(variant, args):
     digest = hashlib.sha256()
     digest.update(methods.fingerprint().encode())
     digest.update(Path(__file__).read_text(encoding='utf-8').encode())
-    weight = ROOT / 'checkpoints/vit_raw/vit_small_patch16_224.bin'
+    weight = fp_checkpoint(args)
     h = hashlib.sha256()
-    if weight.is_file():
+    if weight is not None and weight.is_file():
         with weight.open('rb') as handle:
             for chunk in iter(lambda: handle.read(1048576), b''):
                 h.update(chunk)
@@ -67,7 +87,8 @@ def identity(variant, args):
         except importlib.metadata.PackageNotFoundError:
             versions[package] = None
     return dict(protocol=PROTOCOL, control=variant, command=cmd[1:], code_sha256=digest.hexdigest(),
-                local_model_file_sha256=h.hexdigest() if weight.is_file() else None,
+                local_model_file_sha256=h.hexdigest() if weight is not None and weight.is_file() else None,
+                expected_fp_model_sha256=REFERENCE_FP_SHA,
                 dependency_versions=versions)
 
 
@@ -79,6 +100,9 @@ def run_name(payload, seed):
 def valid_result(result, payload):
     if (result.get('status') != 'complete' or result.get('launch') != payload
             or result.get('control') != payload['control'] or not result.get('fp_model_sha256')):
+        return False
+    expected_sha = payload.get('expected_fp_model_sha256')
+    if expected_sha and result['fp_model_sha256'] != expected_sha:
         return False
     metrics = result.get('after', {})
     if not all(isinstance(metrics.get(k), (int, float)) and math.isfinite(metrics[k])
@@ -157,8 +181,10 @@ def main():
     if args.dry_run:
         print(shlex.join(cmd), flush=True)
         return
-    if not (ROOT / 'checkpoints/vit_raw/vit_small_patch16_224.bin').is_file():
-        p.error('Missing local FP model checkpoints/vit_raw/vit_small_patch16_224.bin')
+    weight = fp_checkpoint(args)
+    if weight is not None and not weight.is_file():
+        p.error(f'FP checkpoint does not exist: {weight}')
+    print(f'FP source: {weight if weight is not None else "timm pretrained cache or download"}', flush=True)
     data = qk.base.dataset_path(args.dataset)
     if not all((data / split).is_dir() for split in ('train', 'val')):
         p.error(f'Missing train/val under {data}')

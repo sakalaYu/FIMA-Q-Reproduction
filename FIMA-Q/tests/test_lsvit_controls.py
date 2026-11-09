@@ -4,7 +4,9 @@ import ast
 import copy
 from pathlib import Path
 import sys
+import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -51,6 +53,18 @@ class ControlTests(unittest.TestCase):
         a = self.parser.parse_args(cmd[3:])
         validate_lsvit_control(a)
 
+    def test_fp_source_supports_safetensors_and_pretrained_fallback(self):
+        with tempfile.TemporaryDirectory() as folder, patch.object(runner, 'ROOT', Path(folder).resolve()):
+            a = self.recipe('b')
+            self.assertIsNone(a.fp_checkpoint)
+            self.assertEqual(a.expected_fp_model_sha256, runner.REFERENCE_FP_SHA)
+            weights = runner.ROOT / 'checkpoints/vit_raw/model.safetensors'
+            weights.parent.mkdir(parents=True)
+            weights.touch()
+            self.assertEqual(Path(self.recipe('b').fp_checkpoint), weights)
+            self.args.fp_checkpoint = Path('weights/alternate.bin')
+            self.assertEqual(Path(self.recipe('b').fp_checkpoint), runner.ROOT / self.args.fp_checkpoint)
+
     def test_control_rejects_checkpoint_or_auxiliary(self):
         for key, value in (('load_calibrate_checkpoint', 'old.pth'), ('qwt', True),
                            ('probe_kd', 'uniform'), ('attention_relation', 'uniform')):
@@ -85,6 +99,10 @@ class ControlTests(unittest.TestCase):
         b['qk_blocks'].pop()
         self.assertFalse(runner.valid_result(b, payload))
         plain, payload = self.result('plain')
+        payload['expected_fp_model_sha256'] = runner.REFERENCE_FP_SHA
+        self.assertFalse(runner.valid_result(plain, payload))
+        plain['fp_model_sha256'] = runner.REFERENCE_FP_SHA
+        self.assertTrue(runner.valid_result(plain, payload))
         plain['qk_blocks'] = [dict(block='blocks.0')]
         self.assertFalse(runner.valid_result(plain, payload))
 

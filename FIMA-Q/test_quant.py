@@ -162,6 +162,8 @@ def get_args_parser():
     parser.add_argument('--method-adaptation', choices=('none', 'kd', 'adalog', 'erq', 'lsvit', 'qkcode', 'qkcode_kd'), default='none')
     parser.add_argument('--lsvit-control', choices=('c', 'plain', 'fixed', 'b'), default='c',
                         help='LS recipe: legacy C-MSE, no rotation, fixed rotation, or B-MSE')
+    parser.add_argument('--fp-checkpoint', help='Path to the floating-point model weights')
+    parser.add_argument('--expected-fp-model-sha256', help='Require this floating-point tensor fingerprint')
     parser.add_argument('--adaptation-steps', type=int, default=500)
     return parser
 
@@ -298,18 +300,24 @@ def main(args):
     logging.info('Python random seeded: %d', args.seed)
     
     logging.info('Building model ...')
-    try:
-        model = timm.create_model(model_zoo[args.model], checkpoint_path='./checkpoints/vit_raw/{}.bin'.format(model_zoo[args.model]))
-    except:
-        model = timm.create_model(model_zoo[args.model], pretrained=True)
+    if args.fp_checkpoint:
+        model = timm.create_model(model_zoo[args.model], checkpoint_path=args.fp_checkpoint)
+    else:
+        try:
+            model = timm.create_model(model_zoo[args.model], checkpoint_path='./checkpoints/vit_raw/{}.bin'.format(model_zoo[args.model]))
+        except:
+            model = timm.create_model(model_zoo[args.model], pretrained=True)
 
-    if args.endpoint_task != 'none' or args.method_adaptation != 'none':
+    if args.endpoint_task != 'none' or args.method_adaptation != 'none' or args.expected_fp_model_sha256:
         digest = hashlib.sha256()
         for name, value in model.state_dict().items():
             digest.update(name.encode('utf-8'))
             digest.update(value.detach().cpu().contiguous().numpy().tobytes())
         model_sha = digest.hexdigest()
         logging.info('Endpoint FP model SHA256: %s', model_sha)
+        if args.expected_fp_model_sha256 and model_sha != args.expected_fp_model_sha256:
+            raise ValueError(f'FP model SHA256 mismatch: expected {args.expected_fp_model_sha256}, got {model_sha}. '
+                             'Use the original ViT-S weights with --fp-checkpoint.')
     else:
         model_sha = None
     model.to(device)

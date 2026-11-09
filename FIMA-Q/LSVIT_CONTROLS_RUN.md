@@ -19,7 +19,9 @@ plain沿用本地流式/数值稳定LS适配版，作为本地原LS对照，并�
 3. scripts/run_lsvit_controls.py（新增）
 
 其余依赖为此前已有的scripts/run_method_adaptations.py、run_qk_joint_experiments.py、run_headwise_experiments.py、utils/lsvit_adapter.py及Q/K模块，保持完整版本。
-不需要新的量化checkpoint，但需要原浮点权重checkpoints/vit_raw/vit_small_patch16_224.bin和ImageNet train/val。
+使用原浮点权重和 ImageNet train/val。启动器优先读取 `checkpoints/vit_raw/model.safetensors`，其次读取 `checkpoints/vit_raw/vit_small_patch16_224.bin`。两份本地文件均缺失时，沿用 timm 的预训练权重缓存或下载流程。权重在其他位置时，运行和汇总命令均可加 `--fp-checkpoint /完整路径/model.safetensors`。
+
+上次 65.022% 的日志记录了 `timm/vit_small_patch16_224.augreg_in21k_ft_in1k` 的 safetensors 加载。本地 `model.safetensors` 的 152 个张量与上次的模型指纹匹配。三窗在校准前均检查加载后模型的 SHA256，须等于 `a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c`。
 
 ## 前台运行
 
@@ -81,4 +83,4 @@ python -u scripts/run_lsvit_controls.py --variant c --gpu 0 --gpu-slots 3 --resu
 
 若fixed已接近/超过65.022，优先简化预校准；若B接近/超过C，暂停额外学习旋转；若C有明确优势，再研究其预校准目标和阶段衔接。不要将这些组件消融本身写成新的算法创新。
 
-本地新增6项检查通过，包含实际CLI配方隔离、误配置拒绝、历史C兼容、完整结果校验，及三个小模型真实量化重建流程；原方法适配5项回归检查通过。完整ViT-S/CUDA需服务器执行。
+本地7项对照检查覆盖 CLI 配方隔离、权重路径选择、误配置拒绝、历史 C 兼容、完整结果校验及三个小模型的量化重建流程。完整 ViT-S/CUDA 需服务器执行。
