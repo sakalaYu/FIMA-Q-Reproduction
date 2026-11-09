@@ -1,0 +1,79 @@
+{
+  "protocol": "ls_controls_v1",
+  "rows": [
+    {
+      "control": "mix-equal",
+      "result_file": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261109_193427_lscontrol_mix-equal_seed3407_a95ce8951ce3/method_result.json",
+      "metrics": {
+        "top1": 65.196,
+        "top5": 87.708,
+        "loss": 1.3975478911972046
+      },
+      "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+      "calibration_hashes": [
+        [
+          "128",
+          "05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6",
+          "4d822ba3ffa61432a9b41f34ff74ddabdb4733ec3f496b4c689a9b7f4c18cb8c"
+        ],
+        [
+          "1024",
+          "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+          "65a35d17aee6c729c0ac21d93b467f9fba2c3b14e80425926b91270caf5a25c5"
+        ]
+      ],
+      "applied_weights": {
+        "blocks.0": 0.5,
+        "blocks.1": 0.5,
+        "blocks.2": 0.5,
+        "blocks.3": 0.5,
+        "blocks.4": 0.5,
+        "blocks.5": 0.5,
+        "blocks.6": 0.5,
+        "blocks.7": 0.5,
+        "blocks.8": 0.5,
+        "blocks.9": 0.5,
+        "blocks.10": 0.5,
+        "blocks.11": 0.5
+      }
+    },
+    {
+      "control": "mix-adaptive",
+      "result_file": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261109_193414_lscontrol_mix-adaptive_seed3407_4c29ffe0ac8f/method_result.json",
+      "metrics": {
+        "top1": 65.554,
+        "top5": 87.866,
+        "loss": 1.393556748123169
+      },
+      "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+      "calibration_hashes": [
+        [
+          "128",
+          "05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6",
+          "4d822ba3ffa61432a9b41f34ff74ddabdb4733ec3f496b4c689a9b7f4c18cb8c"
+        ],
+        [
+          "1024",
+          "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+          "65a35d17aee6c729c0ac21d93b467f9fba2c3b14e80425926b91270caf5a25c5"
+        ]
+      ],
+      "applied_weights": {
+        "blocks.0": 0.75,
+        "blocks.1": 0.75,
+        "blocks.2": 0.5,
+        "blocks.3": 0.5,
+        "blocks.4": 0.5,
+        "blocks.5": 0.5,
+        "blocks.6": 0.5,
+        "blocks.7": 0.5,
+        "blocks.8": 0.75,
+        "blocks.9": 0.75,
+        "blocks.10": 0.5,
+        "blocks.11": 0.25
+      }
+    }
+  ],
+  "hashes_matched": true,
+  "top1_delta_pp": 0.3580000000000041
+}

@@ -1,0 +1,742 @@
+{
+  "method": "lsvit_mix-adaptive_streaming_damped",
+  "control": "mix-adaptive",
+  "args": {
+    "model": "vit_small",
+    "config": "./configs/3bit/best.py",
+    "dataset": "../imagenet_fimaq",
+    "optim_size": 1024,
+    "val_batch_size": 64,
+    "num_workers": 8,
+    "device": "cuda",
+    "calibrate": true,
+    "load_calibrate_checkpoint": null,
+    "test_calibrate_checkpoint": false,
+    "optimize": true,
+    "load_optimize_checkpoint": null,
+    "test_optimize_checkpoint": false,
+    "print_freq": 10,
+    "seed": 3407,
+    "skip_final_validation": false,
+    "headwise_hadamard": true,
+    "headwise_mode": "all",
+    "qk_joint_variant": "none",
+    "qk_joint_protocol": "v2_integer_zp",
+    "qk_joint_steps": 300,
+    "qk_joint_batch_size": 8,
+    "qk_joint_holdout": 128,
+    "qk_joint_lr": 0.003,
+    "qk_joint_eval_every": 50,
+    "qk_joint_rotation_rank": 0,
+    "qk_joint_min_relative_kl": 0.0,
+    "qk_joint_reconstruction_loss": "auto",
+    "attention_relation": "none",
+    "relation_protocol": "relation_v1",
+    "relation_weight": 0.1,
+    "relation_queries": 16,
+    "relation_start": 0.2,
+    "relation_full": 0.6,
+    "probe_kd": "none",
+    "probe_kd_protocol": "semantic_probe_v1",
+    "probe_kd_weight": 0.05,
+    "probe_kd_temperature": 2.0,
+    "probe_kd_ridge": 0.1,
+    "probe_kd_holdout": 128,
+    "probe_kd_code_sha": "unrecorded",
+    "endpoint_task": "none",
+    "endpoint_code_sha": "unrecorded",
+    "endpoint_mode": "none",
+    "endpoint_steps": 2000,
+    "endpoint_lr": 0.001,
+    "endpoint_bound": 1.2,
+    "endpoint_holdout": 128,
+    "endpoint_batch_size": 8,
+    "endpoint_eval_every": 200,
+    "qwt": false,
+    "qwt_samples": 512,
+    "qwt_batch_size": 8,
+    "qwt_ridge": 0.0,
+    "qwt_branch_dtype": "fp16",
+    "qwt_solver_threads": 4,
+    "activation_codebook": "none",
+    "method_adaptation": "lsvit",
+    "lsvit_control": "mix-adaptive",
+    "fp_checkpoint": null,
+    "expected_fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+    "adaptation_steps": 500,
+    "optim_mode": "qdrop",
+    "drop_prob": 0.5,
+    "p1": 1.0,
+    "p2": 1.0,
+    "dis_mode": "q",
+    "calib_size": 128,
+    "calib_batch_size": 32,
+    "optim_batch_size": 32,
+    "recon_iters": 20000,
+    "k": 1
+  },
+  "cfg": {
+    "optim_size": 1024,
+    "calib_size": 128,
+    "optim_batch_size": 32,
+    "calib_batch_size": 32,
+    "w_bit": 3,
+    "a_bit": 3,
+    "qconv_a_bit": 8,
+    "qhead_a_bit": 3,
+    "calib_metric": "mse",
+    "matmul_head_channel_wise": true,
+    "token_channel_wise": true,
+    "eq_n": 128,
+    "search_round": 3,
+    "keep_gpu": true,
+    "optim_metric": "lsvit",
+    "temp": 20,
+    "k": 1,
+    "p1": 1.0,
+    "p2": 1.0,
+    "dis_mode": "q",
+    "optim_mode": "qdrop",
+    "drop_prob": 0.5,
+    "robust_beta": 0.5,
+    "robust_temperature": 0.5,
+    "recon_iters": 20000
+  },
+  "checkpoint_after": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261109_193414_lscontrol_mix-adaptive_seed3407_4c29ffe0ac8f/vit_small_w3_a3_optimsize_1024_lsvit_dis_mode_q_qdrop.pth",
+  "after": {
+    "top1": 65.554,
+    "top5": 87.866,
+    "loss": 1.393556748123169
+  },
+  "qk_blocks": [],
+  "launch": {
+    "protocol": "ls_controls_v1",
+    "control": "mix-adaptive",
+    "command": [
+      "-u",
+      "test_quant.py",
+      "--model",
+      "vit_small",
+      "--config",
+      "./configs/3bit/best.py",
+      "--dataset",
+      "/root/autodl-tmp/FIMA-Q-Reproduction/imagenet_fimaq",
+      "--device",
+      "cuda",
+      "--calibrate",
+      "--optimize",
+      "--val-batch-size",
+      "64",
+      "--num-workers",
+      "8",
+      "--seed",
+      "3407",
+      "--optim-mode",
+      "qdrop",
+      "--drop-prob",
+      "0.5",
+      "--p1",
+      "1",
+      "--p2",
+      "1",
+      "--dis-mode",
+      "q",
+      "--calib-size",
+      "128",
+      "--calib-batch-size",
+      "32",
+      "--optim-size",
+      "1024",
+      "--optim-batch-size",
+      "32",
+      "--recon-iters",
+      "20000",
+      "--k",
+      "1",
+      "--headwise-hadamard",
+      "--method-adaptation",
+      "lsvit",
+      "--lsvit-control",
+      "mix-adaptive",
+      "--expected-fp-model-sha256",
+      "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c"
+    ],
+    "code_sha256": "78bdd1ba683099c5f867f129902262cbe3d2edf83b31ee852cfb5b799b70fd8f",
+    "local_model_file_sha256": null,
+    "expected_fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+    "dependency_versions": {
+      "torch": "2.2.2+cu121",
+      "torchvision": "0.17.2+cu121",
+      "timm": "0.9.2",
+      "numpy": "1.26.4"
+    }
+  },
+  "ls_mix_blocks": [
+    {
+      "probe_samples": 128,
+      "probe_seed": 3407,
+      "mean_kl": 0.18351255256288487,
+      "suggested_weight": 0.75,
+      "candidates": [
+        {
+          "weight": 0.25,
+          "fold_mse": [
+            0.1432164326271105,
+            0.20825295898233193
+          ]
+        },
+        {
+          "weight": 0.375,
+          "fold_mse": [
+            0.14316372271864083,
+            0.20817174698838953
+          ]
+        },
+        {
+          "weight": 0.5,
+          "fold_mse": [
+            0.14310862034706423,
+            0.20809266488342998
+          ]
+        },
+        {
+          "weight": 0.625,
+          "fold_mse": [
+            0.1430508516406339,
+            0.20801602754631782
+          ]
+        },
+        {
+          "weight": 0.75,
+          "fold_mse": [
+            0.14299011017357638,
+            0.20794218060206815
+          ]
+        }
+      ],
+      "block": "blocks.0",
+      "step": 10000,
+      "applied_weight": 0.75
+    },
+    {
+      "probe_samples": 128,
+      "probe_seed": 3407,
+      "mean_kl": 0.10324296240549294,
+      "suggested_weight": 0.75,
+      "candidates": [
+        {
+          "weight": 0.25,
+          "fold_mse": [
+            0.031262853093320754,
+            0.02900254319311965
+          ]
+        },
+        {
+          "weight": 0.375,
+          "fold_mse": [
+            0.03125718728741089,
+            0.028981392331247725
+          ]
+        },
+        {
+          "weight": 0.5,
+          "fold_mse": [
+            0.031251742156010336,
+            0.028960570360886163
+          ]
+        },
+        {
+          "weight": 0.625,
+          "fold_mse": [
+            0.031246517506181924,
+            0.02894007979731826
+          ]
+        },
+        {
+          "weight": 0.75,
+          "fold_mse": [
+            0.031241513096881307,
+            0.028919923118735088
+          ]
+        }
+      ],
+      "block": "blocks.1",
+      "step": 10000,
+      "applied_weight": 0.75
+    },
+    {
+      "probe_samples": 128,
+      "probe_seed": 3407,
+      "mean_kl": 0.05334190876174667,
+      "suggested_weight": 0.5,
+      "candidates": [
+        {
+          "weight": 0.25,
+          "fold_mse": [
+            0.013391651136005387,
+            0.015984982132823053
+          ]
+        },
+        {
+          "weight": 0.375,
+          "fold_mse": [
+            0.013398041575086391,
+            0.01597932556491745
+          ]
+        },
+        {
+          "weight": 0.5,
+          "fold_mse": [
+            0.013404454539369264,
+            0.015973758225795148
+          ]
+        },
+        {
+          "weight": 0.625,
+          "fold_mse": [
+            0.013410887581255602,
+            0.01596828006016729
+          ]
+        },
+        {
+          "weight": 0.75,
+          "fold_mse": [
+            0.013417338228283742,
+            0.015962891007503727
+          ]
+        }
+      ],
+      "block": "blocks.2",
+      "step": 10000,
+      "applied_weight": 0.5
+    },
+    {
+      "probe_samples": 128,
+      "probe_seed": 3407,
+      "mean_kl": 0.054348896696832634,
+      "suggested_weight": 0.5,
+      "candidates": [
+        {
+          "weight": 0.25,
+          "fold_mse": [
+            0.009471450481993474,
+            0.015133994601956443
+          ]
+        },
+        {
+          "weight": 0.375,
+          "fold_mse": [
+            0.009473652936453051,
+            0.015129240406372415
+          ]
+        },
+        {
+          "weight": 0.5,
+          "fold_mse": [
+            0.009475845092794036,
+            0.015124588918886676
+          ]
+        },
+        {
+          "weight": 0.625,
+          "fold_mse": [
+            0.009478025491868455,
+            0.01512003894981802
+          ]
+        },
+        {
+          "weight": 0.75,
+          "fold_mse": [
+            0.00948019271016101,
+            0.015115589319808609
+          ]
+        }
+      ],
+      "block": "blocks.3",
+      "step": 10000,
+      "applied_weight": 0.5
+    },
+    {
+      "probe_samples": 128,
+      "probe_seed": 3407,
+      "mean_kl": 0.052433476641098466,
+      "suggested_weight": 0.5,
+      "candidates": [
+        {
+          "weight": 0.25,
+          "fold_mse": [
+            0.0065666662763154676,
+            0.03285865454075109
+          ]
+        },
+        {
+          "weight": 0.375,
+          "fold_mse": [
+            0.006568017240126034,
+            0.03285742048998856
+          ]
+        },
+        {
+          "weight": 0.5,
+          "fold_mse": [
+            0.006569368851489996,
+            0.03285621352545714
+          ]
+        },
+        {
+          "weight": 0.625,
+          "fold_mse": [
+            0.006570720968480961,
+            0.03285503338431636
+          ]
+        },
+        {
+          "weight": 0.75,
+          "fold_mse": [
+            0.006572073451338605,
+            0.03285387980562782
+          ]
+        }
+      ],
+      "block": "blocks.4",
+      "step": 10000,
+      "applied_weight": 0.5
+    },
+    {
+      "probe_samples": 128,
+      "probe_seed": 3407,
+      "mean_kl": 0.06727586688132017,
+      "suggested_weight": 0.5,
+      "candidates": [
+        {
+          "weight": 0.25,
+          "fold_mse": [
+            0.07173602420797472,
+            0.009164626668088356
+          ]
+        },
+        {
+          "weight": 0.375,
+          "fold_mse": [
+            0.07172927932323503,
+            0.009167435215393534
+          ]
+        },
+        {
+          "weight": 0.5,
+          "fold_mse": [
+            0.07172271557711382,
+            0.009170252381104345
+          ]
+        },
+        {
+          "weight": 0.625,
+          "fold_mse": [
+            0.0717163266726412,
+            0.009173076384946416
+          ]
+        },
+        {
+          "weight": 0.75,
+          "fold_mse": [
+            0.07171010657872415,
+            0.009175905559803264
+          ]
+        }
+      ],
+      "block": "blocks.5",
+      "step": 10000,
+      "applied_weight": 0.5
+    },
+    {
+      "probe_samples": 128,
+      "probe_seed": 3407,
+      "mean_kl": 0.35415582937069157,
+      "suggested_weight": 0.5,
+      "candidates": [
+        {
+          "weight": 0.25,
+          "fold_mse": [
+            0.4753427350307419,
+            0.19156940189732857
+          ]
+        },
+        {
+          "weight": 0.375,
+          "fold_mse": [
+            0.47524406494921406,
+            0.19167013380433312
+          ]
+        },
+        {
+          "weight": 0.5,
+          "fold_mse": [
+            0.4751465908693218,
+            0.19177126548035456
+          ]
+        },
+        {
+          "weight": 0.625,
+          "fold_mse": [
+            0.4750503039625963,
+            0.19187279045142097
+          ]
+        },
+        {
+          "weight": 0.75,
+          "fold_mse": [
+            0.47495519544240017,
+            0.1919747022966793
+          ]
+        }
+      ],
+      "block": "blocks.6",
+      "step": 10000,
+      "applied_weight": 0.5
+    },
+    {
+      "probe_samples": 128,
+      "probe_seed": 3407,
+      "mean_kl": 0.272003610619024,
+      "suggested_weight": 0.5,
+      "candidates": [
+        {
+          "weight": 0.25,
+          "fold_mse": [
+            0.1784893603397335,
+            0.3834188637041381
+          ]
+        },
+        {
+          "weight": 0.375,
+          "fold_mse": [
+            0.17854830005647407,
+            0.38337219179693194
+          ]
+        },
+        {
+          "weight": 0.5,
+          "fold_mse": [
+            0.17860185286924454,
+            0.383330541889633
+          ]
+        },
+        {
+          "weight": 0.625,
+          "fold_mse": [
+            0.17865071991475612,
+            0.38329314981850066
+          ]
+        },
+        {
+          "weight": 0.75,
+          "fold_mse": [
+            0.17869548662285695,
+            0.3832593982128206
+          ]
+        }
+      ],
+      "block": "blocks.7",
+      "step": 10000,
+      "applied_weight": 0.5
+    },
+    {
+      "probe_samples": 128,
+      "probe_seed": 3407,
+      "mean_kl": 0.10121766009664997,
+      "suggested_weight": 0.75,
+      "candidates": [
+        {
+          "weight": 0.25,
+          "fold_mse": [
+            0.019674803742768643,
+            0.026444888913427955
+          ]
+        },
+        {
+          "weight": 0.375,
+          "fold_mse": [
+            0.019671032106951713,
+            0.026439397452025858
+          ]
+        },
+        {
+          "weight": 0.5,
+          "fold_mse": [
+            0.019667769355079693,
+            0.02643464245452496
+          ]
+        },
+        {
+          "weight": 0.625,
+          "fold_mse": [
+            0.01966491949521456,
+            0.026430485790777242
+          ]
+        },
+        {
+          "weight": 0.75,
+          "fold_mse": [
+            0.019662409159545494,
+            0.026426821711096816
+          ]
+        }
+      ],
+      "block": "blocks.8",
+      "step": 10000,
+      "applied_weight": 0.75
+    },
+    {
+      "probe_samples": 128,
+      "probe_seed": 3407,
+      "mean_kl": 0.07808159163230352,
+      "suggested_weight": 0.75,
+      "candidates": [
+        {
+          "weight": 0.25,
+          "fold_mse": [
+            0.034525651962276055,
+            0.010373492814748857
+          ]
+        },
+        {
+          "weight": 0.375,
+          "fold_mse": [
+            0.034525278004544475,
+            0.010362775234029818
+          ]
+        },
+        {
+          "weight": 0.5,
+          "fold_mse": [
+            0.03452503803526182,
+            0.010353657374789002
+          ]
+        },
+        {
+          "weight": 0.625,
+          "fold_mse": [
+            0.03452488950750582,
+            0.01034580631739513
+          ]
+        },
+        {
+          "weight": 0.75,
+          "fold_mse": [
+            0.0345248043616686,
+            0.010338975446954871
+          ]
+        }
+      ],
+      "block": "blocks.9",
+      "step": 10000,
+      "applied_weight": 0.75
+    },
+    {
+      "probe_samples": 128,
+      "probe_seed": 3407,
+      "mean_kl": 0.06891164503088162,
+      "suggested_weight": 0.5,
+      "candidates": [
+        {
+          "weight": 0.25,
+          "fold_mse": [
+            0.012887432099708161,
+            0.008890213957872695
+          ]
+        },
+        {
+          "weight": 0.375,
+          "fold_mse": [
+            0.012946738189278096,
+            0.008886892185225127
+          ]
+        },
+        {
+          "weight": 0.5,
+          "fold_mse": [
+            0.012993697570395198,
+            0.008884471893381986
+          ]
+        },
+        {
+          "weight": 0.625,
+          "fold_mse": [
+            0.013031792849630216,
+            0.008882644974136114
+          ]
+        },
+        {
+          "weight": 0.75,
+          "fold_mse": [
+            0.013063312372474068,
+            0.008881226053491988
+          ]
+        }
+      ],
+      "block": "blocks.10",
+      "step": 10000,
+      "applied_weight": 0.5
+    },
+    {
+      "probe_samples": 128,
+      "probe_seed": 3407,
+      "mean_kl": 0.05338586327558365,
+      "suggested_weight": 0.25,
+      "candidates": [
+        {
+          "weight": 0.25,
+          "fold_mse": [
+            0.006303476343347531,
+            0.012750360048345103
+          ]
+        },
+        {
+          "weight": 0.375,
+          "fold_mse": [
+            0.006315513692820431,
+            0.01275617795925534
+          ]
+        },
+        {
+          "weight": 0.5,
+          "fold_mse": [
+            0.006328328175605554,
+            0.012762855881279957
+          ]
+        },
+        {
+          "weight": 0.625,
+          "fold_mse": [
+            0.0063419207252627076,
+            0.01277039797431664
+          ]
+        },
+        {
+          "weight": 0.75,
+          "fold_mse": [
+            0.006356290898522519,
+            0.012778807398520052
+          ]
+        }
+      ],
+      "block": "blocks.11",
+      "step": 10000,
+      "applied_weight": 0.25
+    }
+  ],
+  "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+  "calibration_hashes": [
+    [
+      "128",
+      "05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6",
+      "4d822ba3ffa61432a9b41f34ff74ddabdb4733ec3f496b4c689a9b7f4c18cb8c"
+    ],
+    [
+      "1024",
+      "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+      "65a35d17aee6c729c0ac21d93b467f9fba2c3b14e80425926b91270caf5a25c5"
+    ]
+  ],
+  "status": "complete"
+}
