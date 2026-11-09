@@ -160,6 +160,8 @@ def get_args_parser():
     parser.add_argument('--qwt-solver-threads', type=int, default=4)
     parser.add_argument('--activation-codebook', choices=('none', 'softmax', 'gelu'), default='none')
     parser.add_argument('--method-adaptation', choices=('none', 'kd', 'adalog', 'erq', 'lsvit', 'qkcode', 'qkcode_kd'), default='none')
+    parser.add_argument('--lsvit-control', choices=('c', 'plain', 'fixed', 'b'), default='c',
+                        help='LS recipe: legacy C-MSE, no rotation, fixed rotation, or B-MSE')
     parser.add_argument('--adaptation-steps', type=int, default=500)
     return parser
 
@@ -455,7 +457,11 @@ def main(args):
         report['launch'] = json.loads(os.environ.get('FIMAQ_METHOD_LAUNCH', '{}'))
         logging.info('Method adaptation result: %s', json.dumps(report))
     elif args.method_adaptation == 'lsvit':
-        report = dict(method='lsvit_C_mse_streaming_damped', after=endpoint_result['final'],
+        report = dict(method=('lsvit_C_mse_streaming_damped' if args.lsvit_control == 'c'
+                              else 'lsvit_' + args.lsvit_control + '_streaming_damped'),
+                      control=args.lsvit_control, args=vars(args), cfg=vars(cfg),
+                      checkpoint_after=endpoint_result['baseline_checkpoint'],
+                      after=endpoint_result['final'],
                       qk_blocks=block_reconstructor.qk_joint_results,
                       launch=json.loads(os.environ.get('FIMAQ_METHOD_LAUNCH', '{}')))
     if args.method_adaptation != 'none':
@@ -524,15 +530,18 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(parents=[get_args_parser()])
     args = parser.parse_args()
+    from utils.lsvit_protocol import validate_lsvit_control
+    try:
+        validate_lsvit_control(args)
+    except ValueError as exc:
+        parser.error(str(exc))
     if args.method_adaptation != 'none':
         if args.model != 'vit_small' or args.skip_final_validation or args.activation_codebook != 'none':
             parser.error('Method adaptations require ViT-S and complete validation')
         if args.adaptation_steps < 1 or args.optim_size != 1024:
             parser.error('Method adaptations require positive steps and 1024 calibration images')
-        if args.method_adaptation == 'lsvit':
-            if not args.optimize or args.qk_joint_variant != 'C' or args.qk_joint_reconstruction_loss != 'mse':
-                parser.error('LS-ViT adaptation requires fresh C-MSE reconstruction')
-        elif not args.load_optimize_checkpoint or not args.test_optimize_checkpoint:
+        if args.method_adaptation != 'lsvit' and (
+                not args.load_optimize_checkpoint or not args.test_optimize_checkpoint):
             parser.error('KD/AdaLog/ERQ require an optimized C-MSE checkpoint and paired validation')
     if args.activation_codebook != 'none' and (
             args.model != 'vit_small' or not args.load_optimize_checkpoint or not args.test_optimize_checkpoint
