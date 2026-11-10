@@ -6,6 +6,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import shlex
 import subprocess
 import time
@@ -24,7 +25,9 @@ def get_parser():
     p = argparse.ArgumentParser(description=__doc__)
     select = p.add_mutually_exclusive_group(required=True)
     select.add_argument('--worker', type=int, choices=(1, 2, 3))
-    select.add_argument('--variant', choices=('plain', 'fixed', 'b', 'c', 'summary', *MIX_VARIANTS, 'mix-summary'))
+    select.add_argument('--variant', choices=('plain', 'fixed', 'b', 'c', 'summary', *MIX_VARIANTS,
+                                             'mix-prepare', 'mix-summary'))
+    p.add_argument('--pair-id', help='Name of the shared calibration and first-branch check')
     p.add_argument('--dataset', default='../imagenet_fimaq')
     p.add_argument('--fp-checkpoint', type=Path, help='Explicit path to the original ViT-S FP weights')
     p.add_argument('--seed', type=int, default=3407)
@@ -60,21 +63,41 @@ def command(variant, args):
     metric_index = cmd.index('--optim-metric')
     del cmd[metric_index:metric_index + 2]
     cmd[cmd.index('--k') + 1] = '1'
-    cmd += ['--method-adaptation', 'lsvit', '--lsvit-control', variant,
-            '--expected-fp-model-sha256', REFERENCE_FP_SHA]
+    cmd += ['--expected-fp-model-sha256', REFERENCE_FP_SHA]
+    if variant == 'mix-prepare':
+        cmd.remove('--optimize')
+        cmd += ['--skip-final-validation', '--ls-pair-dir', str(pair_directory(args))]
+    else:
+        cmd += ['--method-adaptation', 'lsvit', '--lsvit-control', variant]
+        if args.pair_id and variant in MIX_VARIANTS:
+            folder = pair_directory(args)
+            index = cmd.index('--calibrate')
+            cmd[index:index + 1] = ['--load-calibrate-checkpoint', str(folder / 'calibrated.pth')]
+            cmd += ['--ls-pair-dir', str(folder)]
     weight = fp_checkpoint(args)
     if weight is not None:
         cmd += ['--fp-checkpoint', str(weight)]
     return cmd
 
 
+def code_fingerprint():
+    digest = hashlib.sha256()
+    digest.update(methods.fingerprint().encode())
+    digest.update(Path(__file__).read_text(encoding='utf-8').encode())
+    return digest.hexdigest()
+
+
+def pair_directory(args):
+    key = [args.pair_id, args.seed, str(qk.base.dataset_path(args.dataset)),
+           str(fp_checkpoint(args)), args.num_workers, code_fingerprint()]
+    tag = hashlib.sha256(json.dumps(key).encode()).hexdigest()[:12]
+    return ROOT / 'checkpoints/lsvit_controls/pairs' / f'{args.pair_id}_seed{args.seed}_{tag}'
+
+
 def identity(variant, args):
     cmd = command(variant, args)
     cmd[0] = '<python>'
     cmd[cmd.index('--dataset') + 1] = str(qk.base.dataset_path(args.dataset))
-    digest = hashlib.sha256()
-    digest.update(methods.fingerprint().encode())
-    digest.update(Path(__file__).read_text(encoding='utf-8').encode())
     weight = fp_checkpoint(args)
     h = hashlib.sha256()
     if weight is not None and weight.is_file():
@@ -87,7 +110,7 @@ def identity(variant, args):
             versions[package] = importlib.metadata.version(package)
         except importlib.metadata.PackageNotFoundError:
             versions[package] = None
-    return dict(protocol=PROTOCOL, control=variant, command=cmd[1:], code_sha256=digest.hexdigest(),
+    return dict(protocol=PROTOCOL, control=variant, command=cmd[1:], code_sha256=code_fingerprint(),
                 local_model_file_sha256=h.hexdigest() if weight is not None and weight.is_file() else None,
                 expected_fp_model_sha256=REFERENCE_FP_SHA,
                 dependency_versions=versions)
@@ -122,6 +145,14 @@ def valid_result(result, payload):
     blocks = result.get('qk_blocks', [])
     if payload['control'] in MIX_VARIANTS:
         probes = result.get('ls_mix_blocks', [])
+        if '--ls-pair-dir' in payload.get('command', []):
+            signature = result.get('pair_start') or {}
+            hash_keys = ('snapshot_sha256', 'model_sha256', 'optimizer_sha256', 'ls_sha256',
+                         'rng_sha256', 'probe_sha256')
+            if (signature.get('step') != 10000 or signature.get('data_hashes') != hashes[1:]
+                    or not all(re.fullmatch(r'[a-f0-9]{64}', signature.get(key, '')) for key in hash_keys)
+                    or not any(p.get('block') == 'blocks.0' and p.get('pair_start') == signature for p in probes)):
+                return False
         return (not blocks and len(probes) == 12
                 and {p.get('block') for p in probes} == {f'blocks.{i}' for i in range(12)}
                 and all(p.get('step') == 10000 and p.get('probe_samples') == 128
@@ -161,6 +192,8 @@ def summarize(args, mix=False):
                        fp_model_sha256=result['fp_model_sha256'], calibration_hashes=result['calibration_hashes'])
             if mix:
                 row['applied_weights'] = {p['block']: p['applied_weight'] for p in result['ls_mix_blocks']}
+                if args.pair_id:
+                    row['pair_start'] = result['pair_start']
             rows.append(row)
             print(f'{variant}: Top-1 {result["after"]["top1"]:.3f}; {path}', flush=True)
         else:
@@ -168,7 +201,11 @@ def summarize(args, mix=False):
     matched = len(rows) > 1 and all((r['fp_model_sha256'], r['calibration_hashes']) ==
                                   (rows[0]['fp_model_sha256'], rows[0]['calibration_hashes']) for r in rows)
     print(f'FP/data hashes matched across available controls: {matched}', flush=True)
-    delta = rows[1]['metrics']['top1'] - rows[0]['metrics']['top1'] if mix and matched else None
+    pair_verified = bool(mix and args.pair_id and matched and rows[0]['pair_start'] == rows[1]['pair_start'])
+    if args.pair_id:
+        print(f'First-branch signatures matched: {pair_verified}', flush=True)
+    delta = (rows[1]['metrics']['top1'] - rows[0]['metrics']['top1']
+             if mix and matched and (not args.pair_id or pair_verified) else None)
     if delta is not None:
         print(f'Adaptive minus equal Top-1: {delta:+.3f} pp', flush=True)
     if not mix:
@@ -183,6 +220,8 @@ def summarize(args, mix=False):
         summary = dict(protocol=PROTOCOL, rows=rows, hashes_matched=matched)
         if mix:
             summary['top1_delta_pp'] = delta
+        if args.pair_id:
+            summary['pair_verified'] = pair_verified
         temp.write_text(json.dumps(summary, indent=2), encoding='utf-8')
         temp.replace(target)
         print(f'Summary: {target}', flush=True)
@@ -194,12 +233,19 @@ def main():
     if args.num_workers < 0:
         p.error('num-workers must be nonnegative')
     variant = args.variant or {1: 'plain', 2: 'fixed', 3: 'b'}[args.worker]
+    if args.pair_id and (not re.fullmatch(r'[A-Za-z0-9_-]{1,32}', args.pair_id)
+                         or variant not in (*MIX_VARIANTS, 'mix-prepare', 'mix-summary')):
+        p.error('--pair-id requires a mixture variant and a short name using letters, digits, _ or -')
+    if variant == 'mix-prepare' and not args.pair_id:
+        p.error('mix-prepare requires --pair-id')
+    if args.pair_id and variant in MIX_VARIANTS and args.gpu_slots < 2:
+        p.error('Paired branches wait for one another on GPU; use --gpu-slots 2 in both windows')
     if variant in ('summary', 'mix-summary'):
         summarize(args, mix=variant == 'mix-summary')
         return
     payload = identity(variant, args)
     cmd = command(variant, args)
-    print(f'LS control {variant}: fresh reconstruction, seed={args.seed}, 20000 steps/block', flush=True)
+    print(f'LS control {variant}: seed={args.seed}, pair={args.pair_id or "none"}', flush=True)
     if args.dry_run:
         print(shlex.join(cmd), flush=True)
         return
@@ -210,8 +256,16 @@ def main():
     data = qk.base.dataset_path(args.dataset)
     if not all((data / split).is_dir() for split in ('train', 'val')):
         p.error(f'Missing train/val under {data}')
+    folder = pair_directory(args) if args.pair_id else None
+    snapshot_ready = folder and all((folder / name).is_file() for name in ('snapshot.json', 'calibrated.pth'))
+    if folder and variant in MIX_VARIANTS and not snapshot_ready:
+        p.error(f'Shared calibration missing in {folder}; run mix-prepare with the same --pair-id first')
     started = time.perf_counter()
     with qk.base.job_lock(run_name(payload, args.seed)):
+        if variant == 'mix-prepare' and all((folder / name).is_file()
+                                            for name in ('snapshot.json', 'calibrated.pth')):
+            print(f'[PAIR PREPARED] {folder}', flush=True)
+            return
         existing = find_complete(payload, args.seed)
         if args.resume and existing:
             print(f'[SKIPPED] Verified complete: {existing[0]}', flush=True)
@@ -220,8 +274,15 @@ def main():
                 env = dict(os.environ, CUDA_VISIBLE_DEVICES=uuid,
                     FIMAQ_RUN_NAME=run_name(payload, args.seed), FIMAQ_CAPTURE_CALIBRATION_HASH='1',
                     FIMAQ_METHOD_LAUNCH=json.dumps(payload))
+                if folder:
+                    env['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
                 print(f'[START] {variant}', flush=True)
                 subprocess.run(cmd, cwd=ROOT, env=env, check=True)
+            if variant == 'mix-prepare':
+                if not all((folder / name).is_file() for name in ('snapshot.json', 'calibrated.pth')):
+                    raise RuntimeError('Shared calibration process returned without a snapshot')
+                print(f'[PAIR PREPARED] {folder}', flush=True)
+                return
             if not find_complete(payload, args.seed):
                 raise RuntimeError('Child returned without a verified complete LS control result')
     print(f'[WINDOW COMPLETE] {variant}; elapsed {(time.perf_counter() - started) / 60:.1f} min', flush=True)

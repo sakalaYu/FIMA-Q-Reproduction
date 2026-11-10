@@ -92,7 +92,7 @@ def fit_ls_mix(diag, rank_one, target):
 
 
 @torch.no_grad()
-def probe_ls_mix(reconstructor, block, device, loss, seed):
+def probe_ls_mix(reconstructor, block, device, loss, seed, fingerprint_probe=False):
     """Compare FP and hard current block with the same quantized prefix and FP suffix."""
     dataset = reconstructor.calib_loader.dataset
     count = min(128, len(dataset))
@@ -124,7 +124,11 @@ def probe_ls_mix(reconstructor, block, device, loss, seed):
                           .sum(-1).clamp_min(0).cpu())
     finally:
         hook.remove()
-    target = torch.cat(kl)
-    weight, scores = fit_ls_mix(torch.cat(diag), torch.cat(rank_one), target)
-    return dict(probe_samples=count, probe_seed=seed, mean_kl=float(target.mean()),
-                suggested_weight=weight, candidates=scores)
+    diag, rank_one, target = torch.cat(diag), torch.cat(rank_one), torch.cat(kl)
+    weight, scores = fit_ls_mix(diag, rank_one, target)
+    report = dict(probe_samples=count, probe_seed=seed, mean_kl=float(target.mean()),
+                  suggested_weight=weight, candidates=scores)
+    if fingerprint_probe:
+        from utils.lsvit_pair import fingerprint
+        report['probe_sha256'] = fingerprint((indices, diag, rank_one, target))
+    return report

@@ -439,7 +439,21 @@ class BlockReconstructor(QuantCalibrator):
         for it in range(iters):
             if ls_mix and it == iters // 2:
                 from utils.lsvit_adapter import probe_ls_mix
-                report = probe_ls_mix(self, block, device, loss_func, ls_mix['seed'])
+                pair_dir = ls_mix.get('pair_dir') if name == 'blocks.0' else None
+                report = probe_ls_mix(self, block, device, loss_func, ls_mix['seed'],
+                                      fingerprint_probe=bool(pair_dir))
+                if pair_dir:
+                    from utils.lsvit_pair import fingerprint, verify_first_branch
+                    signature = dict(step=it, snapshot_sha256=ls_mix['snapshot_sha256'],
+                        data_hashes=ls_mix['data_hashes'], model_sha256=fingerprint(self.model.state_dict()),
+                        optimizer_sha256=fingerprint((w_optimizer.state_dict(), a_optimizer.state_dict(),
+                                                      a_scheduler.state_dict())),
+                        ls_sha256=fingerprint((block.ls_diagonal, block.ls_root,
+                                               loss_func.init_loss_1, loss_func.init_loss_2)),
+                        rng_sha256=fingerprint((torch.get_rng_state(), torch.cuda.get_rng_state(device))),
+                        probe_sha256=report['probe_sha256'])
+                    verify_first_branch(pair_dir, ls_mix['mode'], signature)
+                    report['pair_start'] = signature
                 if ls_mix['mode'] == 'mix-adaptive':
                     loss_func.ls_mix_weight = report['suggested_weight']
                 report.update(block=name, step=it, applied_weight=loss_func.ls_mix_weight)

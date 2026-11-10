@@ -115,6 +115,57 @@ class ControlTests(unittest.TestCase):
             result['ls_mix_blocks'][0]['applied_weight'] = 0.625
             self.assertFalse(runner.valid_result(result, payload))
 
+    def test_paired_launch_uses_one_checkpoint_and_requires_a_first_branch_signature(self):
+        self.args.pair_id = 'pair3407'
+        prepare = self.recipe('mix-prepare')
+        validate_lsvit_control(prepare)
+        self.assertTrue(prepare.calibrate)
+        self.assertFalse(prepare.optimize)
+        for mode in runner.MIX_VARIANTS:
+            branch = self.recipe(mode)
+            validate_lsvit_control(branch)
+            self.assertEqual(branch.ls_pair_dir, prepare.ls_pair_dir)
+            self.assertEqual(Path(branch.load_calibrate_checkpoint), Path(prepare.ls_pair_dir) / 'calibrated.pth')
+
+        result, payload = self.result('mix-equal')
+        payload['command'] = ['--ls-pair-dir', prepare.ls_pair_dir]
+        result['ls_mix_blocks'] = [dict(block=f'blocks.{i}', step=10000, probe_samples=128,
+            applied_weight=0.5, suggested_weight=0.75) for i in range(12)]
+        self.assertFalse(runner.valid_result(result, payload))
+        signature = {name + '_sha256': 'a' * 64 for name in ('snapshot', 'model', 'optimizer', 'ls', 'rng', 'probe')}
+        signature.update(step=10000, data_hashes=result['calibration_hashes'][1:])
+        result['pair_start'] = result['ls_mix_blocks'][0]['pair_start'] = signature
+        self.assertTrue(runner.valid_result(result, payload))
+
+    def test_shared_snapshot_and_barrier_reject_mismatched_state(self):
+        import torch
+        from utils.lsvit_pair import fingerprint, read_snapshot, save_snapshot, verify_first_branch
+
+        with tempfile.TemporaryDirectory() as folder:
+            directory = Path(folder)
+            initial = directory / 'source.pth'
+            data_hashes = [['128', 'a' * 64, 'b' * 64]]
+            torch.save({'scale': torch.tensor(1.)}, initial)
+            save_snapshot(directory, initial, 'c' * 64, data_hashes, 3407)
+            shared = directory / 'calibrated.pth'
+            self.assertEqual(read_snapshot(directory, shared, 'c' * 64, 3407)['calibration_hashes'], data_hashes)
+            with self.assertRaisesRegex(RuntimeError, 'snapshot fingerprint mismatch'):
+                read_snapshot(directory, shared, 'c' * 64, 3408)
+            first = {'probe_sha256': fingerprint(torch.tensor(1.))}
+            with self.assertRaises(TimeoutError):
+                verify_first_branch(directory, 'mix-equal', first, timeout=0)
+            verify_first_branch(directory, 'mix-adaptive', first, timeout=0)
+            verify_first_branch(directory, 'mix-equal', first, timeout=0)
+
+        with tempfile.TemporaryDirectory() as folder:
+            with self.assertRaises(TimeoutError):
+                verify_first_branch(folder, 'mix-equal', first, timeout=0)
+            other = {'probe_sha256': fingerprint(torch.tensor(2.))}
+            with self.assertRaisesRegex(RuntimeError, 'before adaptation: probe_sha256'):
+                verify_first_branch(folder, 'mix-adaptive', other, timeout=0)
+            with self.assertRaisesRegex(RuntimeError, 'before adaptation: probe_sha256'):
+                verify_first_branch(folder, 'mix-equal', first, timeout=0)
+
     def test_mix_recovers_known_weight_and_keeps_equal_when_components_are_redundant(self):
         import torch
         from utils.lsvit_adapter import fit_ls_mix

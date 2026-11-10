@@ -3,11 +3,22 @@
 
 def validate_lsvit_control(args):
     control = args.lsvit_control
+    pair = getattr(args, 'ls_pair_dir', None)
+    if pair:
+        prepare = (args.method_adaptation == 'none' and args.calibrate and not args.optimize
+                   and not args.load_optimize_checkpoint and not args.load_calibrate_checkpoint)
+        branch = (args.method_adaptation == 'lsvit' and control in ('mix-equal', 'mix-adaptive')
+                  and args.optimize and args.load_calibrate_checkpoint and not args.load_optimize_checkpoint)
+        if not (prepare or branch) or not args.expected_fp_model_sha256 or not args.device.startswith('cuda'):
+            raise ValueError('Paired LS requires shared calibration or a mixture branch, CUDA, and the FP fingerprint')
+        if prepare and (args.model != 'vit_small' or not args.headwise_hadamard or args.headwise_mode != 'all'
+                        or not args.skip_final_validation or args.qk_joint_variant != 'none'):
+            raise ValueError('Shared LS calibration requires ViT-S with fixed full Hadamard and calibration only')
     if args.method_adaptation != 'lsvit':
         if control != 'c':
             raise ValueError('--lsvit-control requires --method-adaptation lsvit')
         return
-    if not args.optimize or args.load_calibrate_checkpoint or args.load_optimize_checkpoint:
+    if not args.optimize or (args.load_calibrate_checkpoint and not pair) or args.load_optimize_checkpoint:
         raise ValueError('LS controls must reconstruct freshly from the FP model')
     if (args.endpoint_task != 'none' or args.endpoint_mode != 'none' or args.qwt
             or args.probe_kd != 'none' or args.attention_relation != 'none'):

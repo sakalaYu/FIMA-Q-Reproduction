@@ -162,6 +162,7 @@ def get_args_parser():
     parser.add_argument('--method-adaptation', choices=('none', 'kd', 'adalog', 'erq', 'lsvit', 'qkcode', 'qkcode_kd'), default='none')
     parser.add_argument('--lsvit-control', choices=('c', 'plain', 'fixed', 'b', 'mix-equal', 'mix-adaptive'),
                         default='c', help='LS reconstruction recipe')
+    parser.add_argument('--ls-pair-dir', help='Shared calibration and verification directory for paired LS')
     parser.add_argument('--fp-checkpoint', help='Path to the floating-point model weights')
     parser.add_argument('--expected-fp-model-sha256', help='Require this floating-point tensor fingerprint')
     parser.add_argument('--adaptation-steps', type=int, default=500)
@@ -200,7 +201,7 @@ def save_model(model, args, cfg, mode='calibrate', tag=''):
     return save_path
 
 
-def load_model(model, args, device, mode='calibrate'):
+def load_model(model, args, device, mode='calibrate', strict=False):
     assert mode in ['calibrate', 'optimize']
     ckpt_path = args.load_calibrate_checkpoint if mode == 'calibrate' else args.load_optimize_checkpoint
     ckpt = torch.load(ckpt_path, map_location='cpu')
@@ -231,13 +232,19 @@ def load_model(model, args, device, mode='calibrate'):
                 ckpt_name = name + '.' + attr + '.scale'
                 quantizer.scale.data = ckpt[ckpt_name].clone()
  
-    result = model.load_state_dict(ckpt, strict=False)
+    result = model.load_state_dict(ckpt, strict=strict)
     logging.info(str(result))
     model.to(device)
     model.eval()
     return model
 
 def main(args):
+    pair_snapshot = None
+    if args.ls_pair_dir:
+        from utils.lsvit_pair import calibration_hashes, read_snapshot, save_snapshot
+        os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
+        torch.backends.cudnn.benchmark = False
+        torch.use_deterministic_algorithms(True)
     logging.info("{} - start the process.".format(get_cur_time()))
     logging.info("Experiment directory: {}".format(root_path))
     logging.info(str(args))
@@ -360,7 +367,9 @@ def main(args):
     if not args.load_optimize_checkpoint:
         if args.load_calibrate_checkpoint:
             logging.info(f"Restoring checkpoint from '{args.load_calibrate_checkpoint}'")
-            model = load_model(model, args, device, mode='calibrate')
+            if args.ls_pair_dir:
+                pair_snapshot = read_snapshot(args.ls_pair_dir, args.load_calibrate_checkpoint, model_sha, args.seed)
+            model = load_model(model, args, device, mode='calibrate', strict=bool(args.ls_pair_dir))
             if args.test_calibrate_checkpoint:
                 val_loss, val_prec1, val_prec5 = validate(val_loader, model, criterion, print_freq=args.print_freq, device=device)
         else:
@@ -371,7 +380,11 @@ def main(args):
             model = wrap_reparamed_modules_in_net(model)
             model.to(device)
             logging.info("{} - {} guided calibration finished.".format(get_cur_time(), cfg.calib_metric))
-            save_model(model, args, cfg, mode='calibrate')
+            checkpoint = save_model(model, args, cfg, mode='calibrate')
+            if args.ls_pair_dir:
+                save_snapshot(args.ls_pair_dir, checkpoint, model_sha,
+                              calibration_hashes(os.path.join(root_path, 'output.log')), args.seed)
+                logging.info('Shared LS calibration snapshot ready: %s', args.ls_pair_dir)
             if not args.skip_final_validation:
                 logging.info('Validating after calibration ...')
                 val_loss, val_prec1, val_prec5 = validate(
@@ -380,6 +393,9 @@ def main(args):
 
     if args.optimize:
         logging.info('Building calibrator ...')
+        if pair_snapshot:
+            # Start both augmentation and reconstruction from the same RNG state.
+            seed_all(args.seed)
         calib_loader = g.calib_loader(num=cfg.optim_size, batch_size=cfg.optim_batch_size, seed=args.seed)
         logging.info("{} - start {} guided block reconstruction".format(get_cur_time(), cfg.optim_metric))
         qk_options = None
@@ -414,6 +430,11 @@ def main(args):
                 batch_size=args.endpoint_batch_size, eval_every=args.endpoint_eval_every, seed=args.seed)
         ls_mix_options = (dict(mode=args.lsvit_control, seed=args.seed)
                           if args.lsvit_control.startswith('mix-') else None)
+        if pair_snapshot:
+            ls_mix_options.update(pair_dir=args.ls_pair_dir, snapshot_sha256=pair_snapshot['checkpoint_sha256'],
+                                  data_hashes=calibration_hashes(os.path.join(root_path, 'output.log')))
+            if [row[0] for row in ls_mix_options['data_hashes']] != ['1024']:
+                raise RuntimeError('Paired LS requires a fingerprint of the 1024 reconstruction images')
         block_reconstructor = BlockReconstructor(model, cfg.optim_batch_size, calib_loader,
             metric=cfg.optim_metric, temp=cfg.temp, k=cfg.k, dis_mode=cfg.dis_mode,
             p1=cfg.p1, p2=cfg.p2, iters=cfg.recon_iters,
@@ -481,6 +502,9 @@ def main(args):
         report['calibration_hashes'] = re.findall(
             r'Calibration cache: count=(\d+) sample_sha256=([a-f0-9]+) tensor_sha256=([a-f0-9]+)',
             open(os.path.join(root_path, 'output.log'), encoding='utf-8').read())
+        if pair_snapshot:
+            report['calibration_hashes'] = pair_snapshot['calibration_hashes'] + report['calibration_hashes']
+            report['pair_start'] = block_reconstructor.ls_mix_results[0]['pair_start']
         report['status'] = 'complete'
         with open(os.path.join(root_path, 'method_result.json.tmp'), 'w', encoding='utf-8') as handle:
             json.dump(report, handle, indent=2)
