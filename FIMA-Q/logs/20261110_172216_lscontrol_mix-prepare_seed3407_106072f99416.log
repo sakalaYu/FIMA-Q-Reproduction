@@ -1,0 +1,44 @@
+2026-11-10 17:22:16 - start the process.
+Experiment directory: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261110_172216_lscontrol_mix-prepare_seed3407_106072f99416
+Namespace(model='vit_small', config='./configs/3bit/best.py', dataset='../imagenet_fimaq', optim_size=1024, val_batch_size=64, num_workers=8, device='cuda', calibrate=True, load_calibrate_checkpoint=None, test_calibrate_checkpoint=False, optimize=False, load_optimize_checkpoint=None, test_optimize_checkpoint=False, print_freq=10, seed=3407, skip_final_validation=True, headwise_hadamard=True, headwise_mode='all', qk_joint_variant='none', qk_joint_protocol='v2_integer_zp', qk_joint_steps=300, qk_joint_batch_size=8, qk_joint_holdout=128, qk_joint_lr=0.003, qk_joint_eval_every=50, qk_joint_rotation_rank=0, qk_joint_min_relative_kl=0.0, qk_joint_reconstruction_loss='auto', attention_relation='none', relation_protocol='relation_v1', relation_weight=0.1, relation_queries=16, relation_start=0.2, relation_full=0.6, probe_kd='none', probe_kd_protocol='semantic_probe_v1', probe_kd_weight=0.05, probe_kd_temperature=2.0, probe_kd_ridge=0.1, probe_kd_holdout=128, probe_kd_code_sha='unrecorded', endpoint_task='none', endpoint_code_sha='unrecorded', endpoint_mode='none', endpoint_steps=2000, endpoint_lr=0.001, endpoint_bound=1.2, endpoint_holdout=128, endpoint_batch_size=8, endpoint_eval_every=200, qwt=False, qwt_samples=512, qwt_batch_size=8, qwt_ridge=0.0, qwt_branch_dtype='fp16', qwt_solver_threads=4, activation_codebook='none', method_adaptation='none', lsvit_control='c', ls_pair_dir='/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/pairs/seed3407_pair_seed3407_c2c35d2bd8f4', fp_checkpoint=None, expected_fp_model_sha256='a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c', adaptation_steps=500, optim_mode='qdrop', drop_prob=0.5, p1=1.0, p2=1.0, dis_mode='q', calib_size=128, calib_batch_size=32, optim_batch_size=32, recon_iters=20000, k=1)
+Successfully imported Config class!
+optim_size: 1024
+calib_size: 128
+optim_batch_size: 32
+calib_batch_size: 32
+w_bit: 3
+a_bit: 3
+qconv_a_bit: 8
+qhead_a_bit: 3
+calib_metric: mse
+matmul_head_channel_wise: True
+token_channel_wise: True
+eq_n: 128
+search_round: 3
+keep_gpu: True
+optim_metric: fisher_dplr
+temp: 20
+k: 1
+p1: 1.0
+p2: 1.0
+dis_mode: q
+optim_mode: qdrop
+drop_prob: 0.5
+robust_beta: 0.5
+robust_temperature: 0.5
+recon_iters: 20000
+Python random seeded: 3407
+Building model ...
+No checkpoint found at './checkpoints/vit_raw/vit_small_patch16_224.bin'
+Loading pretrained weights from Hugging Face hub (timm/vit_small_patch16_224.augreg_in21k_ft_in1k)
+[timm/vit_small_patch16_224.augreg_in21k_ft_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+Endpoint FP model SHA256: a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c
+Applied head-wise Hadamard rotation: {'mode': 'all', 'blocks': 12, 'heads': 72, 'head_dims': [64], 'max_logit_abs_error': 2.9206275939941406e-06}
+Building validation dataloader ...
+Wraping quantiztion modules (reparam: True) ...
+2026-11-10 17:22:31 - start mse guided calibration
+Calibration cache: count=128 sample_sha256=05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6 tensor_sha256=4d822ba3ffa61432a9b41f34ff74ddabdb4733ec3f496b4c689a9b7f4c18cb8c
+2026-11-10 17:27:56 - mse guided calibration finished.
+Saving checkpoint to /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261110_172216_lscontrol_mix-prepare_seed3407_106072f99416/vit_small_w3_a3_calibsize_128_mse.pth
+Shared LS calibration snapshot ready: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/pairs/seed3407_pair_seed3407_c2c35d2bd8f4
+2026-11-10 17:27:56 - finished the process.

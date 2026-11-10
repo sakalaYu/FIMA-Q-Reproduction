@@ -1,0 +1,12 @@
+{
+  "seed": 3407,
+  "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+  "checkpoint_sha256": "6e559424080df72b7f5f72c84c78138d1d2fc1ee53178524198d5c6d9cdafa54",
+  "calibration_hashes": [
+    [
+      "128",
+      "05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6",
+      "4d822ba3ffa61432a9b41f34ff74ddabdb4733ec3f496b4c689a9b7f4c18cb8c"
+    ]
+  ]
+}
