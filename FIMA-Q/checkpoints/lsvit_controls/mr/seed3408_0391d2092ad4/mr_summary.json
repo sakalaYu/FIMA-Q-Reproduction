@@ -1,0 +1,50 @@
+{
+  "rows": [
+    {
+      "variant": "gelu",
+      "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261111_171006_lsvit_mr_gelu_seed3408_3a50dc50dd1e/method_result.json",
+      "metrics": {
+        "top1": 65.558,
+        "top5": 87.956,
+        "loss": 1.3785580733013154
+      },
+      "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+      "calibration_hashes": [
+        [
+          "128",
+          "15db8a3d8c5cd54ee531b7dc5f16d625984989f59cb52f9f64449c018db560da",
+          "717544d885dc5a60613fcf804ce93b1ffbc1baa16f72e0a22160e3125528bc38"
+        ],
+        [
+          "1024",
+          "e4e3f878bb1a4544baa55cd13440283a5518294f7dc88d18a31200d5de0c9a04",
+          "a549d62a2762d7f187ba50e270d7e1750936699a5d43a1ce2162a60afaf6a6bb"
+        ]
+      ]
+    },
+    {
+      "variant": "relu",
+      "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261111_194420_lsvit_mr_relu_seed3408_a4008f61fe80/method_result.json",
+      "metrics": {
+        "top1": 67.492,
+        "top5": 89.182,
+        "loss": 1.280966951007843
+      },
+      "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+      "calibration_hashes": [
+        [
+          "128",
+          "15db8a3d8c5cd54ee531b7dc5f16d625984989f59cb52f9f64449c018db560da",
+          "717544d885dc5a60613fcf804ce93b1ffbc1baa16f72e0a22160e3125528bc38"
+        ],
+        [
+          "1024",
+          "e4e3f878bb1a4544baa55cd13440283a5518294f7dc88d18a31200d5de0c9a04",
+          "a549d62a2762d7f187ba50e270d7e1750936699a5d43a1ce2162a60afaf6a6bb"
+        ]
+      ]
+    }
+  ],
+  "hashes_matched": true,
+  "top1_delta_pp": 1.9339999999999975
+}
