@@ -163,6 +163,9 @@ def get_args_parser():
     parser.add_argument('--lsvit-control', choices=('c', 'plain', 'fixed', 'b', 'mix-equal', 'mix-adaptive'),
                         default='c', help='LS reconstruction recipe')
     parser.add_argument('--ls-pair-dir', help='Shared calibration and verification directory for paired LS')
+    parser.add_argument('--ls-mr', choices=('none', 'screen', 'gelu', 'relu'), default='none')
+    parser.add_argument('--ls-mr-dir', help='MLP reconstruction output or input directory')
+    parser.add_argument('--ls-mr-steps', type=int, default=3000)
     parser.add_argument('--fp-checkpoint', help='Path to the floating-point model weights')
     parser.add_argument('--expected-fp-model-sha256', help='Require this floating-point tensor fingerprint')
     parser.add_argument('--adaptation-steps', type=int, default=500)
@@ -240,11 +243,13 @@ def load_model(model, args, device, mode='calibrate', strict=False):
 
 def main(args):
     pair_snapshot = None
-    if args.ls_pair_dir:
+    if args.ls_pair_dir or args.ls_mr != 'none':
         from utils.lsvit_pair import calibration_hashes, read_snapshot, save_snapshot
         os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
         torch.backends.cudnn.benchmark = False
         torch.use_deterministic_algorithms(True)
+    if args.ls_mr != 'none':
+        os.environ['FIMAQ_CAPTURE_CALIBRATION_HASH'] = '1'
     logging.info("{} - start the process.".format(get_cur_time()))
     logging.info("Experiment directory: {}".format(root_path))
     logging.info(str(args))
@@ -352,6 +357,29 @@ def main(args):
         endpoint_result['launch_identity'] = json.loads(os.environ.get('FIMAQ_ENDPOINT_IDENTITY', 'null'))
     data_path = args.dataset
     g = mydatasets.ViTImageNetLoaderGenerator(data_path, args.val_batch_size, args.num_workers, kwargs={"model":model})
+    mr_calib_loader = mr_optim_loader = mr_weights_sha = None
+    if args.ls_mr != 'none':
+        from utils.lsvit_mr import load_mlp_reconstruction, screen_mlp_reconstruction
+        if (cfg.w_bit, cfg.a_bit, cfg.calib_size, cfg.optim_size) != (3, 3, 128, 1024):
+            raise ValueError('MR experiments use W3A3 and 128/1024 calibration images')
+        if args.ls_mr != 'screen':
+            seed_all(args.seed)
+            mr_calib_loader = g.calib_loader(num=cfg.calib_size, batch_size=cfg.calib_batch_size, seed=args.seed)
+        seed_all(args.seed)
+        mr_optim_loader = g.calib_loader(num=cfg.optim_size, batch_size=cfg.optim_batch_size, seed=args.seed)
+        mr_data_hashes = calibration_hashes(os.path.join(root_path, 'output.log'))[-1:]
+        if [row[0] for row in mr_data_hashes] != ['1024']:
+            raise RuntimeError('MR requires a fingerprint of the 1024 reconstruction images')
+        if args.ls_mr == 'screen':
+            report = screen_mlp_reconstruction(model, mr_optim_loader, args.ls_mr_dir, device,
+                                               args.ls_mr_steps, args.seed, model_sha, mr_data_hashes)
+            logging.info('MR holdout FP top-1 agreement: %.3f%%; mean A3 NMSE GELU %.6g / ReLU %.6g',
+                         100 * report['fp_top1_agreement'], report['mean_gelu_a3_nmse'], report['mean_relu_a3_nmse'])
+            return
+        if args.ls_mr == 'relu':
+            mr_weights_sha = load_mlp_reconstruction(model, args.ls_mr_dir, args.seed, args.ls_mr_steps,
+                                                    model_sha, mr_data_hashes)
+        seed_all(args.seed)
     
     logging.info('Building validation dataloader ...')
     val_loader = g.val_loader()
@@ -374,7 +402,8 @@ def main(args):
                 val_loss, val_prec1, val_prec5 = validate(val_loader, model, criterion, print_freq=args.print_freq, device=device)
         else:
             logging.info("{} - start {} guided calibration".format(get_cur_time(), cfg.calib_metric))
-            calib_loader = g.calib_loader(num=cfg.calib_size, batch_size=cfg.calib_batch_size, seed=args.seed)
+            calib_loader = (mr_calib_loader if mr_calib_loader is not None else
+                            g.calib_loader(num=cfg.calib_size, batch_size=cfg.calib_batch_size, seed=args.seed))
             quant_calibrator = QuantCalibrator(model, calib_loader)
             quant_calibrator.batching_quant_calib()
             model = wrap_reparamed_modules_in_net(model)
@@ -393,10 +422,11 @@ def main(args):
 
     if args.optimize:
         logging.info('Building calibrator ...')
-        if pair_snapshot:
+        if pair_snapshot or mr_optim_loader is not None:
             # Start both augmentation and reconstruction from the same RNG state.
             seed_all(args.seed)
-        calib_loader = g.calib_loader(num=cfg.optim_size, batch_size=cfg.optim_batch_size, seed=args.seed)
+        calib_loader = (mr_optim_loader if mr_optim_loader is not None else
+                        g.calib_loader(num=cfg.optim_size, batch_size=cfg.optim_batch_size, seed=args.seed))
         logging.info("{} - start {} guided block reconstruction".format(get_cur_time(), cfg.optim_metric))
         qk_options = None
         if args.qk_joint_variant != 'none':
@@ -462,7 +492,8 @@ def main(args):
             endpoint_result['endpoint'] = dict(options=endpoint_options, blocks=block_reconstructor.endpoint_results)
             with open(os.path.join(root_path, 'endpoint_blocks.json'), 'w', encoding='utf-8') as handle:
                 json.dump(endpoint_result['endpoint'], handle, indent=2)
-        endpoint_result['baseline_checkpoint'] = save_model(model, args, cfg, mode='optimize')
+        endpoint_result['baseline_checkpoint'] = save_model(
+            model, args, cfg, mode='optimize', tag='relu_mr' if args.ls_mr == 'relu' else '')
     if args.load_optimize_checkpoint:
         logging.info('Building calibrator ...')
         calib_loader = g.calib_loader(num=cfg.optim_size, batch_size=cfg.optim_batch_size, seed=args.seed)
@@ -497,6 +528,9 @@ def main(args):
                       launch=json.loads(os.environ.get('FIMAQ_METHOD_LAUNCH', '{}')))
         if args.lsvit_control.startswith('mix-'):
             report['ls_mix_blocks'] = block_reconstructor.ls_mix_results
+        if args.ls_mr != 'none':
+            report['mr_variant'] = args.ls_mr
+            report['mr_weights_sha256'] = mr_weights_sha
     if args.method_adaptation != 'none':
         report['fp_model_sha256'] = model_sha
         report['calibration_hashes'] = re.findall(

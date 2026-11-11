@@ -4,6 +4,17 @@
 def validate_lsvit_control(args):
     control = args.lsvit_control
     pair = getattr(args, 'ls_pair_dir', None)
+    mr = getattr(args, 'ls_mr', 'none')
+    if mr != 'none':
+        screen = mr == 'screen'
+        needs_directory = mr in ('screen', 'relu')
+        if (pair or args.model != 'vit_small' or not args.calibrate or args.load_optimize_checkpoint
+                or not args.expected_fp_model_sha256 or not args.headwise_hadamard or args.headwise_mode != 'all'
+                or args.qk_joint_variant != 'none' or args.ls_mr_steps < 1
+                or bool(args.ls_mr_dir) != needs_directory or args.optimize == screen
+                or args.skip_final_validation != screen or (screen and args.method_adaptation != 'none')
+                or (not screen and (args.method_adaptation != 'lsvit' or control != 'fixed'))):
+            raise ValueError('MR requires fresh ViT-S with full Hadamard and fixed LS for quantization')
     if pair:
         prepare = (args.method_adaptation == 'none' and args.calibrate and not args.optimize
                    and not args.load_optimize_checkpoint and not args.load_calibrate_checkpoint)
