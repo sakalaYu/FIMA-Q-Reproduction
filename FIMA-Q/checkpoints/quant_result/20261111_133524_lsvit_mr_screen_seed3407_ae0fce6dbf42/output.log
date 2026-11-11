@@ -1,0 +1,50 @@
+2026-11-11 13:35:24 - start the process.
+Experiment directory: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261111_133524_lsvit_mr_screen_seed3407_ae0fce6dbf42
+Namespace(model='vit_small', config='./configs/3bit/best.py', dataset='../imagenet_fimaq', optim_size=1024, val_batch_size=64, num_workers=8, device='cuda', calibrate=True, load_calibrate_checkpoint=None, test_calibrate_checkpoint=False, optimize=False, load_optimize_checkpoint=None, test_optimize_checkpoint=False, print_freq=10, seed=3407, skip_final_validation=True, headwise_hadamard=True, headwise_mode='all', qk_joint_variant='none', qk_joint_protocol='v2_integer_zp', qk_joint_steps=300, qk_joint_batch_size=8, qk_joint_holdout=128, qk_joint_lr=0.003, qk_joint_eval_every=50, qk_joint_rotation_rank=0, qk_joint_min_relative_kl=0.0, qk_joint_reconstruction_loss='auto', attention_relation='none', relation_protocol='relation_v1', relation_weight=0.1, relation_queries=16, relation_start=0.2, relation_full=0.6, probe_kd='none', probe_kd_protocol='semantic_probe_v1', probe_kd_weight=0.05, probe_kd_temperature=2.0, probe_kd_ridge=0.1, probe_kd_holdout=128, probe_kd_code_sha='unrecorded', endpoint_task='none', endpoint_code_sha='unrecorded', endpoint_mode='none', endpoint_steps=2000, endpoint_lr=0.001, endpoint_bound=1.2, endpoint_holdout=128, endpoint_batch_size=8, endpoint_eval_every=200, qwt=False, qwt_samples=512, qwt_batch_size=8, qwt_ridge=0.0, qwt_branch_dtype='fp16', qwt_solver_threads=4, activation_codebook='none', method_adaptation='none', lsvit_control='c', ls_pair_dir=None, ls_mr='screen', ls_mr_dir='/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/mr/seed3407_45e77813d245', ls_mr_steps=3000, fp_checkpoint=None, expected_fp_model_sha256='a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c', adaptation_steps=500, optim_mode='qdrop', drop_prob=0.5, p1=1.0, p2=1.0, dis_mode='q', calib_size=128, calib_batch_size=32, optim_batch_size=32, recon_iters=20000, k=1)
+Successfully imported Config class!
+optim_size: 1024
+calib_size: 128
+optim_batch_size: 32
+calib_batch_size: 32
+w_bit: 3
+a_bit: 3
+qconv_a_bit: 8
+qhead_a_bit: 3
+calib_metric: mse
+matmul_head_channel_wise: True
+token_channel_wise: True
+eq_n: 128
+search_round: 3
+keep_gpu: True
+optim_metric: fisher_dplr
+temp: 20
+k: 1
+p1: 1.0
+p2: 1.0
+dis_mode: q
+optim_mode: qdrop
+drop_prob: 0.5
+robust_beta: 0.5
+robust_temperature: 0.5
+recon_iters: 20000
+Python random seeded: 3407
+Building model ...
+No checkpoint found at './checkpoints/vit_raw/vit_small_patch16_224.bin'
+Loading pretrained weights from Hugging Face hub (timm/vit_small_patch16_224.augreg_in21k_ft_in1k)
+[timm/vit_small_patch16_224.augreg_in21k_ft_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+Endpoint FP model SHA256: a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c
+Applied head-wise Hadamard rotation: {'mode': 'all', 'blocks': 12, 'heads': 72, 'head_dims': [64], 'max_logit_abs_error': 2.9206275939941406e-06}
+Calibration cache: count=1024 sample_sha256=51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b tensor_sha256=d16465b385c037c1b17be73a4d62ff5f2a0a25edc552478fe414f4b373ffa83e
+MLP reconstruction: {"clip": 3.593111991882324, "relu_fp_nmse": 0.007762210435528619, "gelu_a3_nmse": 0.19944656910257666, "relu_a3_nmse": 0.027260784356809262, "block": "blocks.0"}
+MLP reconstruction: {"clip": 1.6954137086868286, "relu_fp_nmse": 0.0274674773072478, "gelu_a3_nmse": 0.0709508375483204, "relu_a3_nmse": 0.047379772198995036, "block": "blocks.1"}
+MLP reconstruction: {"clip": 1.541007161140442, "relu_fp_nmse": 0.036166250306702806, "gelu_a3_nmse": 0.07295196267505485, "relu_a3_nmse": 0.05765170232761699, "block": "blocks.2"}
+MLP reconstruction: {"clip": 1.4384229183197021, "relu_fp_nmse": 0.030396316479556568, "gelu_a3_nmse": 0.12060851731697614, "relu_a3_nmse": 0.050563574137446554, "block": "blocks.3"}
+MLP reconstruction: {"clip": 1.4841084480285645, "relu_fp_nmse": 0.03142459508754048, "gelu_a3_nmse": 0.12337167549527168, "relu_a3_nmse": 0.05249589108218333, "block": "blocks.4"}
+MLP reconstruction: {"clip": 1.5024813413619995, "relu_fp_nmse": 0.03006509978942263, "gelu_a3_nmse": 0.24914387697162593, "relu_a3_nmse": 0.04659692347434503, "block": "blocks.5"}
+MLP reconstruction: {"clip": 1.9033647775650024, "relu_fp_nmse": 0.02873422143423962, "gelu_a3_nmse": 0.5533593774717688, "relu_a3_nmse": 0.03875711805326697, "block": "blocks.6"}
+MLP reconstruction: {"clip": 2.3350985050201416, "relu_fp_nmse": 0.024176020580264922, "gelu_a3_nmse": 0.12024259153556062, "relu_a3_nmse": 0.0471481091675539, "block": "blocks.7"}
+MLP reconstruction: {"clip": 5.372856140136719, "relu_fp_nmse": 0.010806811472886696, "gelu_a3_nmse": 0.08337764549592243, "relu_a3_nmse": 0.043936096518906176, "block": "blocks.8"}
+MLP reconstruction: {"clip": 7.795287132263184, "relu_fp_nmse": 0.004772134485681622, "gelu_a3_nmse": 0.05179640746296138, "relu_a3_nmse": 0.04589926814554561, "block": "blocks.9"}
+MLP reconstruction: {"clip": 23.75006103515625, "relu_fp_nmse": 0.0014396039010994243, "gelu_a3_nmse": 0.11458308577761733, "relu_a3_nmse": 0.11287384091252461, "block": "blocks.10"}
+MLP reconstruction: {"clip": 3.7181098461151123, "relu_fp_nmse": 0.008614489405494684, "gelu_a3_nmse": 0.07114002816072064, "relu_a3_nmse": 0.022909347735689374, "block": "blocks.11"}
+MR holdout FP top-1 agreement: 93.750%; mean A3 NMSE GELU 0.152581 / ReLU 0.049456
