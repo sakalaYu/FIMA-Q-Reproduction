@@ -1,0 +1,82 @@
+{
+  "rows": [
+    {
+      "budget": "uniform",
+      "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261113_130804_lsvit_mr_relu_seed3407_a1b23ee46e83/method_result.json",
+      "metrics": {
+        "top1": 66.582,
+        "top5": 88.68,
+        "loss": 1.325323813970089
+      },
+      "total_mr_steps": 36000,
+      "mr_seconds": 492.76264998316765,
+      "steps_by_block": {
+        "blocks.0": 3000,
+        "blocks.1": 3000,
+        "blocks.2": 3000,
+        "blocks.3": 3000,
+        "blocks.4": 3000,
+        "blocks.5": 3000,
+        "blocks.6": 3000,
+        "blocks.7": 3000,
+        "blocks.8": 3000,
+        "blocks.9": 3000,
+        "blocks.10": 3000,
+        "blocks.11": 3000
+      },
+      "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+      "calibration_hashes": [
+        [
+          "128",
+          "05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6",
+          "9fa0fafb6c8858c44b3f7ece4aa472c8a0793c7a5d1e86e24ea7edba33364330"
+        ],
+        [
+          "1024",
+          "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+          "d16465b385c037c1b17be73a4d62ff5f2a0a25edc552478fe414f4b373ffa83e"
+        ]
+      ]
+    },
+    {
+      "budget": "residual",
+      "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261113_130900_lsvit_mr_relu_seed3407_42a305a3eb20/method_result.json",
+      "metrics": {
+        "top1": 67.052,
+        "top5": 88.88,
+        "loss": 1.3125056755924225
+      },
+      "total_mr_steps": 36000,
+      "mr_seconds": 528.7056378275156,
+      "steps_by_block": {
+        "blocks.0": 2000,
+        "blocks.1": 3000,
+        "blocks.2": 4000,
+        "blocks.3": 3000,
+        "blocks.4": 4000,
+        "blocks.5": 3000,
+        "blocks.6": 4000,
+        "blocks.7": 3000,
+        "blocks.8": 2000,
+        "blocks.9": 2000,
+        "blocks.10": 4000,
+        "blocks.11": 2000
+      },
+      "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+      "calibration_hashes": [
+        [
+          "128",
+          "05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6",
+          "9fa0fafb6c8858c44b3f7ece4aa472c8a0793c7a5d1e86e24ea7edba33364330"
+        ],
+        [
+          "1024",
+          "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+          "d16465b385c037c1b17be73a4d62ff5f2a0a25edc552478fe414f4b373ffa83e"
+        ]
+      ]
+    }
+  ],
+  "matched": true,
+  "top1_delta_pp": 0.4700000000000131
+}
