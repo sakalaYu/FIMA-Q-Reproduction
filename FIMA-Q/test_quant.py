@@ -166,6 +166,7 @@ def get_args_parser():
     parser.add_argument('--ls-mr', choices=('none', 'screen', 'gelu', 'relu'), default='none')
     parser.add_argument('--ls-mr-dir', help='MLP reconstruction output or input directory')
     parser.add_argument('--ls-mr-steps', type=int, default=3000)
+    parser.add_argument('--ls-mr-budget', choices=('uniform', 'residual'), default='uniform')
     parser.add_argument('--fp-checkpoint', help='Path to the floating-point model weights')
     parser.add_argument('--expected-fp-model-sha256', help='Require this floating-point tensor fingerprint')
     parser.add_argument('--adaptation-steps', type=int, default=500)
@@ -372,13 +373,14 @@ def main(args):
             raise RuntimeError('MR requires a fingerprint of the 1024 reconstruction images')
         if args.ls_mr == 'screen':
             report = screen_mlp_reconstruction(model, mr_optim_loader, args.ls_mr_dir, device,
-                                               args.ls_mr_steps, args.seed, model_sha, mr_data_hashes)
+                                               args.ls_mr_steps, args.seed, model_sha, mr_data_hashes,
+                                               budget=args.ls_mr_budget)
             logging.info('MR holdout FP top-1 agreement: %.3f%%; mean A3 NMSE GELU %.6g / ReLU %.6g',
                          100 * report['fp_top1_agreement'], report['mean_gelu_a3_nmse'], report['mean_relu_a3_nmse'])
             return
         if args.ls_mr == 'relu':
             mr_weights_sha = load_mlp_reconstruction(model, args.ls_mr_dir, args.seed, args.ls_mr_steps,
-                                                    model_sha, mr_data_hashes)
+                                                    model_sha, mr_data_hashes, budget=args.ls_mr_budget)
         seed_all(args.seed)
     
     logging.info('Building validation dataloader ...')

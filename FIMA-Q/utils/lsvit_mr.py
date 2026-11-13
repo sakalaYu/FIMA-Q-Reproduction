@@ -5,6 +5,7 @@ import copy
 import json
 import logging
 from pathlib import Path
+import time
 
 import torch
 from torch import nn
@@ -82,12 +83,7 @@ def score_mlp(mlp, inputs, targets, grid, device):
     return fp_error / max(energy, 1e-12), a3_error / max(energy, 1e-12)
 
 
-def fit_mlp(teacher, inputs, targets, device, steps, seed, holdout):
-    train_count = len(inputs) - holdout
-    sample = sample_activations(teacher, inputs[:train_count], device)
-    positive = sample[sample > 0]
-    clip = float(torch.quantile(positive, 0.99)) if len(positive) else 0.
-    baseline_grid = fit_a3_range(sample)
+def start_fit(teacher, steps, seed):
     student = copy.deepcopy(teacher)
     student.act = nn.ReLU()
     student.requires_grad_(False)
@@ -97,9 +93,14 @@ def fit_mlp(teacher, inputs, targets, device, steps, seed, holdout):
     optimizer = torch.optim.Adam(params, lr=4e-5)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=steps)
     generator = torch.Generator().manual_seed(seed)
+    return student, optimizer, scheduler, generator
+
+
+def train_fit(fit, inputs, targets, device, steps, clip):
+    student, optimizer, scheduler, generator = fit
     with capture_fc2_input(student) as captured:
         for _ in range(steps):
-            indices = torch.randint(train_count, (4,), generator=generator)
+            indices = torch.randint(len(inputs), (4,), generator=generator)
             x, target = inputs[indices].to(device), targets[indices].to(device)
             optimizer.zero_grad(set_to_none=True)
             out = student(x)
@@ -109,10 +110,88 @@ def fit_mlp(teacher, inputs, targets, device, steps, seed, holdout):
             loss.backward()
             optimizer.step()
             scheduler.step()
+
+
+def fit_mlp(teacher, inputs, targets, device, steps, seed, holdout):
+    train_count = len(inputs) - holdout
+    sample = sample_activations(teacher, inputs[:train_count], device)
+    positive = sample[sample > 0]
+    clip = float(torch.quantile(positive, 0.99)) if len(positive) else 0.
+    baseline_grid = fit_a3_range(sample)
+    fit = start_fit(teacher, steps, seed)
+    train_fit(fit, inputs[:train_count], targets[:train_count], device, steps, clip)
+    student = fit[0]
     student_grid = fit_a3_range(sample_activations(student, inputs[:train_count], device))
     _, before_a3 = score_mlp(teacher, inputs[train_count:], targets[train_count:], baseline_grid, device)
     after_fp, after_a3 = score_mlp(student, inputs[train_count:], targets[train_count:], student_grid, device)
     return student, dict(clip=clip, relu_fp_nmse=after_fp, gelu_a3_nmse=before_a3, relu_a3_nmse=after_a3)
+
+
+def residual_budgets(errors):
+    """Allocate 2k/3k/4k to the bottom/middle/top thirds of 12 ViT blocks."""
+    if len(errors) != 12 or not bool(torch.isfinite(torch.as_tensor(errors)).all()):
+        raise ValueError('MR allocation requires finite A3 errors from all 12 blocks')
+    budgets = [3000] * len(errors)
+    order = sorted(range(len(errors)), key=lambda i: (errors[i], i))
+    for index in order[:4]:
+        budgets[index] = 2000
+    for index in order[-4:]:
+        budgets[index] = 4000
+    return budgets
+
+
+def fit_with_residual_budget(model, loader, device, seed, holdout):
+    pilot_steps = 1000
+    pilots = []
+    for index, block in enumerate(model.blocks):
+        teacher = block.mlp
+        inputs, targets = teacher_features(model, teacher, loader, device)
+        train_count = len(inputs) - holdout
+        sample = sample_activations(teacher, inputs[:train_count], device)
+        positive = sample[sample > 0]
+        clip = float(torch.quantile(positive, 0.99)) if len(positive) else 0.
+        fit = start_fit(teacher, 3000, seed + index)
+        student, optimizer, scheduler, generator = fit
+        train_fit(fit, inputs[:train_count], targets[:train_count], device, pilot_steps, clip)
+        grid = fit_a3_range(sample_activations(student, inputs[:train_count], device))
+        _, residual = score_mlp(student, inputs[train_count:], targets[train_count:], grid, device)
+        # Keep the pilot weights, Adam moments and sample stream for continuation.
+        state = optimizer.state_dict()
+        for values in state['state'].values():
+            for name, value in values.items():
+                values[name] = value.cpu()
+        pilots.append((student.cpu().state_dict(), state, scheduler.state_dict(), generator.get_state(),
+                       clip, fit_a3_range(sample), residual))
+        logging.info('MR pilot blocks.%d: %d steps, holdout A3 NMSE %.6g', index, pilot_steps, residual)
+        del fit, student, optimizer, scheduler, generator, inputs, targets
+
+    budgets = residual_budgets([pilot[-1] for pilot in pilots])
+    states, reports = [], []
+    for index, (block, budget, pilot) in enumerate(zip(model.blocks, budgets, pilots)):
+        weights, optimizer_state, scheduler_state, rng, clip, baseline_grid, residual = pilot
+        inputs, targets = teacher_features(model, block.mlp, loader, device)
+        train_count = len(inputs) - holdout
+        student, optimizer, scheduler, generator = start_fit(block.mlp, 3000, seed + index)
+        student.load_state_dict(weights)
+        optimizer.load_state_dict(optimizer_state)
+        generator.set_state(rng)
+        remaining = budget - pilot_steps
+        if budget == 3000:
+            scheduler.load_state_dict(scheduler_state)
+        else:
+            # Start at the pilot's current LR and anneal to zero over the allotted steps.
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=remaining)
+        train_fit((student, optimizer, scheduler, generator), inputs[:train_count], targets[:train_count],
+                  device, remaining, clip)
+        student_grid = fit_a3_range(sample_activations(student, inputs[:train_count], device))
+        _, before = score_mlp(block.mlp, inputs[train_count:], targets[train_count:], baseline_grid, device)
+        after_fp, after_a3 = score_mlp(student, inputs[train_count:], targets[train_count:], student_grid, device)
+        report = dict(block=f'blocks.{index}', steps=budget, pilot_steps=pilot_steps, pilot_a3_nmse=residual,
+                      clip=clip, relu_fp_nmse=after_fp, gelu_a3_nmse=before, relu_a3_nmse=after_a3)
+        reports.append(report)
+        states.append({name: value.detach().cpu() for name, value in student.state_dict().items()})
+        logging.info('MLP reconstruction: %s', json.dumps(report, allow_nan=False))
+    return states, reports
 
 
 def apply_mlp_states(model, states):
@@ -134,24 +213,31 @@ def holdout_logits(model, dataset, holdout, device):
     return torch.cat(logits)
 
 
-def screen_mlp_reconstruction(model, loader, directory, device, steps, seed, model_sha, hashes):
+def screen_mlp_reconstruction(model, loader, directory, device, steps, seed, model_sha, hashes, budget='uniform'):
+    started = time.perf_counter()
     holdout = 128
     count = len(loader.dataset)
     if count <= holdout or not all(isinstance(b.mlp.act, nn.GELU) for b in model.blocks):
         raise ValueError('MR screening requires a GELU ViT and a separate 128-image holdout')
     original = holdout_logits(model, loader.dataset, holdout, device)
-    states, reports = [], []
-    for index, block in enumerate(model.blocks):
-        inputs, targets = teacher_features(model, block.mlp, loader, device)
-        student, report = fit_mlp(block.mlp, inputs, targets, device, steps, seed + index, holdout)
-        report['block'] = f'blocks.{index}'
-        reports.append(report)
-        states.append({name: value.detach().cpu() for name, value in student.state_dict().items()})
-        logging.info('MLP reconstruction: %s', json.dumps(report, allow_nan=False))
-        del inputs, targets, student
+    if budget == 'residual':
+        if steps != 3000 or len(model.blocks) != 12:
+            raise ValueError('Residual MR requires 12 blocks and a 36,000-step budget')
+        states, reports = fit_with_residual_budget(model, loader, device, seed, holdout)
+    else:
+        states, reports = [], []
+        for index, block in enumerate(model.blocks):
+            inputs, targets = teacher_features(model, block.mlp, loader, device)
+            student, report = fit_mlp(block.mlp, inputs, targets, device, steps, seed + index, holdout)
+            report.update(block=f'blocks.{index}', steps=steps)
+            reports.append(report)
+            states.append({name: value.detach().cpu() for name, value in student.state_dict().items()})
+            logging.info('MLP reconstruction: %s', json.dumps(report, allow_nan=False))
+            del inputs, targets, student
     apply_mlp_states(model, states)
     relu = holdout_logits(model, loader.dataset, holdout, device)
     report = dict(seed=seed, fp_model_sha256=model_sha, data_hashes=hashes, steps=steps,
+                  budget=budget, total_mr_steps=sum(r['steps'] for r in reports),
                   train_images=count - holdout, holdout_images=holdout, blocks=reports,
                   fp_top1_agreement=float((relu.argmax(-1) == original.argmax(-1)).float().mean()),
                   fp_teacher_kl=float(F.kl_div(relu.log_softmax(-1), original.softmax(-1), reduction='batchmean')),
@@ -164,16 +250,19 @@ def screen_mlp_reconstruction(model, loader, directory, device, steps, seed, mod
     torch.save(states, temporary)
     temporary.replace(target)
     report['checkpoint_sha256'] = file_sha(target)
+    report['elapsed_seconds'] = time.perf_counter() - started
     report['status'] = 'complete'
     write_json(directory / 'mr_screen.json', report)
     return report
 
 
-def load_mlp_reconstruction(model, directory, seed, steps, model_sha, hashes):
+def load_mlp_reconstruction(model, directory, seed, steps, model_sha, hashes, budget='uniform'):
     directory = Path(directory)
     report = json.loads((directory / 'mr_screen.json').read_text(encoding='utf-8'))
     weights = directory / 'relu_mlp.pth'
     if (report['status'] != 'complete' or report['seed'] != seed or report['steps'] != steps
+            or report.get('budget', 'uniform') != budget
+            or report.get('total_mr_steps', steps * len(model.blocks)) != steps * len(model.blocks)
             or report['fp_model_sha256'] != model_sha or report['data_hashes'] != hashes
             or report['checkpoint_sha256'] != file_sha(weights)):
         raise RuntimeError('MR screen and quantization recipe fingerprints differ')
