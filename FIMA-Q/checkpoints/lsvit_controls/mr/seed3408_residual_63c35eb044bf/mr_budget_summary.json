@@ -1,0 +1,86 @@
+{
+  "rows": [
+    {
+      "budget": "uniform",
+      "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261113_161338_lsvit_mr_relu_seed3408_44d6a43c2b48/method_result.json",
+      "screen": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/mr/seed3408_uniform_9e2e047a7c10/mr_screen.json",
+      "metrics": {
+        "top1": 67.492,
+        "top5": 89.182,
+        "loss": 1.280966951007843
+      },
+      "total_mr_steps": 36000,
+      "mr_seconds": 729.1552809774876,
+      "steps_by_block": {
+        "blocks.0": 3000,
+        "blocks.1": 3000,
+        "blocks.2": 3000,
+        "blocks.3": 3000,
+        "blocks.4": 3000,
+        "blocks.5": 3000,
+        "blocks.6": 3000,
+        "blocks.7": 3000,
+        "blocks.8": 3000,
+        "blocks.9": 3000,
+        "blocks.10": 3000,
+        "blocks.11": 3000
+      },
+      "code_sha256": "309aef8ec5dbc2e772416fed8985e1b1bca0c85ea5b810f8aac11bddbf048f19",
+      "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+      "calibration_hashes": [
+        [
+          "128",
+          "15db8a3d8c5cd54ee531b7dc5f16d625984989f59cb52f9f64449c018db560da",
+          "717544d885dc5a60613fcf804ce93b1ffbc1baa16f72e0a22160e3125528bc38"
+        ],
+        [
+          "1024",
+          "e4e3f878bb1a4544baa55cd13440283a5518294f7dc88d18a31200d5de0c9a04",
+          "a549d62a2762d7f187ba50e270d7e1750936699a5d43a1ce2162a60afaf6a6bb"
+        ]
+      ]
+    },
+    {
+      "budget": "residual",
+      "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261113_191354_lsvit_mr_relu_seed3408_df44a7c461bd/method_result.json",
+      "screen": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/mr/seed3408_residual_63c35eb044bf/mr_screen.json",
+      "metrics": {
+        "top1": 67.016,
+        "top5": 88.866,
+        "loss": 1.3028067055749892
+      },
+      "total_mr_steps": 36000,
+      "mr_seconds": 457.47683761268854,
+      "steps_by_block": {
+        "blocks.0": 2000,
+        "blocks.1": 3000,
+        "blocks.2": 4000,
+        "blocks.3": 4000,
+        "blocks.4": 4000,
+        "blocks.5": 3000,
+        "blocks.6": 4000,
+        "blocks.7": 3000,
+        "blocks.8": 3000,
+        "blocks.9": 2000,
+        "blocks.10": 2000,
+        "blocks.11": 2000
+      },
+      "code_sha256": "309aef8ec5dbc2e772416fed8985e1b1bca0c85ea5b810f8aac11bddbf048f19",
+      "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+      "calibration_hashes": [
+        [
+          "128",
+          "15db8a3d8c5cd54ee531b7dc5f16d625984989f59cb52f9f64449c018db560da",
+          "717544d885dc5a60613fcf804ce93b1ffbc1baa16f72e0a22160e3125528bc38"
+        ],
+        [
+          "1024",
+          "e4e3f878bb1a4544baa55cd13440283a5518294f7dc88d18a31200d5de0c9a04",
+          "a549d62a2762d7f187ba50e270d7e1750936699a5d43a1ce2162a60afaf6a6bb"
+        ]
+      ]
+    }
+  ],
+  "matched": true,
+  "top1_delta_pp": -0.4759999999999991
+}
