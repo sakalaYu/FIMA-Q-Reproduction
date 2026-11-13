@@ -166,7 +166,7 @@ def get_args_parser():
     parser.add_argument('--ls-mr', choices=('none', 'screen', 'gelu', 'relu'), default='none')
     parser.add_argument('--ls-mr-dir', help='MLP reconstruction output or input directory')
     parser.add_argument('--ls-mr-steps', type=int, default=3000)
-    parser.add_argument('--ls-mr-budget', choices=('uniform', 'residual'), default='uniform')
+    parser.add_argument('--ls-mr-budget', choices=('uniform', 'residual', 'shuffled'), default='uniform')
     parser.add_argument('--fp-checkpoint', help='Path to the floating-point model weights')
     parser.add_argument('--expected-fp-model-sha256', help='Require this floating-point tensor fingerprint')
     parser.add_argument('--adaptation-steps', type=int, default=500)

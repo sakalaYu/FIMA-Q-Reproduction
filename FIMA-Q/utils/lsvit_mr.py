@@ -5,6 +5,7 @@ import copy
 import json
 import logging
 from pathlib import Path
+from random import Random
 import time
 
 import torch
@@ -140,7 +141,7 @@ def residual_budgets(errors):
     return budgets
 
 
-def fit_with_residual_budget(model, loader, device, seed, holdout):
+def fit_with_residual_budget(model, loader, device, seed, holdout, budget_policy):
     pilot_steps = 1000
     pilots = []
     for index, block in enumerate(model.blocks):
@@ -165,7 +166,11 @@ def fit_with_residual_budget(model, loader, device, seed, holdout):
         logging.info('MR pilot blocks.%d: %d steps, holdout A3 NMSE %.6g', index, pilot_steps, residual)
         del fit, student, optimizer, scheduler, generator, inputs, targets
 
-    budgets = residual_budgets([pilot[-1] for pilot in pilots])
+    ranked_budgets = residual_budgets([pilot[-1] for pilot in pilots])
+    budgets = ranked_budgets
+    if budget_policy == 'shuffled':
+        budgets = sorted(ranked_budgets)
+        Random(seed).shuffle(budgets)
     states, reports = [], []
     for index, (block, budget, pilot) in enumerate(zip(model.blocks, budgets, pilots)):
         weights, optimizer_state, scheduler_state, rng, clip, baseline_grid, residual = pilot
@@ -188,6 +193,8 @@ def fit_with_residual_budget(model, loader, device, seed, holdout):
         after_fp, after_a3 = score_mlp(student, inputs[train_count:], targets[train_count:], student_grid, device)
         report = dict(block=f'blocks.{index}', steps=budget, pilot_steps=pilot_steps, pilot_a3_nmse=residual,
                       clip=clip, relu_fp_nmse=after_fp, gelu_a3_nmse=before, relu_a3_nmse=after_a3)
+        if budget_policy == 'shuffled':
+            report['residual_rank_steps'] = ranked_budgets[index]
         reports.append(report)
         states.append({name: value.detach().cpu() for name, value in student.state_dict().items()})
         logging.info('MLP reconstruction: %s', json.dumps(report, allow_nan=False))
@@ -220,10 +227,10 @@ def screen_mlp_reconstruction(model, loader, directory, device, steps, seed, mod
     if count <= holdout or not all(isinstance(b.mlp.act, nn.GELU) for b in model.blocks):
         raise ValueError('MR screening requires a GELU ViT and a separate 128-image holdout')
     original = holdout_logits(model, loader.dataset, holdout, device)
-    if budget == 'residual':
+    if budget in ('residual', 'shuffled'):
         if steps != 3000 or len(model.blocks) != 12:
-            raise ValueError('Residual MR requires 12 blocks and a 36,000-step budget')
-        states, reports = fit_with_residual_budget(model, loader, device, seed, holdout)
+            raise ValueError('Staged MR requires 12 blocks and a 36,000-step budget')
+        states, reports = fit_with_residual_budget(model, loader, device, seed, holdout, budget)
     else:
         states, reports = [], []
         for index, block in enumerate(model.blocks):

@@ -5,9 +5,9 @@ def validate_lsvit_control(args):
     control = args.lsvit_control
     pair = getattr(args, 'ls_pair_dir', None)
     mr = getattr(args, 'ls_mr', 'none')
-    if getattr(args, 'ls_mr_budget', 'uniform') == 'residual' and (
+    if getattr(args, 'ls_mr_budget', 'uniform') != 'uniform' and (
             mr not in ('screen', 'relu') or args.ls_mr_steps != 3000):
-        raise ValueError('Residual allocation requires a 36,000-step ViT-S MR screen or ReLU run')
+        raise ValueError('Staged allocation requires a 36,000-step ViT-S MR screen or ReLU run')
     if mr != 'none':
         screen = mr == 'screen'
         needs_directory = mr in ('screen', 'relu')
