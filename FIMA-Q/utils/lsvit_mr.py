@@ -212,22 +212,29 @@ def apply_mlp_states(model, states):
 
 
 @torch.no_grad()
-def holdout_logits(model, dataset, holdout, device):
+def holdout_logits(model, dataset, holdout, device, batch_size=16):
     logits = []
-    for start in range(len(dataset) - holdout, len(dataset), 16):
-        images = torch.stack([dataset[i][0] for i in range(start, min(start + 16, len(dataset)))])
+    for start in range(len(dataset) - holdout, len(dataset), batch_size):
+        images = torch.stack([dataset[i][0] for i in range(start, min(start + batch_size, len(dataset)))])
         logits.append(model(images.to(device)).cpu())
     return torch.cat(logits)
 
 
-def screen_mlp_reconstruction(model, loader, directory, device, steps, seed, model_sha, hashes, budget='uniform'):
+def screen_mlp_reconstruction(model, loader, directory, device, steps, seed, model_sha, hashes,
+                              budget='uniform', cfg=None):
     started = time.perf_counter()
     holdout = 128
     count = len(loader.dataset)
     if count <= holdout or not all(isinstance(b.mlp.act, nn.GELU) for b in model.blocks):
         raise ValueError('MR screening requires a GELU ViT and a separate 128-image holdout')
     original = holdout_logits(model, loader.dataset, holdout, device)
-    if budget in ('residual', 'shuffled'):
+    extra = {}
+    if budget in ('gain-uniform', 'gain'):
+        from utils.lsvit_mr_gain import fit_with_gain_budget
+        if steps != 3000:
+            raise ValueError('MR gain allocation requires a 36,000-step budget')
+        states, reports, extra = fit_with_gain_budget(model, loader, device, seed, holdout, cfg, original, budget)
+    elif budget in ('residual', 'shuffled'):
         if steps != 3000 or len(model.blocks) != 12:
             raise ValueError('Staged MR requires 12 blocks and a 36,000-step budget')
         states, reports = fit_with_residual_budget(model, loader, device, seed, holdout, budget)
@@ -250,6 +257,7 @@ def screen_mlp_reconstruction(model, loader, directory, device, steps, seed, mod
                   fp_teacher_kl=float(F.kl_div(relu.log_softmax(-1), original.softmax(-1), reduction='batchmean')),
                   mean_gelu_a3_nmse=sum(r['gelu_a3_nmse'] for r in reports) / len(reports),
                   mean_relu_a3_nmse=sum(r['relu_a3_nmse'] for r in reports) / len(reports))
+    report.update(extra)
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     target = directory / 'relu_mlp.pth'

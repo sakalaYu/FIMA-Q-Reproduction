@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import shlex
@@ -12,16 +13,18 @@ import run_lsvit_controls as controls
 
 
 BUDGETS = ('uniform', 'residual', 'shuffled')
+GAIN_BUDGETS = ('gain-uniform', 'gain')
 
 
 def get_parser():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--variant', required=True, choices=('screen', 'gelu', 'relu', 'summary', 'budget-summary'))
+    parser.add_argument('--variant', required=True,
+                        choices=('screen', 'gelu', 'relu', 'summary', 'budget-summary', 'gain-summary'))
     parser.add_argument('--dataset', default='../imagenet_fimaq')
     parser.add_argument('--fp-checkpoint', type=Path)
     parser.add_argument('--seed', type=int, default=3407)
     parser.add_argument('--mr-steps', type=int, default=3000)
-    parser.add_argument('--budget', choices=BUDGETS, default='uniform')
+    parser.add_argument('--budget', choices=BUDGETS + GAIN_BUDGETS, default='uniform')
     parser.add_argument('--reference-budget-summary', type=Path,
                         help='Use a completed uniform/residual pair when comparing a new shuffled result')
     parser.add_argument('--num-workers', type=int, default=8)
@@ -55,7 +58,23 @@ def read_screen(directory, args):
     try:
         result = json.loads((directory / 'mr_screen.json').read_text(encoding='utf-8'))
         blocks = result['blocks']
-        expected_steps = [args.mr_steps] * 12 if args.budget == 'uniform' else [2000] * 4 + [3000] * 4 + [4000] * 4
+        if args.budget in ('uniform', 'gain-uniform'):
+            expected_steps = [args.mr_steps] * 12
+        elif args.budget == 'gain':
+            expected_steps = [2500] * 4 + [3000] * 4 + [3500] * 4
+        else:
+            expected_steps = [2000] * 4 + [3000] * 4 + [4000] * 4
+        if args.budget in GAIN_BUDGETS:
+            if (not result['pilot_sha256'] or (result['early_step'], result['pilot_step'], result['cosine_steps'])
+                    != (2000, 2500, 3500) or result['probe_images'] != (32 if args.budget == 'gain' else 0)):
+                return None
+            if args.budget == 'gain':
+                scores = [b['teacher_kl_gain'] for b in blocks]
+                if not all(math.isfinite(s) for s in scores):
+                    return None
+                order = sorted(range(12), key=lambda i: (scores[i], i))
+                if [blocks[i]['steps'] for i in order] != expected_steps:
+                    return None
         if (result['status'] == 'complete' and result['seed'] == args.seed and result['steps'] == args.mr_steps
                 and [b['block'] for b in blocks] == [f'blocks.{i}' for i in range(12)]
                 and sorted(b['steps'] for b in blocks) == expected_steps
@@ -179,10 +198,11 @@ def reference_records(args):
     return records
 
 
-def summarize_budgets(args, base):
+def summarize_budgets(args, base, gain=False):
     records = reference_records(args) if args.reference_budget_summary else {}
+    budgets = GAIN_BUDGETS if gain else BUDGETS
     target = None
-    for budget in BUDGETS:
+    for budget in budgets:
         if budget in records:
             continue
         budget_args = argparse.Namespace(**dict(vars(args), budget=budget))
@@ -194,27 +214,33 @@ def summarize_budgets(args, base):
             print(f'{budget}: no matching complete ReLU result', flush=True)
             continue
         records[budget] = budget_record(budget_args, directory, screen, *found)
-        target = directory / 'mr_budget_summary.json'
+        if gain:
+            row, signature = records[budget]
+            row['pilot_sha256'] = screen['pilot_sha256']
+            row['mean_relu_a3_nmse'] = screen['mean_relu_a3_nmse']
+            row['probe_images'] = screen['probe_images']
+            records[budget] = (row, signature + (row['pilot_sha256'],))
+        target = directory / ('mr_gain_summary.json' if gain else 'mr_budget_summary.json')
     for row, _ in records.values():
         print(f'{row["budget"]}: Top-1 {row["metrics"]["top1"]:.3f}%', flush=True)
-    required = BUDGETS if args.reference_budget_summary else BUDGETS[:2]
+    required = budgets if args.reference_budget_summary else budgets[:2]
     if any(budget not in records for budget in required):
         print('Budget comparison is incomplete', flush=True)
         return
-    uniform, signature = records['uniform']
+    uniform, signature = records[budgets[0]]
     if any(other != signature for _, other in records.values()):
-        raise ValueError('Budget runs differ in recipe, dependencies, FP, calibration or total MR steps')
-    residual = records['residual'][0]
-    delta = residual['metrics']['top1'] - uniform['metrics']['top1']
+        raise ValueError('Budget runs differ in recipe, dependencies, FP, calibration, MR steps or shared pilot')
+    adaptive = records[budgets[1]][0]
+    delta = adaptive['metrics']['top1'] - uniform['metrics']['top1']
     summary = dict(rows=[row for row, _ in records.values()], matched=True, top1_delta_pp=delta)
-    print(f'Residual minus uniform Top-1: {delta:+.3f} pp', flush=True)
+    print(f'{"Gain" if gain else "Residual"} minus uniform Top-1: {delta:+.3f} pp', flush=True)
     if 'shuffled' in records:
         shuffled = records['shuffled'][0]
-        if shuffled['residual_rank_steps_by_block'] != residual['steps_by_block']:
+        if shuffled['residual_rank_steps_by_block'] != adaptive['steps_by_block']:
             raise ValueError('Shuffled and residual MR disagree on the residual-ranked budgets')
-        if shuffled['steps_by_block'] == residual['steps_by_block']:
+        if shuffled['steps_by_block'] == adaptive['steps_by_block']:
             raise ValueError('Shuffled MR reproduced the residual assignment')
-        residual_minus_shuffled = residual['metrics']['top1'] - shuffled['metrics']['top1']
+        residual_minus_shuffled = adaptive['metrics']['top1'] - shuffled['metrics']['top1']
         summary['residual_minus_shuffled_pp'] = residual_minus_shuffled
         summary['shuffled_minus_uniform_pp'] = shuffled['metrics']['top1'] - uniform['metrics']['top1']
         print(f'Residual minus shuffled Top-1: {residual_minus_shuffled:+.3f} pp', flush=True)
@@ -231,7 +257,7 @@ def main():
     args = parser.parse_args()
     if args.mr_steps < 1 or args.num_workers < 0:
         parser.error('mr-steps must be positive and num-workers must be nonnegative')
-    if (args.budget != 'uniform' or args.variant == 'budget-summary') and args.mr_steps != 3000:
+    if (args.budget != 'uniform' or args.variant in ('budget-summary', 'gain-summary')) and args.mr_steps != 3000:
         parser.error('The budget comparison requires --mr-steps 3000')
     if args.budget != 'uniform' and args.variant in ('gelu', 'summary'):
         parser.error('Use a staged budget with screen or relu, and budget-summary for comparison')
@@ -239,9 +265,9 @@ def main():
         parser.error('--reference-budget-summary requires --variant budget-summary')
     base = controls.identity('fixed', args)
     base['mr_runner_sha256'] = hashlib.sha256(Path(__file__).read_text(encoding='utf-8').encode()).hexdigest()
-    if args.variant == 'budget-summary':
+    if args.variant in ('budget-summary', 'gain-summary'):
         try:
-            summarize_budgets(args, base)
+            summarize_budgets(args, base, gain=args.variant == 'gain-summary')
         except (OSError, ValueError, KeyError) as error:
             parser.error(str(error))
         return
