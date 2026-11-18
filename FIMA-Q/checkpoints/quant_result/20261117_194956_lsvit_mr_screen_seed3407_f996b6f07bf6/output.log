@@ -1,0 +1,87 @@
+2026-11-17 19:49:56 - start the process.
+Experiment directory: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261117_194956_lsvit_mr_screen_seed3407_f996b6f07bf6
+Namespace(model='vit_small', config='./configs/3bit/best.py', dataset='../imagenet_fimaq', optim_size=1024, val_batch_size=64, num_workers=8, device='cuda', calibrate=True, load_calibrate_checkpoint=None, test_calibrate_checkpoint=False, optimize=False, load_optimize_checkpoint=None, test_optimize_checkpoint=False, print_freq=10, seed=3407, skip_final_validation=True, headwise_hadamard=True, headwise_mode='all', qk_joint_variant='none', qk_joint_protocol='v2_integer_zp', qk_joint_steps=300, qk_joint_batch_size=8, qk_joint_holdout=128, qk_joint_lr=0.003, qk_joint_eval_every=50, qk_joint_rotation_rank=0, qk_joint_min_relative_kl=0.0, qk_joint_reconstruction_loss='auto', attention_relation='none', relation_protocol='relation_v1', relation_weight=0.1, relation_queries=16, relation_start=0.2, relation_full=0.6, probe_kd='none', probe_kd_protocol='semantic_probe_v1', probe_kd_weight=0.05, probe_kd_temperature=2.0, probe_kd_ridge=0.1, probe_kd_holdout=128, probe_kd_code_sha='unrecorded', endpoint_task='none', endpoint_code_sha='unrecorded', endpoint_mode='none', endpoint_steps=2000, endpoint_lr=0.001, endpoint_bound=1.2, endpoint_holdout=128, endpoint_batch_size=8, endpoint_eval_every=200, qwt=False, qwt_samples=512, qwt_batch_size=8, qwt_ridge=0.0, qwt_branch_dtype='fp16', qwt_solver_threads=4, activation_codebook='none', method_adaptation='none', lsvit_control='c', ls_pair_dir=None, ls_mr='screen', ls_mr_dir='/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/mr/seed3407_gain_d50dde7415a2', ls_mr_steps=3000, ls_mr_budget='gain', fp_checkpoint=None, expected_fp_model_sha256='a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c', adaptation_steps=500, optim_mode='qdrop', drop_prob=0.5, p1=1.0, p2=1.0, dis_mode='q', calib_size=128, calib_batch_size=32, optim_batch_size=32, recon_iters=20000, k=1)
+Successfully imported Config class!
+optim_size: 1024
+calib_size: 128
+optim_batch_size: 32
+calib_batch_size: 32
+w_bit: 3
+a_bit: 3
+qconv_a_bit: 8
+qhead_a_bit: 3
+calib_metric: mse
+matmul_head_channel_wise: True
+token_channel_wise: True
+eq_n: 128
+search_round: 3
+keep_gpu: True
+optim_metric: fisher_dplr
+temp: 20
+k: 1
+p1: 1.0
+p2: 1.0
+dis_mode: q
+optim_mode: qdrop
+drop_prob: 0.5
+robust_beta: 0.5
+robust_temperature: 0.5
+recon_iters: 20000
+Python random seeded: 3407
+Building model ...
+No checkpoint found at './checkpoints/vit_raw/vit_small_patch16_224.bin'
+Loading pretrained weights from Hugging Face hub (timm/vit_small_patch16_224.augreg_in21k_ft_in1k)
+[timm/vit_small_patch16_224.augreg_in21k_ft_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+Endpoint FP model SHA256: a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c
+Applied head-wise Hadamard rotation: {'mode': 'all', 'blocks': 12, 'heads': 72, 'head_dims': [64], 'max_logit_abs_error': 2.9206275939941406e-06}
+Calibration cache: count=1024 sample_sha256=51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b tensor_sha256=d16465b385c037c1b17be73a4d62ff5f2a0a25edc552478fe414f4b373ffa83e
+MR pilot blocks.0, step 2000: holdout A3 NMSE 0.0272066
+MR pilot blocks.0, step 2500: holdout A3 NMSE 0.0267322
+MR pilot blocks.1, step 2000: holdout A3 NMSE 0.0472736
+MR pilot blocks.1, step 2500: holdout A3 NMSE 0.0456132
+MR pilot blocks.2, step 2000: holdout A3 NMSE 0.0575262
+MR pilot blocks.2, step 2500: holdout A3 NMSE 0.0554890
+MR pilot blocks.3, step 2000: holdout A3 NMSE 0.0504339
+MR pilot blocks.3, step 2500: holdout A3 NMSE 0.0491432
+MR pilot blocks.4, step 2000: holdout A3 NMSE 0.0523971
+MR pilot blocks.4, step 2500: holdout A3 NMSE 0.0509365
+MR pilot blocks.5, step 2000: holdout A3 NMSE 0.0465085
+MR pilot blocks.5, step 2500: holdout A3 NMSE 0.0453779
+MR pilot blocks.6, step 2000: holdout A3 NMSE 0.0375338
+MR pilot blocks.6, step 2500: holdout A3 NMSE 0.0339336
+MR pilot blocks.7, step 2000: holdout A3 NMSE 0.0471392
+MR pilot blocks.7, step 2500: holdout A3 NMSE 0.0466855
+MR pilot blocks.8, step 2000: holdout A3 NMSE 0.0438145
+MR pilot blocks.8, step 2500: holdout A3 NMSE 0.0434572
+MR pilot blocks.9, step 2000: holdout A3 NMSE 0.0458384
+MR pilot blocks.9, step 2500: holdout A3 NMSE 0.0455403
+MR pilot blocks.10, step 2000: holdout A3 NMSE 0.1131030
+MR pilot blocks.10, step 2500: holdout A3 NMSE 0.1125986
+MR pilot blocks.11, step 2000: holdout A3 NMSE 0.0228794
+MR pilot blocks.11, step 2500: holdout A3 NMSE 0.0225164
+MR gain probe blocks.0: KL 7.1231480 -> 7.1266174, gain -0.0034695
+MR gain probe blocks.1: KL 7.2467980 -> 7.0841942, gain +0.1626039
+MR gain probe blocks.2: KL 7.1043806 -> 7.1394267, gain -0.0350461
+MR gain probe blocks.3: KL 7.0879512 -> 7.1071815, gain -0.0192304
+MR gain probe blocks.4: KL 7.2067385 -> 7.0990047, gain +0.1077337
+MR gain probe blocks.5: KL 7.0350895 -> 6.9752765, gain +0.0598130
+MR gain probe blocks.6: KL 7.2091136 -> 7.1948638, gain +0.0142498
+MR gain probe blocks.7: KL 7.1012850 -> 7.1538458, gain -0.0525608
+MR gain probe blocks.8: KL 7.1971064 -> 7.0608931, gain +0.1362133
+MR gain probe blocks.9: KL 7.1560440 -> 7.1033306, gain +0.0527134
+MR gain probe blocks.10: KL 7.1480780 -> 7.0483327, gain +0.0997453
+MR gain probe blocks.11: KL 7.1271887 -> 7.1422472, gain -0.0150585
+MR gain steps: [3000, 3500, 2500, 2500, 3500, 3000, 3000, 2500, 3500, 3000, 3500, 2500] (total=36000)
+MLP reconstruction: {"block": "blocks.0", "steps": 3000, "clip": 3.593111991882324, "gelu_a3_nmse": 0.19944656910257666, "relu_fp_nmse": 0.007429832785675719, "relu_a3_nmse": 0.02653005184929028, "early_a3_nmse": 0.027206570878526404, "pilot_a3_nmse": 0.026732239652085422, "early_teacher_kl": 7.123147964477539, "pilot_teacher_kl": 7.126617431640625, "teacher_kl_gain": -0.0034694671630859375}
+MLP reconstruction: {"block": "blocks.1", "steps": 3500, "clip": 1.6954137086868286, "gelu_a3_nmse": 0.0709508375483204, "relu_fp_nmse": 0.02537854360821053, "relu_a3_nmse": 0.044870822643957, "early_a3_nmse": 0.04727364955075097, "pilot_a3_nmse": 0.045613247281598594, "early_teacher_kl": 7.246798038482666, "pilot_teacher_kl": 7.084194183349609, "teacher_kl_gain": 0.16260385513305664}
+MLP reconstruction: {"block": "blocks.2", "steps": 2500, "clip": 1.541007161140442, "gelu_a3_nmse": 0.07295196267505485, "relu_fp_nmse": 0.03428577317261039, "relu_a3_nmse": 0.055488997836066714, "early_a3_nmse": 0.057526162669689594, "pilot_a3_nmse": 0.055488997836066714, "early_teacher_kl": 7.1043806076049805, "pilot_teacher_kl": 7.1394267082214355, "teacher_kl_gain": -0.03504610061645508}
+MLP reconstruction: {"block": "blocks.3", "steps": 2500, "clip": 1.4384229183197021, "gelu_a3_nmse": 0.12060851731697614, "relu_fp_nmse": 0.029256128425394278, "relu_a3_nmse": 0.0491431661423503, "early_a3_nmse": 0.05043385768759554, "pilot_a3_nmse": 0.0491431661423503, "early_teacher_kl": 7.087951183319092, "pilot_teacher_kl": 7.107181549072266, "teacher_kl_gain": -0.019230365753173828}
+MLP reconstruction: {"block": "blocks.4", "steps": 3500, "clip": 1.4841084480285645, "gelu_a3_nmse": 0.12337167549527168, "relu_fp_nmse": 0.029521085623939278, "relu_a3_nmse": 0.05025027557768864, "early_a3_nmse": 0.0523970665911198, "pilot_a3_nmse": 0.05093653160790182, "early_teacher_kl": 7.206738471984863, "pilot_teacher_kl": 7.099004745483398, "teacher_kl_gain": 0.10773372650146484}
+MLP reconstruction: {"block": "blocks.5", "steps": 3000, "clip": 1.5024813413619995, "gelu_a3_nmse": 0.24914387697162593, "relu_fp_nmse": 0.027861774225459917, "relu_a3_nmse": 0.04491958890371561, "early_a3_nmse": 0.04650854250429548, "pilot_a3_nmse": 0.04537785402595587, "early_teacher_kl": 7.035089492797852, "pilot_teacher_kl": 6.975276470184326, "teacher_kl_gain": 0.05981302261352539}
+MLP reconstruction: {"block": "blocks.6", "steps": 3000, "clip": 1.9033647775650024, "gelu_a3_nmse": 0.5533593774717688, "relu_fp_nmse": 0.025510450253196634, "relu_a3_nmse": 0.03264483556324856, "early_a3_nmse": 0.03753379635792282, "pilot_a3_nmse": 0.033933607338996634, "early_teacher_kl": 7.209113597869873, "pilot_teacher_kl": 7.194863796234131, "teacher_kl_gain": 0.014249801635742188}
+MLP reconstruction: {"block": "blocks.7", "steps": 2500, "clip": 2.3350985050201416, "gelu_a3_nmse": 0.12024259153556062, "relu_fp_nmse": 0.023771751084835247, "relu_a3_nmse": 0.04668545788992554, "early_a3_nmse": 0.047139195287079536, "pilot_a3_nmse": 0.04668545788992554, "early_teacher_kl": 7.101284980773926, "pilot_teacher_kl": 7.15384578704834, "teacher_kl_gain": -0.05256080627441406}
+MLP reconstruction: {"block": "blocks.8", "steps": 3500, "clip": 5.372856140136719, "gelu_a3_nmse": 0.08337764549592243, "relu_fp_nmse": 0.010634661531647324, "relu_a3_nmse": 0.04342868561781115, "early_a3_nmse": 0.04381450383881238, "pilot_a3_nmse": 0.04345721746712715, "early_teacher_kl": 7.19710636138916, "pilot_teacher_kl": 7.0608930587768555, "teacher_kl_gain": 0.1362133026123047}
+MLP reconstruction: {"block": "blocks.9", "steps": 3000, "clip": 7.795287132263184, "gelu_a3_nmse": 0.05179640746296138, "relu_fp_nmse": 0.004804760487141279, "relu_a3_nmse": 0.04548981337756476, "early_a3_nmse": 0.04583840547198649, "pilot_a3_nmse": 0.0455403010355633, "early_teacher_kl": 7.156044006347656, "pilot_teacher_kl": 7.103330612182617, "teacher_kl_gain": 0.05271339416503906}
+MLP reconstruction: {"block": "blocks.10", "steps": 3500, "clip": 23.75006103515625, "gelu_a3_nmse": 0.11458308577761733, "relu_fp_nmse": 0.0015937076329337245, "relu_a3_nmse": 0.11246794569977266, "early_a3_nmse": 0.11310300790866457, "pilot_a3_nmse": 0.11259858816538676, "early_teacher_kl": 7.148077964782715, "pilot_teacher_kl": 7.048332691192627, "teacher_kl_gain": 0.09974527359008789}
+MLP reconstruction: {"block": "blocks.11", "steps": 2500, "clip": 3.7181098461151123, "gelu_a3_nmse": 0.07114002816072064, "relu_fp_nmse": 0.008345069532214791, "relu_a3_nmse": 0.022516421013507926, "early_a3_nmse": 0.022879432440816812, "pilot_a3_nmse": 0.022516421013507926, "early_teacher_kl": 7.127188682556152, "pilot_teacher_kl": 7.142247200012207, "teacher_kl_gain": -0.015058517456054688}
+MR holdout FP top-1 agreement: 93.750%; mean A3 NMSE GELU 0.152581 / ReLU 0.0478697

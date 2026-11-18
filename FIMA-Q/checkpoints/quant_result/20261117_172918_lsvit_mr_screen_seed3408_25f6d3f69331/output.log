@@ -1,0 +1,75 @@
+2026-11-17 17:29:18 - start the process.
+Experiment directory: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261117_172918_lsvit_mr_screen_seed3408_25f6d3f69331
+Namespace(model='vit_small', config='./configs/3bit/best.py', dataset='../imagenet_fimaq', optim_size=1024, val_batch_size=64, num_workers=8, device='cuda', calibrate=True, load_calibrate_checkpoint=None, test_calibrate_checkpoint=False, optimize=False, load_optimize_checkpoint=None, test_optimize_checkpoint=False, print_freq=10, seed=3408, skip_final_validation=True, headwise_hadamard=True, headwise_mode='all', qk_joint_variant='none', qk_joint_protocol='v2_integer_zp', qk_joint_steps=300, qk_joint_batch_size=8, qk_joint_holdout=128, qk_joint_lr=0.003, qk_joint_eval_every=50, qk_joint_rotation_rank=0, qk_joint_min_relative_kl=0.0, qk_joint_reconstruction_loss='auto', attention_relation='none', relation_protocol='relation_v1', relation_weight=0.1, relation_queries=16, relation_start=0.2, relation_full=0.6, probe_kd='none', probe_kd_protocol='semantic_probe_v1', probe_kd_weight=0.05, probe_kd_temperature=2.0, probe_kd_ridge=0.1, probe_kd_holdout=128, probe_kd_code_sha='unrecorded', endpoint_task='none', endpoint_code_sha='unrecorded', endpoint_mode='none', endpoint_steps=2000, endpoint_lr=0.001, endpoint_bound=1.2, endpoint_holdout=128, endpoint_batch_size=8, endpoint_eval_every=200, qwt=False, qwt_samples=512, qwt_batch_size=8, qwt_ridge=0.0, qwt_branch_dtype='fp16', qwt_solver_threads=4, activation_codebook='none', method_adaptation='none', lsvit_control='c', ls_pair_dir=None, ls_mr='screen', ls_mr_dir='/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/mr/seed3408_gain-uniform_6e294cef35d9', ls_mr_steps=3000, ls_mr_budget='gain-uniform', fp_checkpoint=None, expected_fp_model_sha256='a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c', adaptation_steps=500, optim_mode='qdrop', drop_prob=0.5, p1=1.0, p2=1.0, dis_mode='q', calib_size=128, calib_batch_size=32, optim_batch_size=32, recon_iters=20000, k=1)
+Successfully imported Config class!
+optim_size: 1024
+calib_size: 128
+optim_batch_size: 32
+calib_batch_size: 32
+w_bit: 3
+a_bit: 3
+qconv_a_bit: 8
+qhead_a_bit: 3
+calib_metric: mse
+matmul_head_channel_wise: True
+token_channel_wise: True
+eq_n: 128
+search_round: 3
+keep_gpu: True
+optim_metric: fisher_dplr
+temp: 20
+k: 1
+p1: 1.0
+p2: 1.0
+dis_mode: q
+optim_mode: qdrop
+drop_prob: 0.5
+robust_beta: 0.5
+robust_temperature: 0.5
+recon_iters: 20000
+Python random seeded: 3408
+Building model ...
+No checkpoint found at './checkpoints/vit_raw/vit_small_patch16_224.bin'
+Loading pretrained weights from Hugging Face hub (timm/vit_small_patch16_224.augreg_in21k_ft_in1k)
+[timm/vit_small_patch16_224.augreg_in21k_ft_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+Endpoint FP model SHA256: a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c
+Applied head-wise Hadamard rotation: {'mode': 'all', 'blocks': 12, 'heads': 72, 'head_dims': [64], 'max_logit_abs_error': 2.9206275939941406e-06}
+Calibration cache: count=1024 sample_sha256=e4e3f878bb1a4544baa55cd13440283a5518294f7dc88d18a31200d5de0c9a04 tensor_sha256=a549d62a2762d7f187ba50e270d7e1750936699a5d43a1ce2162a60afaf6a6bb
+MR pilot blocks.0, step 2000: holdout A3 NMSE 0.0253090
+MR pilot blocks.0, step 2500: holdout A3 NMSE 0.0247450
+MR pilot blocks.1, step 2000: holdout A3 NMSE 0.0462002
+MR pilot blocks.1, step 2500: holdout A3 NMSE 0.0445447
+MR pilot blocks.2, step 2000: holdout A3 NMSE 0.0572766
+MR pilot blocks.2, step 2500: holdout A3 NMSE 0.0551960
+MR pilot blocks.3, step 2000: holdout A3 NMSE 0.0506164
+MR pilot blocks.3, step 2500: holdout A3 NMSE 0.0493632
+MR pilot blocks.4, step 2000: holdout A3 NMSE 0.0513278
+MR pilot blocks.4, step 2500: holdout A3 NMSE 0.0499736
+MR pilot blocks.5, step 2000: holdout A3 NMSE 0.0459565
+MR pilot blocks.5, step 2500: holdout A3 NMSE 0.0447364
+MR pilot blocks.6, step 2000: holdout A3 NMSE 0.0434253
+MR pilot blocks.6, step 2500: holdout A3 NMSE 0.0388296
+MR pilot blocks.7, step 2000: holdout A3 NMSE 0.0465879
+MR pilot blocks.7, step 2500: holdout A3 NMSE 0.0461249
+MR pilot blocks.8, step 2000: holdout A3 NMSE 0.0447616
+MR pilot blocks.8, step 2500: holdout A3 NMSE 0.0442593
+MR pilot blocks.9, step 2000: holdout A3 NMSE 0.0412193
+MR pilot blocks.9, step 2500: holdout A3 NMSE 0.0410370
+MR pilot blocks.10, step 2000: holdout A3 NMSE 0.0429244
+MR pilot blocks.10, step 2500: holdout A3 NMSE 0.0430622
+MR pilot blocks.11, step 2000: holdout A3 NMSE 0.0223627
+MR pilot blocks.11, step 2500: holdout A3 NMSE 0.0221189
+MR gain-uniform steps: [3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000] (total=36000)
+MLP reconstruction: {"block": "blocks.0", "steps": 3000, "clip": 3.2561261653900146, "gelu_a3_nmse": 0.2004309629316014, "relu_fp_nmse": 0.008083136981278383, "relu_a3_nmse": 0.024529309437098735, "early_a3_nmse": 0.025308968970553358, "pilot_a3_nmse": 0.024744981326739947}
+MLP reconstruction: {"block": "blocks.1", "steps": 3000, "clip": 1.6100194454193115, "gelu_a3_nmse": 0.06794190787604239, "relu_fp_nmse": 0.025760825663829454, "relu_a3_nmse": 0.04390248022044842, "early_a3_nmse": 0.046200223287505705, "pilot_a3_nmse": 0.044544696979039886}
+MLP reconstruction: {"block": "blocks.2", "steps": 3000, "clip": 1.5319490432739258, "gelu_a3_nmse": 0.07257010892296091, "relu_fp_nmse": 0.03364792176093938, "relu_a3_nmse": 0.054420133217473354, "early_a3_nmse": 0.057276593671401164, "pilot_a3_nmse": 0.055195956636141075}
+MLP reconstruction: {"block": "blocks.3", "steps": 3000, "clip": 1.4025251865386963, "gelu_a3_nmse": 0.11869685412927776, "relu_fp_nmse": 0.029255672439869852, "relu_a3_nmse": 0.04885994149540974, "early_a3_nmse": 0.050616365694654206, "pilot_a3_nmse": 0.049363236577653805}
+MLP reconstruction: {"block": "blocks.4", "steps": 3000, "clip": 1.439808964729309, "gelu_a3_nmse": 0.12578142416679833, "relu_fp_nmse": 0.029807454640754887, "relu_a3_nmse": 0.04938463504616736, "early_a3_nmse": 0.0513277694047743, "pilot_a3_nmse": 0.04997355786123239}
+MLP reconstruction: {"block": "blocks.5", "steps": 3000, "clip": 1.5306135416030884, "gelu_a3_nmse": 0.2498023175212717, "relu_fp_nmse": 0.028097556594193707, "relu_a3_nmse": 0.044353913335417015, "early_a3_nmse": 0.045956522569723, "pilot_a3_nmse": 0.04473638321078841}
+MLP reconstruction: {"block": "blocks.6", "steps": 3000, "clip": 1.8345080614089966, "gelu_a3_nmse": 0.553662434580211, "relu_fp_nmse": 0.02386837682129023, "relu_a3_nmse": 0.03728436690335549, "early_a3_nmse": 0.04342530034184953, "pilot_a3_nmse": 0.03882957575534045}
+MLP reconstruction: {"block": "blocks.7", "steps": 3000, "clip": 2.2928714752197266, "gelu_a3_nmse": 0.11993889735986757, "relu_fp_nmse": 0.023376673549539893, "relu_a3_nmse": 0.04596956487684002, "early_a3_nmse": 0.04658790369186844, "pilot_a3_nmse": 0.04612490898111688}
+MLP reconstruction: {"block": "blocks.8", "steps": 3000, "clip": 5.136725425720215, "gelu_a3_nmse": 0.08438268815234222, "relu_fp_nmse": 0.010840066956014263, "relu_a3_nmse": 0.04414451401188844, "early_a3_nmse": 0.04476157569978255, "pilot_a3_nmse": 0.044259263424902}
+MLP reconstruction: {"block": "blocks.9", "steps": 3000, "clip": 7.541823863983154, "gelu_a3_nmse": 0.046826252099435514, "relu_fp_nmse": 0.005002385248806087, "relu_a3_nmse": 0.04088458928100294, "early_a3_nmse": 0.041219270105583454, "pilot_a3_nmse": 0.041036960637564755}
+MLP reconstruction: {"block": "blocks.10", "steps": 3000, "clip": 22.996679306030273, "gelu_a3_nmse": 0.04883046752464166, "relu_fp_nmse": 0.0016125481103622412, "relu_a3_nmse": 0.043034167819963276, "early_a3_nmse": 0.04292443509646431, "pilot_a3_nmse": 0.04306219374968912}
+MLP reconstruction: {"block": "blocks.11", "steps": 3000, "clip": 3.5825724601745605, "gelu_a3_nmse": 0.07161236638579524, "relu_fp_nmse": 0.008326299009461727, "relu_a3_nmse": 0.022003291051951854, "early_a3_nmse": 0.022362651785245515, "pilot_a3_nmse": 0.022118902356960735}
+MR holdout FP top-1 agreement: 91.406%; mean A3 NMSE GELU 0.146706 / ReLU 0.0415642

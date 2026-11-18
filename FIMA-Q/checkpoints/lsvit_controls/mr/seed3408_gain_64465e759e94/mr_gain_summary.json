@@ -1,0 +1,92 @@
+{
+  "rows": [
+    {
+      "budget": "gain-uniform",
+      "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261117_211826_lsvit_mr_relu_seed3408_a7ede11cac2a/method_result.json",
+      "screen": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/mr/seed3408_gain-uniform_6e294cef35d9/mr_screen.json",
+      "metrics": {
+        "top1": 67.342,
+        "top5": 89.116,
+        "loss": 1.2934386007738112
+      },
+      "total_mr_steps": 36000,
+      "mr_seconds": 12961.405883744359,
+      "steps_by_block": {
+        "blocks.0": 3000,
+        "blocks.1": 3000,
+        "blocks.2": 3000,
+        "blocks.3": 3000,
+        "blocks.4": 3000,
+        "blocks.5": 3000,
+        "blocks.6": 3000,
+        "blocks.7": 3000,
+        "blocks.8": 3000,
+        "blocks.9": 3000,
+        "blocks.10": 3000,
+        "blocks.11": 3000
+      },
+      "code_sha256": "af494a61ff7cb0edf3ff38721af5aa853ac414174f98662b71499e80299e76d6",
+      "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+      "calibration_hashes": [
+        [
+          "128",
+          "15db8a3d8c5cd54ee531b7dc5f16d625984989f59cb52f9f64449c018db560da",
+          "717544d885dc5a60613fcf804ce93b1ffbc1baa16f72e0a22160e3125528bc38"
+        ],
+        [
+          "1024",
+          "e4e3f878bb1a4544baa55cd13440283a5518294f7dc88d18a31200d5de0c9a04",
+          "a549d62a2762d7f187ba50e270d7e1750936699a5d43a1ce2162a60afaf6a6bb"
+        ]
+      ],
+      "pilot_sha256": "fc168e1e1e6ead2602340415a5a671af0f04995974f2267fbadbec9a2c8af34d",
+      "mean_relu_a3_nmse": 0.041564242224751385,
+      "probe_images": 0
+    },
+    {
+      "budget": "gain",
+      "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261117_221341_lsvit_mr_relu_seed3408_000a32f31767/method_result.json",
+      "screen": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/mr/seed3408_gain_64465e759e94/mr_screen.json",
+      "metrics": {
+        "top1": 67.332,
+        "top5": 89.14,
+        "loss": 1.2900859888768197
+      },
+      "total_mr_steps": 36000,
+      "mr_seconds": 16732.202917143703,
+      "steps_by_block": {
+        "blocks.0": 3500,
+        "blocks.1": 3000,
+        "blocks.2": 2500,
+        "blocks.3": 2500,
+        "blocks.4": 3000,
+        "blocks.5": 3500,
+        "blocks.6": 3000,
+        "blocks.7": 2500,
+        "blocks.8": 2500,
+        "blocks.9": 3500,
+        "blocks.10": 3500,
+        "blocks.11": 3000
+      },
+      "code_sha256": "af494a61ff7cb0edf3ff38721af5aa853ac414174f98662b71499e80299e76d6",
+      "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+      "calibration_hashes": [
+        [
+          "128",
+          "15db8a3d8c5cd54ee531b7dc5f16d625984989f59cb52f9f64449c018db560da",
+          "717544d885dc5a60613fcf804ce93b1ffbc1baa16f72e0a22160e3125528bc38"
+        ],
+        [
+          "1024",
+          "e4e3f878bb1a4544baa55cd13440283a5518294f7dc88d18a31200d5de0c9a04",
+          "a549d62a2762d7f187ba50e270d7e1750936699a5d43a1ce2162a60afaf6a6bb"
+        ]
+      ],
+      "pilot_sha256": "fc168e1e1e6ead2602340415a5a671af0f04995974f2267fbadbec9a2c8af34d",
+      "mean_relu_a3_nmse": 0.041671309080042455,
+      "probe_images": 32
+    }
+  ],
+  "matched": true,
+  "top1_delta_pp": -0.010000000000005116
+}
