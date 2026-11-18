@@ -1,0 +1,333 @@
+{
+  "seed": 3407,
+  "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+  "data_hashes": [
+    [
+      "1024",
+      "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+      "d16465b385c037c1b17be73a4d62ff5f2a0a25edc552478fe414f4b373ffa83e"
+    ]
+  ],
+  "steps": 3000,
+  "budget": "residual",
+  "total_mr_steps": 36000,
+  "train_images": 896,
+  "holdout_images": 128,
+  "blocks": [
+    {
+      "block": "blocks.0",
+      "steps": 2000,
+      "pilot_steps": 1000,
+      "pilot_a3_nmse": 0.03053907267572749,
+      "clip": 3.593111991882324,
+      "relu_fp_nmse": 0.008231057955328733,
+      "gelu_a3_nmse": 0.19944656910257666,
+      "relu_a3_nmse": 0.028202311706435217,
+      "interaction_diagnostics": {
+        "fp_nmse": 0.008231058030874629,
+        "fc1_w3a3_nmse": 0.4403936906703682,
+        "fc2_w3a3_nmse": 0.170640073216075,
+        "joint_w3a3_nmse": 0.5788283233749304,
+        "positive_interaction_nmse": 0.010323867697127743,
+        "harmful_token_fraction": 0.3115482233502538,
+        "mean_interaction_weight": 1.0085990174772776
+      },
+      "shared_start_sha256": "9fff70660ef33610d9311fd41913c808970bd3db293aa9eb05d255b63fa2069c"
+    },
+    {
+      "block": "blocks.1",
+      "steps": 3000,
+      "pilot_steps": 1000,
+      "pilot_a3_nmse": 0.05845779694388018,
+      "clip": 1.6954137086868286,
+      "relu_fp_nmse": 0.0274674773072478,
+      "gelu_a3_nmse": 0.0709508375483204,
+      "relu_a3_nmse": 0.047379772198995036,
+      "interaction_diagnostics": {
+        "fp_nmse": 0.02746747705817446,
+        "fc1_w3a3_nmse": 0.5196183734402772,
+        "fc2_w3a3_nmse": 0.12194631455058129,
+        "joint_w3a3_nmse": 0.5860324131398565,
+        "positive_interaction_nmse": 0.0029839620337545423,
+        "harmful_token_fraction": 0.1598984771573604,
+        "mean_interaction_weight": 1.0021627978019907
+      },
+      "shared_start_sha256": "04acf1efe0f523b915ce7f229f03dc2ff0a71bcdf547997acfec0d8457a5156f"
+    },
+    {
+      "block": "blocks.2",
+      "steps": 4000,
+      "pilot_steps": 1000,
+      "pilot_a3_nmse": 0.07110114105938785,
+      "clip": 1.541007161140442,
+      "relu_fp_nmse": 0.030894089377960027,
+      "gelu_a3_nmse": 0.07295196267505485,
+      "relu_a3_nmse": 0.051635063121514634,
+      "interaction_diagnostics": {
+        "fp_nmse": 0.030894088927331618,
+        "fc1_w3a3_nmse": 0.5860547292658644,
+        "fc2_w3a3_nmse": 0.14210886229993563,
+        "joint_w3a3_nmse": 0.6765440999142757,
+        "positive_interaction_nmse": 0.007234148445823669,
+        "harmful_token_fraction": 0.27272366751269034,
+        "mean_interaction_weight": 1.00456965151172
+      },
+      "shared_start_sha256": "001d754ebf5bad90eab144182e81a22424b011b3451e1c5be1d7ef643e38708f"
+    },
+    {
+      "block": "blocks.3",
+      "steps": 3000,
+      "pilot_steps": 1000,
+      "pilot_a3_nmse": 0.058778544135363126,
+      "clip": 1.4384229183197021,
+      "relu_fp_nmse": 0.030396316479556568,
+      "gelu_a3_nmse": 0.12060851731697614,
+      "relu_a3_nmse": 0.050563574137446554,
+      "interaction_diagnostics": {
+        "fp_nmse": 0.030396316341014477,
+        "fc1_w3a3_nmse": 0.661921801543046,
+        "fc2_w3a3_nmse": 0.16874262638420728,
+        "joint_w3a3_nmse": 0.775038225177254,
+        "positive_interaction_nmse": 0.008565255754501866,
+        "harmful_token_fraction": 0.24801713197969544,
+        "mean_interaction_weight": 1.004299120249482
+      },
+      "shared_start_sha256": "3cd5ebf67b9277421d93af05e77573f1536e99e0a0145f61d73a8508499b4f3c"
+    },
+    {
+      "block": "blocks.4",
+      "steps": 4000,
+      "pilot_steps": 1000,
+      "pilot_a3_nmse": 0.06139590846289808,
+      "clip": 1.4841084480285645,
+      "relu_fp_nmse": 0.027707005018754068,
+      "gelu_a3_nmse": 0.12337167549527168,
+      "relu_a3_nmse": 0.04814426938839682,
+      "interaction_diagnostics": {
+        "fp_nmse": 0.027707004403492625,
+        "fc1_w3a3_nmse": 0.6060350451901332,
+        "fc2_w3a3_nmse": 0.1719460456065282,
+        "joint_w3a3_nmse": 0.7214602183784118,
+        "positive_interaction_nmse": 0.0061853443567449545,
+        "harmful_token_fraction": 0.22263642131979697,
+        "mean_interaction_weight": 1.0036018366741044
+      },
+      "shared_start_sha256": "6b41cb50c12329c2652fc61663f5d5921b90ffab63a860fe03dd84c583458d99"
+    },
+    {
+      "block": "blocks.5",
+      "steps": 3000,
+      "pilot_steps": 1000,
+      "pilot_a3_nmse": 0.05431382727696553,
+      "clip": 1.5024813413619995,
+      "relu_fp_nmse": 0.03006509978942263,
+      "gelu_a3_nmse": 0.24914387697162593,
+      "relu_a3_nmse": 0.04659692347434503,
+      "interaction_diagnostics": {
+        "fp_nmse": 0.030065100101548836,
+        "fc1_w3a3_nmse": 0.5652067936632497,
+        "fc2_w3a3_nmse": 0.27909472868425894,
+        "joint_w3a3_nmse": 0.811883096842024,
+        "positive_interaction_nmse": 0.033824626759402336,
+        "harmful_token_fraction": 0.3612785532994924,
+        "mean_interaction_weight": 1.0113962434875179
+      },
+      "shared_start_sha256": "720e377f44adbf0d5e124299090679fcf94baab1db7cb9b225173359df23a24e"
+    },
+    {
+      "block": "blocks.6",
+      "steps": 4000,
+      "pilot_steps": 1000,
+      "pilot_a3_nmse": 0.06187933862683716,
+      "clip": 1.9033647775650024,
+      "relu_fp_nmse": 0.022325815841002353,
+      "gelu_a3_nmse": 0.5533593774717688,
+      "relu_a3_nmse": 0.026455401752631006,
+      "interaction_diagnostics": {
+        "fp_nmse": 0.022325816210761403,
+        "fc1_w3a3_nmse": 0.41772930824491783,
+        "fc2_w3a3_nmse": 0.283155682691244,
+        "joint_w3a3_nmse": 0.7549123837821968,
+        "positive_interaction_nmse": 0.1164485279102938,
+        "harmful_token_fraction": 0.06361040609137056,
+        "mean_interaction_weight": 1.0044142727924483
+      },
+      "shared_start_sha256": "215651cfa48bb2642c38a4239d49c5ae683e0b217cf5474e13745a999aadf5a3"
+    },
+    {
+      "block": "blocks.7",
+      "steps": 3000,
+      "pilot_steps": 1000,
+      "pilot_a3_nmse": 0.05020585531711958,
+      "clip": 2.3350985050201416,
+      "relu_fp_nmse": 0.024176020580264922,
+      "gelu_a3_nmse": 0.12024259153556062,
+      "relu_a3_nmse": 0.0471481091675539,
+      "interaction_diagnostics": {
+        "fp_nmse": 0.024176020447561567,
+        "fc1_w3a3_nmse": 0.38533145647378414,
+        "fc2_w3a3_nmse": 0.1890777306836757,
+        "joint_w3a3_nmse": 0.5700087065700904,
+        "positive_interaction_nmse": 0.03279799952104436,
+        "harmful_token_fraction": 0.6174651015228426,
+        "mean_interaction_weight": 1.025722665835153
+      },
+      "shared_start_sha256": "6e05fc8fd87ee470c602f3ab3e4bf662a7b4bd2bb1d7eedf0d64a49368f2eea1"
+    },
+    {
+      "block": "blocks.8",
+      "steps": 2000,
+      "pilot_steps": 1000,
+      "pilot_a3_nmse": 0.04583719811482867,
+      "clip": 5.372856140136719,
+      "relu_fp_nmse": 0.01106469416196543,
+      "gelu_a3_nmse": 0.08337764549592243,
+      "relu_a3_nmse": 0.04466486230615734,
+      "interaction_diagnostics": {
+        "fp_nmse": 0.01106469430610625,
+        "fc1_w3a3_nmse": 0.6294381259249064,
+        "fc2_w3a3_nmse": 0.15872832861482714,
+        "joint_w3a3_nmse": 0.7547334608888289,
+        "positive_interaction_nmse": 0.0274288434209858,
+        "harmful_token_fraction": 0.4825507614213198,
+        "mean_interaction_weight": 1.0189720700840055
+      },
+      "shared_start_sha256": "abcac651d1d72f2b7c32a970e08c1cb6bfbfaab7c707c69e2094685082bec18f"
+    },
+    {
+      "block": "blocks.9",
+      "steps": 2000,
+      "pilot_steps": 1000,
+      "pilot_a3_nmse": 0.047527724098333314,
+      "clip": 7.795287132263184,
+      "relu_fp_nmse": 0.0047544894939629415,
+      "gelu_a3_nmse": 0.05179640746296138,
+      "relu_a3_nmse": 0.04623750400057573,
+      "interaction_diagnostics": {
+        "fp_nmse": 0.004754489397460242,
+        "fc1_w3a3_nmse": 0.8088397693733163,
+        "fc2_w3a3_nmse": 0.13978016051667366,
+        "joint_w3a3_nmse": 0.9827921512995147,
+        "positive_interaction_nmse": 0.06844270914471587,
+        "harmful_token_fraction": 0.7202569796954315,
+        "mean_interaction_weight": 1.0353417953258843
+      },
+      "shared_start_sha256": "3d38618040321f4e60cd0bd107d4c34cfdc17c80cf9d1daf74dd6d0a9254fc3c"
+    },
+    {
+      "block": "blocks.10",
+      "steps": 4000,
+      "pilot_steps": 1000,
+      "pilot_a3_nmse": 0.11365502554224946,
+      "clip": 23.75006103515625,
+      "relu_fp_nmse": 0.0017674499040495441,
+      "gelu_a3_nmse": 0.11458308577761733,
+      "relu_a3_nmse": 0.11220426394359811,
+      "interaction_diagnostics": {
+        "fp_nmse": 0.0017674498835118597,
+        "fc1_w3a3_nmse": 1.0517993494794236,
+        "fc2_w3a3_nmse": 0.1212889225058841,
+        "joint_w3a3_nmse": 0.9490780961280945,
+        "positive_interaction_nmse": 0.07060857007841069,
+        "harmful_token_fraction": 0.6210342639593909,
+        "mean_interaction_weight": 1.0420286740143287
+      },
+      "shared_start_sha256": "2352424a822db484299bb54c97d5cc0d245160fea9a6bc9934f1e08cd4376885"
+    },
+    {
+      "block": "blocks.11",
+      "steps": 2000,
+      "pilot_steps": 1000,
+      "pilot_a3_nmse": 0.025009531890868596,
+      "clip": 3.7181098461151123,
+      "relu_fp_nmse": 0.009092489040408455,
+      "gelu_a3_nmse": 0.07114002816072064,
+      "relu_a3_nmse": 0.023586575198361694,
+      "interaction_diagnostics": {
+        "fp_nmse": 0.009092489036698168,
+        "fc1_w3a3_nmse": 0.2852050606017528,
+        "fc2_w3a3_nmse": 0.07757433640024466,
+        "joint_w3a3_nmse": 0.35261139308288414,
+        "positive_interaction_nmse": 0.00925698544064427,
+        "harmful_token_fraction": 0.4829076776649746,
+        "mean_interaction_weight": 1.0125865694229979
+      },
+      "shared_start_sha256": "9aeb80ed4c08be512de849b28e16f0fe81ccf046ec8559c335a63ec991a7d0e6"
+    }
+  ],
+  "fp_top1_agreement": 0.9375,
+  "fp_teacher_kl": 0.07278474420309067,
+  "mean_gelu_a3_nmse": 0.15258104791786475,
+  "mean_relu_a3_nmse": 0.04773488586633426,
+  "checkpoint_sha256": "b4f846dfd1994f772e9c3fdbcf0854b7d0d5769f031946513fad4437916ab110",
+  "elapsed_seconds": 548.335127428174,
+  "status": "complete",
+  "interaction_recipe": {
+    "protocol": "mr_interaction_v1",
+    "variant": "baseline",
+    "source_sha256": "04121862007c6143b2817ef54af397dbbaee7f56516e1f829c4a4bb6d2c4b1d1",
+    "base": {
+      "protocol": "ls_controls_v1",
+      "control": "fixed",
+      "command": [
+        "-u",
+        "test_quant.py",
+        "--model",
+        "vit_small",
+        "--config",
+        "./configs/3bit/best.py",
+        "--dataset",
+        "/root/autodl-tmp/FIMA-Q-Reproduction/imagenet_fimaq",
+        "--device",
+        "cuda",
+        "--calibrate",
+        "--optimize",
+        "--val-batch-size",
+        "64",
+        "--num-workers",
+        "8",
+        "--seed",
+        "3407",
+        "--optim-mode",
+        "qdrop",
+        "--drop-prob",
+        "0.5",
+        "--p1",
+        "1",
+        "--p2",
+        "1",
+        "--dis-mode",
+        "q",
+        "--calib-size",
+        "128",
+        "--calib-batch-size",
+        "32",
+        "--optim-size",
+        "1024",
+        "--optim-batch-size",
+        "32",
+        "--recon-iters",
+        "20000",
+        "--k",
+        "1",
+        "--headwise-hadamard",
+        "--expected-fp-model-sha256",
+        "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+        "--method-adaptation",
+        "lsvit",
+        "--lsvit-control",
+        "fixed"
+      ],
+      "code_sha256": "af494a61ff7cb0edf3ff38721af5aa853ac414174f98662b71499e80299e76d6",
+      "local_model_file_sha256": null,
+      "expected_fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+      "dependency_versions": {
+        "torch": "2.2.2+cu121",
+        "torchvision": "0.17.2+cu121",
+        "timm": "0.9.2",
+        "numpy": "1.26.4"
+      }
+    }
+  },
+  "weights_tensor_sha256": "6b1cdda5810e3f5164c0441697749c572cef0da76ba397a700da602de7f6a517"
+}

@@ -1,0 +1,134 @@
+2026-11-18 16:58:28 - start the process.
+Experiment directory: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261118_165828_mr_interaction_screen_interaction_6ce9ed5bfc77
+Namespace(model='vit_small', config='./configs/3bit/best.py', dataset='../imagenet_fimaq', optim_size=1024, val_batch_size=64, num_workers=8, device='cuda', calibrate=True, load_calibrate_checkpoint=None, test_calibrate_checkpoint=False, optimize=False, load_optimize_checkpoint=None, test_optimize_checkpoint=False, print_freq=10, seed=3407, skip_final_validation=True, headwise_hadamard=True, headwise_mode='all', qk_joint_variant='none', qk_joint_protocol='v2_integer_zp', qk_joint_steps=300, qk_joint_batch_size=8, qk_joint_holdout=128, qk_joint_lr=0.003, qk_joint_eval_every=50, qk_joint_rotation_rank=0, qk_joint_min_relative_kl=0.0, qk_joint_reconstruction_loss='auto', attention_relation='none', relation_protocol='relation_v1', relation_weight=0.1, relation_queries=16, relation_start=0.2, relation_full=0.6, probe_kd='none', probe_kd_protocol='semantic_probe_v1', probe_kd_weight=0.05, probe_kd_temperature=2.0, probe_kd_ridge=0.1, probe_kd_holdout=128, probe_kd_code_sha='unrecorded', endpoint_task='none', endpoint_code_sha='unrecorded', endpoint_mode='none', endpoint_steps=2000, endpoint_lr=0.001, endpoint_bound=1.2, endpoint_holdout=128, endpoint_batch_size=8, endpoint_eval_every=200, qwt=False, qwt_samples=512, qwt_batch_size=8, qwt_ridge=0.0, qwt_branch_dtype='fp16', qwt_solver_threads=4, activation_codebook='none', method_adaptation='none', lsvit_control='c', ls_pair_dir=None, ls_mr='screen', ls_mr_dir='/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/mr_interaction/seed3407_interaction_6ce9ed5bfc77', ls_mr_steps=3000, ls_mr_budget='residual', fp_checkpoint=None, expected_fp_model_sha256='a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c', adaptation_steps=500, optim_mode='qdrop', drop_prob=0.5, p1=1.0, p2=1.0, dis_mode='q', calib_size=128, calib_batch_size=32, optim_batch_size=32, recon_iters=20000, k=1)
+Successfully imported Config class!
+optim_size: 1024
+calib_size: 128
+optim_batch_size: 32
+calib_batch_size: 32
+w_bit: 3
+a_bit: 3
+qconv_a_bit: 8
+qhead_a_bit: 3
+calib_metric: mse
+matmul_head_channel_wise: True
+token_channel_wise: True
+eq_n: 128
+search_round: 3
+keep_gpu: True
+optim_metric: fisher_dplr
+temp: 20
+k: 1
+p1: 1.0
+p2: 1.0
+dis_mode: q
+optim_mode: qdrop
+drop_prob: 0.5
+robust_beta: 0.5
+robust_temperature: 0.5
+recon_iters: 20000
+Python random seeded: 3407
+Building model ...
+No checkpoint found at './checkpoints/vit_raw/vit_small_patch16_224.bin'
+Loading pretrained weights from Hugging Face hub (timm/vit_small_patch16_224.augreg_in21k_ft_in1k)
+[timm/vit_small_patch16_224.augreg_in21k_ft_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+Endpoint FP model SHA256: a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c
+Applied head-wise Hadamard rotation: {'mode': 'all', 'blocks': 12, 'heads': 72, 'head_dims': [64], 'max_logit_abs_error': 2.9206275939941406e-06}
+Calibration cache: count=1024 sample_sha256=51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b tensor_sha256=d16465b385c037c1b17be73a4d62ff5f2a0a25edc552478fe414f4b373ffa83e
+MR pilot blocks.0: 1000 steps, holdout A3 NMSE 0.0305391
+MR pilot blocks.1: 1000 steps, holdout A3 NMSE 0.0584578
+MR pilot blocks.2: 1000 steps, holdout A3 NMSE 0.0711011
+MR pilot blocks.3: 1000 steps, holdout A3 NMSE 0.0587785
+MR pilot blocks.4: 1000 steps, holdout A3 NMSE 0.0613959
+MR pilot blocks.5: 1000 steps, holdout A3 NMSE 0.0543138
+MR pilot blocks.6: 1000 steps, holdout A3 NMSE 0.0618793
+MR pilot blocks.7: 1000 steps, holdout A3 NMSE 0.0502059
+MR pilot blocks.8: 1000 steps, holdout A3 NMSE 0.0458372
+MR pilot blocks.9: 1000 steps, holdout A3 NMSE 0.0475277
+MR pilot blocks.10: 1000 steps, holdout A3 NMSE 0.113655
+MR pilot blocks.11: 1000 steps, holdout A3 NMSE 0.0250095
+Interaction MR interaction: 500 quant-aware updates
+Interaction MR interaction 250/500 base=0.0272104 joint=0.455678 harmful=0.317 mean_w=1.0078
+Interaction MR interaction 500/500 base=0.0212449 joint=0.479262 harmful=0.431 mean_w=1.0125
+MLP reconstruction: {"block": "blocks.0", "steps": 2000, "pilot_steps": 1000, "pilot_a3_nmse": 0.03053907267572749, "clip": 3.593111991882324, "relu_fp_nmse": 0.00853372831772815, "gelu_a3_nmse": 0.19944656910257666, "relu_a3_nmse": 0.028276685389753413}
+Interaction MR interaction: 1000 quant-aware updates
+Interaction MR interaction 250/1000 base=0.0265535 joint=0.171494 harmful=0.137 mean_w=1.0019
+Interaction MR interaction 500/1000 base=0.0276486 joint=0.181677 harmful=0.160 mean_w=1.0023
+Interaction MR interaction 750/1000 base=0.0263796 joint=0.165854 harmful=0.119 mean_w=1.0017
+Interaction MR interaction 1000/1000 base=0.0267148 joint=0.161956 harmful=0.147 mean_w=1.0019
+MLP reconstruction: {"block": "blocks.1", "steps": 3000, "pilot_steps": 1000, "pilot_a3_nmse": 0.05845779694388018, "clip": 1.6954137086868286, "relu_fp_nmse": 0.027751068377006884, "gelu_a3_nmse": 0.0709508375483204, "relu_a3_nmse": 0.04745171734054992}
+Interaction MR interaction: 1500 quant-aware updates
+Interaction MR interaction 250/1500 base=0.0224611 joint=0.139082 harmful=0.265 mean_w=1.0042
+Interaction MR interaction 500/1500 base=0.0222232 joint=0.141806 harmful=0.260 mean_w=1.0043
+Interaction MR interaction 750/1500 base=0.0242924 joint=0.14265 harmful=0.258 mean_w=1.0041
+Interaction MR interaction 1000/1500 base=0.0215906 joint=0.132582 harmful=0.230 mean_w=1.0040
+Interaction MR interaction 1250/1500 base=0.0208683 joint=0.137702 harmful=0.226 mean_w=1.0036
+Interaction MR interaction 1500/1500 base=0.0238292 joint=0.136695 harmful=0.250 mean_w=1.0035
+MLP reconstruction: {"block": "blocks.2", "steps": 4000, "pilot_steps": 1000, "pilot_a3_nmse": 0.07110114105938785, "clip": 1.541007161140442, "relu_fp_nmse": 0.031219862938011933, "gelu_a3_nmse": 0.07295196267505485, "relu_a3_nmse": 0.0516065131456395}
+Interaction MR interaction: 1000 quant-aware updates
+Interaction MR interaction 250/1000 base=0.0208478 joint=0.158038 harmful=0.237 mean_w=1.0041
+Interaction MR interaction 500/1000 base=0.0204758 joint=0.137906 harmful=0.253 mean_w=1.0038
+Interaction MR interaction 750/1000 base=0.0203417 joint=0.139906 harmful=0.269 mean_w=1.0048
+Interaction MR interaction 1000/1000 base=0.0179463 joint=0.133628 harmful=0.218 mean_w=1.0036
+MLP reconstruction: {"block": "blocks.3", "steps": 3000, "pilot_steps": 1000, "pilot_a3_nmse": 0.058778544135363126, "clip": 1.4384229183197021, "relu_fp_nmse": 0.031076985763202246, "gelu_a3_nmse": 0.12060851731697614, "relu_a3_nmse": 0.050507230473558956}
+Interaction MR interaction: 1500 quant-aware updates
+Interaction MR interaction 250/1500 base=0.020819 joint=0.155376 harmful=0.212 mean_w=1.0039
+Interaction MR interaction 500/1500 base=0.0197095 joint=0.144836 harmful=0.201 mean_w=1.0031
+Interaction MR interaction 750/1500 base=0.0190922 joint=0.146725 harmful=0.175 mean_w=1.0029
+Interaction MR interaction 1000/1500 base=0.0199526 joint=0.152674 harmful=0.165 mean_w=1.0025
+Interaction MR interaction 1250/1500 base=0.020595 joint=0.144478 harmful=0.173 mean_w=1.0027
+Interaction MR interaction 1500/1500 base=0.0190975 joint=0.14396 harmful=0.181 mean_w=1.0026
+MLP reconstruction: {"block": "blocks.4", "steps": 4000, "pilot_steps": 1000, "pilot_a3_nmse": 0.06139590846289808, "clip": 1.4841084480285645, "relu_fp_nmse": 0.028281972349037426, "gelu_a3_nmse": 0.12337167549527168, "relu_a3_nmse": 0.04812261421862085}
+Interaction MR interaction: 1000 quant-aware updates
+Interaction MR interaction 250/1000 base=0.0274815 joint=0.220418 harmful=0.400 mean_w=1.0128
+Interaction MR interaction 500/1000 base=0.027286 joint=0.205915 harmful=0.419 mean_w=1.0138
+Interaction MR interaction 750/1000 base=0.028849 joint=0.218827 harmful=0.352 mean_w=1.0114
+Interaction MR interaction 1000/1000 base=0.0241713 joint=0.214991 harmful=0.348 mean_w=1.0112
+MLP reconstruction: {"block": "blocks.5", "steps": 3000, "pilot_steps": 1000, "pilot_a3_nmse": 0.05431382727696553, "clip": 1.5024813413619995, "relu_fp_nmse": 0.031130252208188526, "gelu_a3_nmse": 0.24914387697162593, "relu_a3_nmse": 0.0463452686989221}
+Interaction MR interaction: 1500 quant-aware updates
+Interaction MR interaction 250/1500 base=0.184497 joint=1.8712 harmful=0.046 mean_w=1.0035
+Interaction MR interaction 500/1500 base=0.185705 joint=1.66362 harmful=0.057 mean_w=1.0046
+Interaction MR interaction 750/1500 base=0.165652 joint=1.25775 harmful=0.065 mean_w=1.0056
+Interaction MR interaction 1000/1500 base=0.170277 joint=1.48352 harmful=0.058 mean_w=1.0041
+Interaction MR interaction 1250/1500 base=0.165119 joint=1.47647 harmful=0.056 mean_w=1.0045
+Interaction MR interaction 1500/1500 base=0.17676 joint=1.50857 harmful=0.081 mean_w=1.0060
+MLP reconstruction: {"block": "blocks.6", "steps": 4000, "pilot_steps": 1000, "pilot_a3_nmse": 0.06187933862683716, "clip": 1.9033647775650024, "relu_fp_nmse": 0.02578255461420697, "gelu_a3_nmse": 0.5533593774717688, "relu_a3_nmse": 0.024363150249269647}
+Interaction MR interaction: 1000 quant-aware updates
+Interaction MR interaction 250/1000 base=0.0362428 joint=0.261369 harmful=0.632 mean_w=1.0298
+Interaction MR interaction 500/1000 base=0.0359432 joint=0.247013 harmful=0.637 mean_w=1.0257
+Interaction MR interaction 750/1000 base=0.0408438 joint=0.254469 harmful=0.599 mean_w=1.0241
+Interaction MR interaction 1000/1000 base=0.0465744 joint=0.269045 harmful=0.640 mean_w=1.0273
+MLP reconstruction: {"block": "blocks.7", "steps": 3000, "pilot_steps": 1000, "pilot_a3_nmse": 0.05020585531711958, "clip": 2.3350985050201416, "relu_fp_nmse": 0.02454048692256739, "gelu_a3_nmse": 0.12024259153556062, "relu_a3_nmse": 0.04712842611057775}
+Interaction MR interaction: 500 quant-aware updates
+Interaction MR interaction 250/500 base=0.0302558 joint=0.562685 harmful=0.457 mean_w=1.0186
+Interaction MR interaction 500/500 base=0.0364328 joint=0.607742 harmful=0.454 mean_w=1.0174
+MLP reconstruction: {"block": "blocks.8", "steps": 2000, "pilot_steps": 1000, "pilot_a3_nmse": 0.04583719811482867, "clip": 5.372856140136719, "relu_fp_nmse": 0.011553124465075813, "gelu_a3_nmse": 0.08337764549592243, "relu_a3_nmse": 0.04556699647205753}
+Interaction MR interaction: 500 quant-aware updates
+Interaction MR interaction 250/500 base=0.184977 joint=1.38536 harmful=0.647 mean_w=1.0299
+Interaction MR interaction 500/500 base=0.0234701 joint=1.05351 harmful=0.698 mean_w=1.0356
+MLP reconstruction: {"block": "blocks.9", "steps": 2000, "pilot_steps": 1000, "pilot_a3_nmse": 0.047527724098333314, "clip": 7.795287132263184, "relu_fp_nmse": 0.0062199742284702484, "gelu_a3_nmse": 0.05179640746296138, "relu_a3_nmse": 0.04896670527937137}
+Interaction MR interaction: 1500 quant-aware updates
+Interaction MR interaction 250/1500 base=0.0978668 joint=6.44328 harmful=0.622 mean_w=1.0413
+Interaction MR interaction 500/1500 base=0.127932 joint=4.90512 harmful=0.622 mean_w=1.0393
+Interaction MR interaction 750/1500 base=0.329458 joint=5.43682 harmful=0.590 mean_w=1.0362
+Interaction MR interaction 1000/1500 base=0.156028 joint=5.37514 harmful=0.614 mean_w=1.0422
+Interaction MR interaction 1250/1500 base=0.708306 joint=4.50556 harmful=0.575 mean_w=1.0369
+Interaction MR interaction 1500/1500 base=0.681681 joint=3.70553 harmful=0.566 mean_w=1.0412
+MLP reconstruction: {"block": "blocks.10", "steps": 4000, "pilot_steps": 1000, "pilot_a3_nmse": 0.11365502554224946, "clip": 23.75006103515625, "relu_fp_nmse": 0.004772450823436254, "gelu_a3_nmse": 0.11458308577761733, "relu_a3_nmse": 0.12163688353717673}
+Interaction MR interaction: 500 quant-aware updates
+Interaction MR interaction 250/500 base=0.0543544 joint=0.816797 harmful=0.444 mean_w=1.0107
+Interaction MR interaction 500/500 base=0.064278 joint=0.779894 harmful=0.443 mean_w=1.0107
+MLP reconstruction: {"block": "blocks.11", "steps": 2000, "pilot_steps": 1000, "pilot_a3_nmse": 0.025009531890868596, "clip": 3.7181098461151123, "relu_fp_nmse": 0.009392648549384755, "gelu_a3_nmse": 0.07114002816072064, "relu_a3_nmse": 0.023713682634551668}
+Interaction diagnostics blocks.0: {'fp_nmse': 0.008533728392185864, 'fc1_w3a3_nmse': 0.4277683721803732, 'fc2_w3a3_nmse': 0.16968653029200886, 'joint_w3a3_nmse': 0.5640585346719172, 'positive_interaction_nmse': 0.010072789145472773, 'harmful_token_fraction': 0.3073842005076142, 'mean_interaction_weight': 1.0086747522886634}
+Interaction diagnostics blocks.1: {'fp_nmse': 0.027751068922117157, 'fc1_w3a3_nmse': 0.5085530929414525, 'fc2_w3a3_nmse': 0.12051982500244046, 'joint_w3a3_nmse': 0.5730266684180113, 'positive_interaction_nmse': 0.0027602395836354037, 'harmful_token_fraction': 0.15831218274111675, 'mean_interaction_weight': 1.0020707391845394}
+Interaction diagnostics blocks.2: {'fp_nmse': 0.031219862822889487, 'fc1_w3a3_nmse': 0.5690602363214174, 'fc2_w3a3_nmse': 0.13809216451648973, 'joint_w3a3_nmse': 0.6526549797712048, 'positive_interaction_nmse': 0.006014837948431049, 'harmful_token_fraction': 0.24750158629441624, 'mean_interaction_weight': 1.0039556062766137}
+Interaction diagnostics blocks.3: {'fp_nmse': 0.031076985768273415, 'fc1_w3a3_nmse': 0.6478530884835905, 'fc2_w3a3_nmse': 0.1647446770798063, 'joint_w3a3_nmse': 0.7558734629887346, 'positive_interaction_nmse': 0.008287899895463509, 'harmful_token_fraction': 0.2412753807106599, 'mean_interaction_weight': 1.0041092519227623}
+Interaction diagnostics blocks.4: {'fp_nmse': 0.028281972168733755, 'fc1_w3a3_nmse': 0.5777933523656351, 'fc2_w3a3_nmse': 0.16979608181888714, 'joint_w3a3_nmse': 0.6839552141892637, 'positive_interaction_nmse': 0.00440221848367697, 'harmful_token_fraction': 0.17818052030456852, 'mean_interaction_weight': 1.002761886809683}
+Interaction diagnostics blocks.5: {'fp_nmse': 0.031130252328939397, 'fc1_w3a3_nmse': 0.5399190660606698, 'fc2_w3a3_nmse': 0.27746649428476844, 'joint_w3a3_nmse': 0.7783177564040973, 'positive_interaction_nmse': 0.028539162412050106, 'harmful_token_fraction': 0.35957328680203043, 'mean_interaction_weight': 1.0111723865954403}
+Interaction diagnostics blocks.6: {'fp_nmse': 0.025782554180245106, 'fc1_w3a3_nmse': 0.33949019450201096, 'fc2_w3a3_nmse': 0.28924372602625614, 'joint_w3a3_nmse': 0.7037236374917503, 'positive_interaction_nmse': 0.13838108453801806, 'harmful_token_fraction': 0.06896414974619289, 'mean_interaction_weight': 1.0053470340477029}
+Interaction diagnostics blocks.7: {'fp_nmse': 0.024540487086360578, 'fc1_w3a3_nmse': 0.37570804629882354, 'fc2_w3a3_nmse': 0.18390103104511396, 'joint_w3a3_nmse': 0.5520165158376216, 'positive_interaction_nmse': 0.030535860152078594, 'harmful_token_fraction': 0.5969622461928934, 'mean_interaction_weight': 1.02466903483202}
+Interaction diagnostics blocks.8: {'fp_nmse': 0.011553124631589504, 'fc1_w3a3_nmse': 0.59454550278105, 'fc2_w3a3_nmse': 0.1536923000153576, 'joint_w3a3_nmse': 0.7132069326202698, 'positive_interaction_nmse': 0.025383190286772887, 'harmful_token_fraction': 0.4710104695431472, 'mean_interaction_weight': 1.0183788701362417}
+Interaction diagnostics blocks.9: {'fp_nmse': 0.0062199739061880475, 'fc1_w3a3_nmse': 0.7286070282093261, 'fc2_w3a3_nmse': 0.13616670873001124, 'joint_w3a3_nmse': 0.8845774676049812, 'positive_interaction_nmse': 0.05912613159227265, 'harmful_token_fraction': 0.690989847715736, 'mean_interaction_weight': 1.0328975643603329}
+Interaction diagnostics blocks.10: {'fp_nmse': 0.004772450703927339, 'fc1_w3a3_nmse': 0.7436912611519916, 'fc2_w3a3_nmse': 0.1196179827861077, 'joint_w3a3_nmse': 0.7305918738108609, 'positive_interaction_nmse': 0.05390274413766774, 'harmful_token_fraction': 0.5783629441624365, 'mean_interaction_weight': 1.0379107034751}
+Interaction diagnostics blocks.11: {'fp_nmse': 0.009392648393879854, 'fc1_w3a3_nmse': 0.27699702541163335, 'fc2_w3a3_nmse': 0.07365771416438636, 'joint_w3a3_nmse': 0.3390653674039337, 'positive_interaction_nmse': 0.00846489147070895, 'harmful_token_fraction': 0.46621192893401014, 'mean_interaction_weight': 1.0119645002529707}
+MR holdout FP top-1 agreement: 92.969%; mean A3 NMSE GELU 0.152581 / ReLU 0.0486405

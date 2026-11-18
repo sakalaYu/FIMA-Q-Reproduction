@@ -1,0 +1,299 @@
+2026-11-18 17:27:27 - start the process.
+Experiment directory: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261118_172727_mr_interaction_joint_seed3407_b5e344eac3cd
+Namespace(model='vit_small', config='./configs/3bit/best.py', dataset='../imagenet_fimaq', optim_size=1024, val_batch_size=64, num_workers=8, device='cuda', calibrate=True, load_calibrate_checkpoint=None, test_calibrate_checkpoint=False, optimize=True, load_optimize_checkpoint=None, test_optimize_checkpoint=False, print_freq=10, seed=3407, skip_final_validation=False, headwise_hadamard=True, headwise_mode='all', qk_joint_variant='none', qk_joint_protocol='v2_integer_zp', qk_joint_steps=300, qk_joint_batch_size=8, qk_joint_holdout=128, qk_joint_lr=0.003, qk_joint_eval_every=50, qk_joint_rotation_rank=0, qk_joint_min_relative_kl=0.0, qk_joint_reconstruction_loss='auto', attention_relation='none', relation_protocol='relation_v1', relation_weight=0.1, relation_queries=16, relation_start=0.2, relation_full=0.6, probe_kd='none', probe_kd_protocol='semantic_probe_v1', probe_kd_weight=0.05, probe_kd_temperature=2.0, probe_kd_ridge=0.1, probe_kd_holdout=128, probe_kd_code_sha='unrecorded', endpoint_task='none', endpoint_code_sha='unrecorded', endpoint_mode='none', endpoint_steps=2000, endpoint_lr=0.001, endpoint_bound=1.2, endpoint_holdout=128, endpoint_batch_size=8, endpoint_eval_every=200, qwt=False, qwt_samples=512, qwt_batch_size=8, qwt_ridge=0.0, qwt_branch_dtype='fp16', qwt_solver_threads=4, activation_codebook='none', method_adaptation='lsvit', lsvit_control='fixed', ls_pair_dir=None, ls_mr='relu', ls_mr_dir='/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/mr_interaction/seed3407_joint_fb1f5e6544b1', ls_mr_steps=3000, ls_mr_budget='residual', fp_checkpoint=None, expected_fp_model_sha256='a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c', adaptation_steps=500, optim_mode='qdrop', drop_prob=0.5, p1=1.0, p2=1.0, dis_mode='q', calib_size=128, calib_batch_size=32, optim_batch_size=32, recon_iters=20000, k=1)
+Successfully imported Config class!
+optim_size: 1024
+calib_size: 128
+optim_batch_size: 32
+calib_batch_size: 32
+w_bit: 3
+a_bit: 3
+qconv_a_bit: 8
+qhead_a_bit: 3
+calib_metric: mse
+matmul_head_channel_wise: True
+token_channel_wise: True
+eq_n: 128
+search_round: 3
+keep_gpu: True
+optim_metric: lsvit
+temp: 20
+k: 1
+p1: 1.0
+p2: 1.0
+dis_mode: q
+optim_mode: qdrop
+drop_prob: 0.5
+robust_beta: 0.5
+robust_temperature: 0.5
+recon_iters: 20000
+Python random seeded: 3407
+Building model ...
+No checkpoint found at './checkpoints/vit_raw/vit_small_patch16_224.bin'
+Loading pretrained weights from Hugging Face hub (timm/vit_small_patch16_224.augreg_in21k_ft_in1k)
+[timm/vit_small_patch16_224.augreg_in21k_ft_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+Endpoint FP model SHA256: a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c
+Applied head-wise Hadamard rotation: {'mode': 'all', 'blocks': 12, 'heads': 72, 'head_dims': [64], 'max_logit_abs_error': 2.9206275939941406e-06}
+Calibration cache: count=128 sample_sha256=05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6 tensor_sha256=9fa0fafb6c8858c44b3f7ece4aa472c8a0793c7a5d1e86e24ea7edba33364330
+Calibration cache: count=1024 sample_sha256=51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b tensor_sha256=d16465b385c037c1b17be73a4d62ff5f2a0a25edc552478fe414f4b373ffa83e
+Building validation dataloader ...
+Wraping quantiztion modules (reparam: True) ...
+2026-11-18 17:28:23 - start mse guided calibration
+2026-11-18 17:38:58 - mse guided calibration finished.
+Saving checkpoint to /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261118_172727_mr_interaction_joint_seed3407_b5e344eac3cd/vit_small_w3_a3_calibsize_128_mse.pth
+Validating after calibration ...
+Test: [0/782]	Time 1.137 (1.137)	Loss 4.4042 (4.4042)	Prec@1 20.312 (20.312)	Prec@5 40.625 (40.625)
+Test: [10/782]	Time 0.143 (0.230)	Loss 5.2173 (5.0849)	Prec@1 7.812 (12.358)	Prec@5 18.750 (24.716)
+Test: [20/782]	Time 0.177 (0.205)	Loss 3.3351 (5.0455)	Prec@1 35.938 (12.872)	Prec@5 60.938 (25.893)
+Test: [30/782]	Time 0.192 (0.198)	Loss 4.7442 (4.7997)	Prec@1 12.500 (13.962)	Prec@5 25.000 (30.746)
+Test: [40/782]	Time 0.185 (0.195)	Loss 5.5962 (4.7700)	Prec@1 9.375 (13.643)	Prec@5 18.750 (31.059)
+Test: [50/782]	Time 0.177 (0.192)	Loss 3.4374 (4.6354)	Prec@1 21.875 (14.522)	Prec@5 59.375 (33.456)
+Test: [60/782]	Time 0.182 (0.191)	Loss 4.3196 (4.6402)	Prec@1 14.062 (14.395)	Prec@5 39.062 (33.478)
+Test: [70/782]	Time 0.104 (0.183)	Loss 4.0498 (4.7459)	Prec@1 35.938 (13.776)	Prec@5 51.562 (31.778)
+Test: [80/782]	Time 0.180 (0.181)	Loss 5.5499 (4.7432)	Prec@1 4.688 (14.217)	Prec@5 10.938 (31.462)
+Test: [90/782]	Time 0.187 (0.181)	Loss 3.6151 (4.7076)	Prec@1 18.750 (14.440)	Prec@5 56.250 (32.332)
+Test: [100/782]	Time 0.173 (0.181)	Loss 4.0563 (4.7524)	Prec@1 25.000 (13.722)	Prec@5 46.875 (31.265)
+Test: [110/782]	Time 0.159 (0.181)	Loss 5.0024 (4.7196)	Prec@1 10.938 (14.386)	Prec@5 25.000 (32.123)
+Test: [120/782]	Time 0.187 (0.181)	Loss 5.4192 (4.7357)	Prec@1 6.250 (14.347)	Prec@5 14.062 (31.612)
+Test: [130/782]	Time 0.158 (0.179)	Loss 6.2320 (4.7917)	Prec@1 0.000 (13.657)	Prec@5 1.562 (30.391)
+Test: [140/782]	Time 0.115 (0.175)	Loss 5.2997 (4.8741)	Prec@1 6.250 (12.965)	Prec@5 18.750 (29.089)
+Test: [150/782]	Time 0.140 (0.171)	Loss 6.2633 (4.9467)	Prec@1 0.000 (12.283)	Prec@5 7.812 (27.701)
+Test: [160/782]	Time 0.160 (0.170)	Loss 6.5363 (5.0235)	Prec@1 1.562 (11.762)	Prec@5 9.375 (26.698)
+Test: [170/782]	Time 0.164 (0.170)	Loss 4.6514 (5.0715)	Prec@1 9.375 (11.239)	Prec@5 32.812 (25.786)
+Test: [180/782]	Time 0.164 (0.170)	Loss 5.0997 (5.1167)	Prec@1 1.562 (10.843)	Prec@5 20.312 (25.112)
+Test: [190/782]	Time 0.168 (0.169)	Loss 6.3651 (5.1463)	Prec@1 0.000 (10.463)	Prec@5 1.562 (24.468)
+Test: [200/782]	Time 0.163 (0.169)	Loss 6.8388 (5.1700)	Prec@1 0.000 (10.113)	Prec@5 3.125 (23.943)
+Test: [210/782]	Time 0.157 (0.169)	Loss 4.8565 (5.2000)	Prec@1 10.938 (9.775)	Prec@5 29.688 (23.326)
+Test: [220/782]	Time 0.165 (0.169)	Loss 5.5365 (5.1876)	Prec@1 0.000 (9.757)	Prec@5 12.500 (23.438)
+Test: [230/782]	Time 0.160 (0.169)	Loss 4.6737 (5.1472)	Prec@1 17.188 (10.234)	Prec@5 34.375 (24.283)
+Test: [240/782]	Time 0.165 (0.168)	Loss 4.7919 (5.1378)	Prec@1 15.625 (10.257)	Prec@5 26.562 (24.410)
+Test: [250/782]	Time 0.161 (0.168)	Loss 4.4251 (5.1175)	Prec@1 17.188 (10.365)	Prec@5 28.125 (24.496)
+Test: [260/782]	Time 0.160 (0.168)	Loss 5.0631 (5.0933)	Prec@1 6.250 (10.662)	Prec@5 20.312 (24.922)
+Test: [270/782]	Time 0.164 (0.168)	Loss 5.2062 (5.1019)	Prec@1 4.688 (10.574)	Prec@5 17.188 (24.735)
+Test: [280/782]	Time 0.162 (0.168)	Loss 5.6711 (5.1116)	Prec@1 0.000 (10.504)	Prec@5 6.250 (24.550)
+Test: [290/782]	Time 0.168 (0.168)	Loss 5.4869 (5.1085)	Prec@1 6.250 (10.605)	Prec@5 18.750 (24.678)
+Test: [300/782]	Time 0.170 (0.168)	Loss 5.1091 (5.1021)	Prec@1 4.688 (10.527)	Prec@5 14.062 (24.574)
+Test: [310/782]	Time 0.162 (0.168)	Loss 4.6659 (5.0865)	Prec@1 15.625 (10.721)	Prec@5 29.688 (24.945)
+Test: [320/782]	Time 0.168 (0.167)	Loss 6.2662 (5.1014)	Prec@1 6.250 (10.699)	Prec@5 7.812 (24.903)
+Test: [330/782]	Time 0.166 (0.167)	Loss 7.1084 (5.1439)	Prec@1 0.000 (10.480)	Prec@5 0.000 (24.471)
+Test: [340/782]	Time 0.163 (0.167)	Loss 6.2528 (5.1812)	Prec@1 1.562 (10.337)	Prec@5 12.500 (24.097)
+Test: [350/782]	Time 0.170 (0.167)	Loss 6.6460 (5.1988)	Prec@1 4.688 (10.288)	Prec@5 7.812 (23.949)
+Test: [360/782]	Time 0.164 (0.167)	Loss 5.6033 (5.2155)	Prec@1 10.938 (10.180)	Prec@5 17.188 (23.779)
+Test: [370/782]	Time 0.170 (0.167)	Loss 5.9427 (5.2413)	Prec@1 3.125 (10.045)	Prec@5 6.250 (23.484)
+Test: [380/782]	Time 0.173 (0.167)	Loss 5.6566 (5.2466)	Prec@1 6.250 (10.121)	Prec@5 17.188 (23.532)
+Test: [390/782]	Time 0.164 (0.167)	Loss 6.4106 (5.2717)	Prec@1 3.125 (10.030)	Prec@5 9.375 (23.314)
+Test: [400/782]	Time 0.159 (0.167)	Loss 6.9348 (5.2868)	Prec@1 1.562 (9.971)	Prec@5 6.250 (23.173)
+Test: [410/782]	Time 0.166 (0.167)	Loss 4.6372 (5.3130)	Prec@1 15.625 (9.892)	Prec@5 37.500 (22.974)
+Test: [420/782]	Time 0.166 (0.167)	Loss 5.2581 (5.3284)	Prec@1 9.375 (9.780)	Prec@5 18.750 (22.706)
+Test: [430/782]	Time 0.155 (0.166)	Loss 7.0239 (5.3518)	Prec@1 0.000 (9.672)	Prec@5 1.562 (22.473)
+Test: [440/782]	Time 0.174 (0.166)	Loss 5.2789 (5.3634)	Prec@1 9.375 (9.662)	Prec@5 21.875 (22.378)
+Test: [450/782]	Time 0.161 (0.166)	Loss 6.0962 (5.3731)	Prec@1 4.688 (9.694)	Prec@5 14.062 (22.357)
+Test: [460/782]	Time 0.174 (0.166)	Loss 7.0544 (5.3929)	Prec@1 1.562 (9.714)	Prec@5 3.125 (22.258)
+Test: [470/782]	Time 0.160 (0.166)	Loss 7.7532 (5.4167)	Prec@1 3.125 (9.637)	Prec@5 3.125 (22.024)
+Test: [480/782]	Time 0.159 (0.166)	Loss 5.3260 (5.4210)	Prec@1 9.375 (9.612)	Prec@5 20.312 (21.985)
+Test: [490/782]	Time 0.164 (0.166)	Loss 5.5949 (5.4450)	Prec@1 3.125 (9.505)	Prec@5 14.062 (21.732)
+Test: [500/782]	Time 0.160 (0.166)	Loss 5.9963 (5.4549)	Prec@1 4.688 (9.453)	Prec@5 14.062 (21.669)
+Test: [510/782]	Time 0.163 (0.166)	Loss 5.8227 (5.4732)	Prec@1 4.688 (9.341)	Prec@5 10.938 (21.441)
+Test: [520/782]	Time 0.162 (0.166)	Loss 6.5462 (5.4756)	Prec@1 0.000 (9.216)	Prec@5 6.250 (21.320)
+Test: [530/782]	Time 0.172 (0.166)	Loss 6.1739 (5.4858)	Prec@1 4.688 (9.207)	Prec@5 12.500 (21.298)
+Test: [540/782]	Time 0.166 (0.166)	Loss 6.6524 (5.5006)	Prec@1 6.250 (9.205)	Prec@5 9.375 (21.199)
+Test: [550/782]	Time 0.167 (0.166)	Loss 6.0952 (5.5152)	Prec@1 0.000 (9.117)	Prec@5 4.688 (21.070)
+Test: [560/782]	Time 0.166 (0.166)	Loss 4.0095 (5.5174)	Prec@1 20.312 (9.138)	Prec@5 51.562 (21.090)
+Test: [570/782]	Time 0.171 (0.166)	Loss 7.2162 (5.5214)	Prec@1 0.000 (9.162)	Prec@5 7.812 (21.106)
+Test: [580/782]	Time 0.164 (0.166)	Loss 5.2778 (5.5357)	Prec@1 12.500 (9.074)	Prec@5 25.000 (20.947)
+Test: [590/782]	Time 0.160 (0.166)	Loss 5.6131 (5.5490)	Prec@1 14.062 (9.023)	Prec@5 23.438 (20.802)
+Test: [600/782]	Time 0.168 (0.166)	Loss 7.2013 (5.5614)	Prec@1 0.000 (8.995)	Prec@5 4.688 (20.715)
+Test: [610/782]	Time 0.162 (0.166)	Loss 5.8851 (5.5636)	Prec@1 9.375 (9.053)	Prec@5 15.625 (20.773)
+Test: [620/782]	Time 0.171 (0.166)	Loss 5.5018 (5.5738)	Prec@1 12.500 (9.020)	Prec@5 29.688 (20.680)
+Test: [630/782]	Time 0.161 (0.166)	Loss 4.9819 (5.5700)	Prec@1 14.062 (9.075)	Prec@5 29.688 (20.855)
+Test: [640/782]	Time 0.159 (0.166)	Loss 5.9048 (5.5752)	Prec@1 7.812 (9.058)	Prec@5 21.875 (20.868)
+Test: [650/782]	Time 0.168 (0.166)	Loss 2.9549 (5.5864)	Prec@1 43.750 (9.085)	Prec@5 68.750 (20.836)
+Test: [660/782]	Time 0.160 (0.166)	Loss 6.8003 (5.5975)	Prec@1 0.000 (8.980)	Prec@5 1.562 (20.669)
+Test: [670/782]	Time 0.168 (0.166)	Loss 5.2881 (5.6021)	Prec@1 7.812 (8.914)	Prec@5 23.438 (20.597)
+Test: [680/782]	Time 0.173 (0.166)	Loss 4.9498 (5.6078)	Prec@1 26.562 (8.879)	Prec@5 34.375 (20.547)
+Test: [690/782]	Time 0.172 (0.166)	Loss 4.3077 (5.6082)	Prec@1 29.688 (8.905)	Prec@5 42.188 (20.600)
+Test: [700/782]	Time 0.162 (0.166)	Loss 5.8642 (5.6161)	Prec@1 3.125 (8.900)	Prec@5 12.500 (20.526)
+Test: [710/782]	Time 0.164 (0.166)	Loss 6.5289 (5.6191)	Prec@1 1.562 (8.920)	Prec@5 15.625 (20.556)
+Test: [720/782]	Time 0.162 (0.166)	Loss 5.3361 (5.6171)	Prec@1 1.562 (8.957)	Prec@5 18.750 (20.612)
+Test: [730/782]	Time 0.171 (0.166)	Loss 6.3628 (5.6295)	Prec@1 4.688 (8.888)	Prec@5 10.938 (20.462)
+Test: [740/782]	Time 0.164 (0.166)	Loss 2.9894 (5.6132)	Prec@1 40.625 (9.031)	Prec@5 73.438 (20.696)
+Test: [750/782]	Time 0.166 (0.166)	Loss 7.3356 (5.6083)	Prec@1 0.000 (9.071)	Prec@5 0.000 (20.731)
+Test: [760/782]	Time 0.159 (0.166)	Loss 2.8956 (5.6096)	Prec@1 48.438 (9.157)	Prec@5 82.812 (20.830)
+Test: [770/782]	Time 0.165 (0.166)	Loss 3.1848 (5.5956)	Prec@1 45.312 (9.296)	Prec@5 65.625 (21.087)
+Test: [780/782]	Time 0.167 (0.166)	Loss 6.5244 (5.5849)	Prec@1 0.000 (9.393)	Prec@5 14.062 (21.211)
+ * Prec@1 9.390 Prec@5 21.204 Loss 5.586 Time 129.797
+Building calibrator ...
+2026-11-18 17:41:08 - start lsvit guided block reconstruction
+reconstructing patch_embed ...
+initializing raw input and raw output ...
+adaround training for patch_embed ...
+LS-ViT curvature initialized for patch_embed
+finished reconstructing patch_embed.
+reconstructing blocks.0 ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for blocks.0 ...
+LS-ViT curvature initialized for blocks.0
+finished reconstructing blocks.0.
+reconstructing blocks.1 ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for blocks.1 ...
+LS-ViT curvature initialized for blocks.1
+finished reconstructing blocks.1.
+reconstructing blocks.2 ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for blocks.2 ...
+LS-ViT curvature initialized for blocks.2
+finished reconstructing blocks.2.
+reconstructing blocks.3 ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for blocks.3 ...
+LS-ViT curvature initialized for blocks.3
+finished reconstructing blocks.3.
+reconstructing blocks.4 ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for blocks.4 ...
+LS-ViT curvature initialized for blocks.4
+finished reconstructing blocks.4.
+reconstructing blocks.5 ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for blocks.5 ...
+LS-ViT curvature initialized for blocks.5
+finished reconstructing blocks.5.
+reconstructing blocks.6 ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for blocks.6 ...
+LS-ViT curvature initialized for blocks.6
+finished reconstructing blocks.6.
+reconstructing blocks.7 ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for blocks.7 ...
+LS-ViT curvature initialized for blocks.7
+finished reconstructing blocks.7.
+reconstructing blocks.8 ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for blocks.8 ...
+LS-ViT curvature initialized for blocks.8
+finished reconstructing blocks.8.
+reconstructing blocks.9 ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for blocks.9 ...
+LS-ViT curvature initialized for blocks.9
+finished reconstructing blocks.9.
+reconstructing blocks.10 ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for blocks.10 ...
+LS-ViT curvature initialized for blocks.10
+finished reconstructing blocks.10.
+reconstructing blocks.11 ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for blocks.11 ...
+LS-ViT curvature initialized for blocks.11
+finished reconstructing blocks.11.
+reconstructing head ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for head ...
+finished reconstructing head.
+Block reconstruction elapsed seconds: 8836.383
+2026-11-18 20:08:24 - lsvit guided block reconstruction finished.
+Saving checkpoint to /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261118_172727_mr_interaction_joint_seed3407_b5e344eac3cd/vit_small_w3_a3_optimsize_1024_lsvit_dis_mode_q_qdrop_relu_mr.pth
+Validating on calibration set after block reconstruction ...
+Test: [0/32]	Time 1.106 (1.106)	Loss 0.3463 (0.3463)	Prec@1 93.750 (93.750)	Prec@5 96.875 (96.875)
+Test: [10/32]	Time 0.033 (0.134)	Loss 1.0441 (0.6650)	Prec@1 62.500 (84.375)	Prec@5 90.625 (94.034)
+Test: [20/32]	Time 0.033 (0.086)	Loss 1.2339 (0.7351)	Prec@1 75.000 (82.292)	Prec@5 96.875 (94.048)
+Test: [30/32]	Time 0.033 (0.069)	Loss 0.4561 (0.7545)	Prec@1 87.500 (81.653)	Prec@5 100.000 (94.254)
+ * Prec@1 81.738 Prec@5 94.434 Loss 0.751 Time 2.300
+Validating on test set after block reconstruction ...
+Test: [0/782]	Time 1.440 (1.440)	Loss 0.5511 (0.5511)	Prec@1 89.062 (89.062)	Prec@5 96.875 (96.875)
+Test: [10/782]	Time 0.178 (0.262)	Loss 0.5231 (0.7678)	Prec@1 85.938 (80.398)	Prec@5 96.875 (94.176)
+Test: [20/782]	Time 0.075 (0.178)	Loss 0.8806 (0.7624)	Prec@1 68.750 (80.432)	Prec@5 96.875 (94.345)
+Test: [30/782]	Time 0.086 (0.146)	Loss 0.7008 (0.8950)	Prec@1 81.250 (76.966)	Prec@5 93.750 (93.296)
+Test: [40/782]	Time 0.127 (0.137)	Loss 0.8952 (0.9878)	Prec@1 82.812 (74.276)	Prec@5 92.188 (92.683)
+Test: [50/782]	Time 0.122 (0.134)	Loss 1.2538 (1.0859)	Prec@1 65.625 (71.477)	Prec@5 95.312 (91.973)
+Test: [60/782]	Time 0.116 (0.133)	Loss 1.1261 (1.1012)	Prec@1 70.312 (70.645)	Prec@5 93.750 (91.778)
+Test: [70/782]	Time 0.119 (0.131)	Loss 0.4780 (1.0576)	Prec@1 90.625 (72.293)	Prec@5 95.312 (91.923)
+Test: [80/782]	Time 0.116 (0.129)	Loss 1.4741 (1.0248)	Prec@1 65.625 (73.264)	Prec@5 81.250 (91.975)
+Test: [90/782]	Time 0.119 (0.128)	Loss 1.1251 (1.0349)	Prec@1 60.938 (73.180)	Prec@5 96.875 (91.844)
+Test: [100/782]	Time 0.123 (0.127)	Loss 0.8091 (1.0331)	Prec@1 79.688 (73.113)	Prec@5 92.188 (91.894)
+Test: [110/782]	Time 0.125 (0.127)	Loss 0.5952 (0.9934)	Prec@1 84.375 (74.155)	Prec@5 95.312 (92.300)
+Test: [120/782]	Time 0.122 (0.127)	Loss 0.9671 (0.9799)	Prec@1 75.000 (74.613)	Prec@5 90.625 (92.381)
+Test: [130/782]	Time 0.128 (0.127)	Loss 1.5565 (1.0043)	Prec@1 40.625 (73.688)	Prec@5 93.750 (92.307)
+Test: [140/782]	Time 0.116 (0.127)	Loss 1.5433 (1.0226)	Prec@1 53.125 (72.994)	Prec@5 85.938 (92.154)
+Test: [150/782]	Time 0.109 (0.126)	Loss 1.8636 (1.0530)	Prec@1 48.438 (71.927)	Prec@5 84.375 (91.939)
+Test: [160/782]	Time 0.121 (0.126)	Loss 1.1694 (1.0710)	Prec@1 70.312 (71.186)	Prec@5 92.188 (91.867)
+Test: [170/782]	Time 0.118 (0.125)	Loss 0.6029 (1.0637)	Prec@1 79.688 (71.363)	Prec@5 100.000 (91.959)
+Test: [180/782]	Time 0.111 (0.125)	Loss 1.2681 (1.0839)	Prec@1 57.812 (70.934)	Prec@5 89.062 (91.799)
+Test: [190/782]	Time 0.130 (0.125)	Loss 0.7396 (1.0905)	Prec@1 82.812 (70.476)	Prec@5 93.750 (91.811)
+Test: [200/782]	Time 0.116 (0.124)	Loss 1.4944 (1.0841)	Prec@1 54.688 (70.522)	Prec@5 90.625 (91.970)
+Test: [210/782]	Time 0.123 (0.124)	Loss 1.0048 (1.0826)	Prec@1 75.000 (70.490)	Prec@5 92.188 (91.965)
+Test: [220/782]	Time 0.121 (0.124)	Loss 2.1025 (1.0910)	Prec@1 20.312 (70.072)	Prec@5 90.625 (92.025)
+Test: [230/782]	Time 0.121 (0.124)	Loss 0.6220 (1.0805)	Prec@1 82.812 (70.414)	Prec@5 96.875 (92.181)
+Test: [240/782]	Time 0.111 (0.123)	Loss 0.8672 (1.0853)	Prec@1 70.312 (70.254)	Prec@5 95.312 (92.168)
+Test: [250/782]	Time 0.127 (0.123)	Loss 0.9675 (1.0866)	Prec@1 65.625 (70.207)	Prec@5 95.312 (92.163)
+Test: [260/782]	Time 0.122 (0.123)	Loss 0.3040 (1.0731)	Prec@1 90.625 (70.570)	Prec@5 100.000 (92.277)
+Test: [270/782]	Time 0.120 (0.123)	Loss 1.2188 (1.0710)	Prec@1 59.375 (70.693)	Prec@5 90.625 (92.257)
+Test: [280/782]	Time 0.118 (0.123)	Loss 1.6535 (1.0721)	Prec@1 57.812 (70.591)	Prec@5 89.062 (92.310)
+Test: [290/782]	Time 0.124 (0.123)	Loss 1.5330 (1.0713)	Prec@1 60.938 (70.731)	Prec@5 89.062 (92.268)
+Test: [300/782]	Time 0.123 (0.123)	Loss 0.8128 (1.0759)	Prec@1 79.688 (70.634)	Prec@5 92.188 (92.224)
+Test: [310/782]	Time 0.119 (0.123)	Loss 0.9643 (1.0711)	Prec@1 75.000 (70.745)	Prec@5 93.750 (92.233)
+Test: [320/782]	Time 0.114 (0.123)	Loss 1.1964 (1.0819)	Prec@1 64.062 (70.502)	Prec@5 95.312 (92.139)
+Test: [330/782]	Time 0.125 (0.123)	Loss 1.4435 (1.0972)	Prec@1 64.062 (70.199)	Prec@5 87.500 (91.942)
+Test: [340/782]	Time 0.123 (0.123)	Loss 2.1165 (1.1087)	Prec@1 34.375 (69.946)	Prec@5 87.500 (91.793)
+Test: [350/782]	Time 0.123 (0.123)	Loss 0.9165 (1.1208)	Prec@1 71.875 (69.716)	Prec@5 92.188 (91.658)
+Test: [360/782]	Time 0.116 (0.123)	Loss 0.9293 (1.1263)	Prec@1 65.625 (69.620)	Prec@5 96.875 (91.556)
+Test: [370/782]	Time 0.121 (0.122)	Loss 1.5903 (1.1412)	Prec@1 60.938 (69.394)	Prec@5 89.062 (91.366)
+Test: [380/782]	Time 0.121 (0.122)	Loss 1.2382 (1.1488)	Prec@1 67.188 (69.205)	Prec@5 90.625 (91.277)
+Test: [390/782]	Time 0.118 (0.122)	Loss 2.7772 (1.1677)	Prec@1 39.062 (68.890)	Prec@5 67.188 (91.069)
+Test: [400/782]	Time 0.114 (0.122)	Loss 1.2035 (1.1831)	Prec@1 65.625 (68.575)	Prec@5 87.500 (90.870)
+Test: [410/782]	Time 0.124 (0.122)	Loss 1.1075 (1.1913)	Prec@1 68.750 (68.370)	Prec@5 92.188 (90.731)
+Test: [420/782]	Time 0.127 (0.122)	Loss 1.0332 (1.1922)	Prec@1 71.875 (68.442)	Prec@5 95.312 (90.733)
+Test: [430/782]	Time 0.127 (0.122)	Loss 1.5228 (1.1985)	Prec@1 65.625 (68.366)	Prec@5 84.375 (90.640)
+Test: [440/782]	Time 0.119 (0.122)	Loss 1.0241 (1.2014)	Prec@1 71.875 (68.410)	Prec@5 93.750 (90.579)
+Test: [450/782]	Time 0.126 (0.122)	Loss 0.8327 (1.1970)	Prec@1 82.812 (68.601)	Prec@5 90.625 (90.566)
+Test: [460/782]	Time 0.119 (0.122)	Loss 2.0438 (1.2091)	Prec@1 56.250 (68.384)	Prec@5 75.000 (90.384)
+Test: [470/782]	Time 0.119 (0.122)	Loss 1.1667 (1.2171)	Prec@1 67.188 (68.209)	Prec@5 90.625 (90.277)
+Test: [480/782]	Time 0.118 (0.122)	Loss 1.1324 (1.2139)	Prec@1 76.562 (68.376)	Prec@5 85.938 (90.255)
+Test: [490/782]	Time 0.120 (0.122)	Loss 0.8291 (1.2245)	Prec@1 81.250 (68.180)	Prec@5 90.625 (90.049)
+Test: [500/782]	Time 0.127 (0.122)	Loss 1.0774 (1.2322)	Prec@1 65.625 (67.955)	Prec@5 93.750 (89.986)
+Test: [510/782]	Time 0.121 (0.122)	Loss 2.2430 (1.2439)	Prec@1 62.500 (67.839)	Prec@5 76.562 (89.815)
+Test: [520/782]	Time 0.119 (0.122)	Loss 1.4071 (1.2512)	Prec@1 65.625 (67.589)	Prec@5 82.812 (89.761)
+Test: [530/782]	Time 0.107 (0.122)	Loss 1.6548 (1.2581)	Prec@1 71.875 (67.529)	Prec@5 79.688 (89.627)
+Test: [540/782]	Time 0.123 (0.122)	Loss 2.3368 (1.2615)	Prec@1 43.750 (67.494)	Prec@5 81.250 (89.588)
+Test: [550/782]	Time 0.123 (0.122)	Loss 0.9524 (1.2640)	Prec@1 73.438 (67.465)	Prec@5 92.188 (89.539)
+Test: [560/782]	Time 0.124 (0.122)	Loss 1.5601 (1.2694)	Prec@1 60.938 (67.371)	Prec@5 85.938 (89.477)
+Test: [570/782]	Time 0.131 (0.122)	Loss 1.5501 (1.2705)	Prec@1 59.375 (67.420)	Prec@5 92.188 (89.451)
+Test: [580/782]	Time 0.124 (0.122)	Loss 1.7160 (1.2805)	Prec@1 56.250 (67.244)	Prec@5 82.812 (89.278)
+Test: [590/782]	Time 0.119 (0.122)	Loss 0.5422 (1.2830)	Prec@1 87.500 (67.193)	Prec@5 96.875 (89.224)
+Test: [600/782]	Time 0.117 (0.122)	Loss 0.9878 (1.2872)	Prec@1 79.688 (67.154)	Prec@5 93.750 (89.156)
+Test: [610/782]	Time 0.112 (0.122)	Loss 0.8107 (1.2907)	Prec@1 78.125 (67.118)	Prec@5 93.750 (89.091)
+Test: [620/782]	Time 0.121 (0.122)	Loss 1.5584 (1.2956)	Prec@1 67.188 (67.062)	Prec@5 79.688 (89.015)
+Test: [630/782]	Time 0.123 (0.122)	Loss 1.4553 (1.2951)	Prec@1 59.375 (67.093)	Prec@5 84.375 (89.020)
+Test: [640/782]	Time 0.128 (0.122)	Loss 1.0185 (1.3014)	Prec@1 84.375 (66.934)	Prec@5 93.750 (88.980)
+Test: [650/782]	Time 0.129 (0.122)	Loss 0.5815 (1.3018)	Prec@1 87.500 (66.981)	Prec@5 90.625 (88.957)
+Test: [660/782]	Time 0.132 (0.122)	Loss 2.4584 (1.3138)	Prec@1 43.750 (66.734)	Prec@5 64.062 (88.791)
+Test: [670/782]	Time 0.129 (0.122)	Loss 1.5284 (1.3157)	Prec@1 59.375 (66.659)	Prec@5 84.375 (88.762)
+Test: [680/782]	Time 0.121 (0.123)	Loss 0.8402 (1.3193)	Prec@1 67.188 (66.584)	Prec@5 96.875 (88.737)
+Test: [690/782]	Time 0.124 (0.123)	Loss 0.9797 (1.3183)	Prec@1 78.125 (66.638)	Prec@5 93.750 (88.741)
+Test: [700/782]	Time 0.128 (0.123)	Loss 1.3982 (1.3200)	Prec@1 60.938 (66.610)	Prec@5 85.938 (88.726)
+Test: [710/782]	Time 0.127 (0.123)	Loss 1.9379 (1.3288)	Prec@1 45.312 (66.418)	Prec@5 82.812 (88.616)
+Test: [720/782]	Time 0.125 (0.123)	Loss 1.4090 (1.3265)	Prec@1 48.438 (66.455)	Prec@5 90.625 (88.653)
+Test: [730/782]	Time 0.121 (0.123)	Loss 1.4921 (1.3274)	Prec@1 59.375 (66.437)	Prec@5 82.812 (88.648)
+Test: [740/782]	Time 0.130 (0.123)	Loss 0.8952 (1.3214)	Prec@1 65.625 (66.553)	Prec@5 98.438 (88.721)
+Test: [750/782]	Time 0.128 (0.123)	Loss 2.7179 (1.3178)	Prec@1 37.500 (66.667)	Prec@5 68.750 (88.740)
+Test: [760/782]	Time 0.125 (0.123)	Loss 0.8551 (1.3229)	Prec@1 79.688 (66.569)	Prec@5 96.875 (88.691)
+Test: [770/782]	Time 0.125 (0.123)	Loss 0.0285 (1.3186)	Prec@1 100.000 (66.691)	Prec@5 100.000 (88.748)
+Test: [780/782]	Time 0.128 (0.123)	Loss 2.8651 (1.3129)	Prec@1 26.562 (66.827)	Prec@5 68.750 (88.794)
+ * Prec@1 66.822 Prec@5 88.784 Loss 1.314 Time 96.144
+2026-11-18 20:10:03 - finished the process.

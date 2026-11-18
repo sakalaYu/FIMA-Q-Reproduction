@@ -1,0 +1,148 @@
+{
+  "uniform": {
+    "screen": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/mr_grid/seed3408_uniform_b5cc917dd6df/mr_screen.json",
+    "mean_a3_nmse": 0.043298152087679155,
+    "mean_fp_nmse": 0.020142880653416958,
+    "mean_worst_a3_nmse": 0.046791151422001326,
+    "fp_teacher_kl": 0.09223423898220062,
+    "seconds": 527.7193185836077,
+    "selected_steps": [
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      3000
+    ],
+    "anchors": [
+      "97bf267b80b078c88c6d413c99e38705d38a5deffb6b30d75f2812e2ef3d4bcf",
+      "30f265da6366c757d8e2dcca65a3e16bc0f9b0ad50d93ff716a8a4b68339fb1f",
+      "30cf7fc13ca3ff19ddf056cbbe1ad0bd5aad7c89fe155dfdcbfe2654ff150ca9",
+      "69e56478e484aab934cf620d93651158db7ff653a1e63265733be9aec9a15629",
+      "ed3872acb6ba1afd12f3be128340e0d9d6f1436cee8286bdb137dd500d5a2d11",
+      "253203831642ea7602f390ac28e5d8e911697d29e4d601751fadc5d09712ab4a",
+      "ab776b9901aaffa03dd80c144f4fd5eefeeb02dd26f5f66f2835ad2a8a4da458",
+      "797a1e229f74a23c69f522e32f283ba5b0bc0639d8d91156d6bba07393053a61",
+      "a9c36085e8a7f905238616c47dd6d36a82e708d287738d3e94265ee5ad29b71b",
+      "53f7800ac24a44615146a67a69a61fe9c3ac6eb5f44fce2b61a3007751b1328a",
+      "129711a6d9ad916dbff5eb7e802d79566ee856742492855d2ac2aa7f867d6689",
+      "32d7e40c3268c5eb91e630f23691c2d1b237a0b2087e4d1c244cf67754cbac43"
+    ],
+    "fp_sha": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+    "data_hashes": [
+      [
+        "1024",
+        "e4e3f878bb1a4544baa55cd13440283a5518294f7dc88d18a31200d5de0c9a04",
+        "a549d62a2762d7f187ba50e270d7e1750936699a5d43a1ce2162a60afaf6a6bb"
+      ]
+    ],
+    "metrics": null,
+    "calibration_hashes": null
+  },
+  "single": {
+    "screen": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/mr_grid/seed3408_single_650c40a649af/mr_screen.json",
+    "mean_a3_nmse": 0.04301163020570867,
+    "mean_fp_nmse": 0.02032844865355516,
+    "mean_worst_a3_nmse": 0.046569668126179846,
+    "fp_teacher_kl": 0.09157775342464447,
+    "seconds": 595.8620491325855,
+    "selected_steps": [
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      2750,
+      2250,
+      3000
+    ],
+    "anchors": [
+      "97bf267b80b078c88c6d413c99e38705d38a5deffb6b30d75f2812e2ef3d4bcf",
+      "30f265da6366c757d8e2dcca65a3e16bc0f9b0ad50d93ff716a8a4b68339fb1f",
+      "30cf7fc13ca3ff19ddf056cbbe1ad0bd5aad7c89fe155dfdcbfe2654ff150ca9",
+      "69e56478e484aab934cf620d93651158db7ff653a1e63265733be9aec9a15629",
+      "ed3872acb6ba1afd12f3be128340e0d9d6f1436cee8286bdb137dd500d5a2d11",
+      "253203831642ea7602f390ac28e5d8e911697d29e4d601751fadc5d09712ab4a",
+      "ab776b9901aaffa03dd80c144f4fd5eefeeb02dd26f5f66f2835ad2a8a4da458",
+      "797a1e229f74a23c69f522e32f283ba5b0bc0639d8d91156d6bba07393053a61",
+      "a9c36085e8a7f905238616c47dd6d36a82e708d287738d3e94265ee5ad29b71b",
+      "53f7800ac24a44615146a67a69a61fe9c3ac6eb5f44fce2b61a3007751b1328a",
+      "129711a6d9ad916dbff5eb7e802d79566ee856742492855d2ac2aa7f867d6689",
+      "32d7e40c3268c5eb91e630f23691c2d1b237a0b2087e4d1c244cf67754cbac43"
+    ],
+    "fp_sha": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+    "data_hashes": [
+      [
+        "1024",
+        "e4e3f878bb1a4544baa55cd13440283a5518294f7dc88d18a31200d5de0c9a04",
+        "a549d62a2762d7f187ba50e270d7e1750936699a5d43a1ce2162a60afaf6a6bb"
+      ]
+    ],
+    "metrics": null,
+    "calibration_hashes": null,
+    "screen_matched": true,
+    "nominal_error_change_pct": -0.661741594399401,
+    "worst_error_change_pct": -0.4733444018591437,
+    "worth_full_reconstruction": false
+  },
+  "robust": {
+    "screen": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/mr_grid/seed3408_robust_db777423f930/mr_screen.json",
+    "mean_a3_nmse": 0.043110269110769255,
+    "mean_fp_nmse": 0.020254165358497885,
+    "mean_worst_a3_nmse": 0.04661778495650493,
+    "fp_teacher_kl": 0.09152145683765411,
+    "seconds": 374.3709026277065,
+    "selected_steps": [
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      3000,
+      2750,
+      2250,
+      3000
+    ],
+    "anchors": [
+      "97bf267b80b078c88c6d413c99e38705d38a5deffb6b30d75f2812e2ef3d4bcf",
+      "30f265da6366c757d8e2dcca65a3e16bc0f9b0ad50d93ff716a8a4b68339fb1f",
+      "30cf7fc13ca3ff19ddf056cbbe1ad0bd5aad7c89fe155dfdcbfe2654ff150ca9",
+      "69e56478e484aab934cf620d93651158db7ff653a1e63265733be9aec9a15629",
+      "ed3872acb6ba1afd12f3be128340e0d9d6f1436cee8286bdb137dd500d5a2d11",
+      "253203831642ea7602f390ac28e5d8e911697d29e4d601751fadc5d09712ab4a",
+      "ab776b9901aaffa03dd80c144f4fd5eefeeb02dd26f5f66f2835ad2a8a4da458",
+      "797a1e229f74a23c69f522e32f283ba5b0bc0639d8d91156d6bba07393053a61",
+      "a9c36085e8a7f905238616c47dd6d36a82e708d287738d3e94265ee5ad29b71b",
+      "53f7800ac24a44615146a67a69a61fe9c3ac6eb5f44fce2b61a3007751b1328a",
+      "129711a6d9ad916dbff5eb7e802d79566ee856742492855d2ac2aa7f867d6689",
+      "32d7e40c3268c5eb91e630f23691c2d1b237a0b2087e4d1c244cf67754cbac43"
+    ],
+    "fp_sha": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+    "data_hashes": [
+      [
+        "1024",
+        "e4e3f878bb1a4544baa55cd13440283a5518294f7dc88d18a31200d5de0c9a04",
+        "a549d62a2762d7f187ba50e270d7e1750936699a5d43a1ce2162a60afaf6a6bb"
+      ]
+    ],
+    "metrics": null,
+    "calibration_hashes": null,
+    "screen_matched": true,
+    "nominal_error_change_pct": -0.4339283961343976,
+    "worst_error_change_pct": -0.3705112189542614,
+    "worth_full_reconstruction": false
+  }
+}

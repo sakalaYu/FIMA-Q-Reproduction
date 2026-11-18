@@ -1,0 +1,222 @@
+{
+  "baseline": {
+    "screen": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/mr_interaction/seed3407_baseline_fd78ff7f2c26/mr_screen.json",
+    "means": {
+      "fp_nmse": 0.018995167012044675,
+      "fc1_w3a3_nmse": 0.5797977919892533,
+      "fc2_w3a3_nmse": 0.16867365101284468,
+      "joint_w3a3_nmse": 0.7094935473815304,
+      "positive_interaction_nmse": 0.032841736713620825,
+      "harmful_token_fraction": 0.3803273054145517,
+      "mean_interaction_weight": 1.0144745595564093
+    },
+    "fp_teacher_kl": 0.07278474420309067,
+    "seconds": 548.335127428174,
+    "steps": [
+      2000,
+      3000,
+      4000,
+      3000,
+      4000,
+      3000,
+      4000,
+      3000,
+      2000,
+      2000,
+      4000,
+      2000
+    ],
+    "shared_starts": [
+      "9fff70660ef33610d9311fd41913c808970bd3db293aa9eb05d255b63fa2069c",
+      "04acf1efe0f523b915ce7f229f03dc2ff0a71bcdf547997acfec0d8457a5156f",
+      "001d754ebf5bad90eab144182e81a22424b011b3451e1c5be1d7ef643e38708f",
+      "3cd5ebf67b9277421d93af05e77573f1536e99e0a0145f61d73a8508499b4f3c",
+      "6b41cb50c12329c2652fc61663f5d5921b90ffab63a860fe03dd84c583458d99",
+      "720e377f44adbf0d5e124299090679fcf94baab1db7cb9b225173359df23a24e",
+      "215651cfa48bb2642c38a4239d49c5ae683e0b217cf5474e13745a999aadf5a3",
+      "6e05fc8fd87ee470c602f3ab3e4bf662a7b4bd2bb1d7eedf0d64a49368f2eea1",
+      "abcac651d1d72f2b7c32a970e08c1cb6bfbfaab7c707c69e2094685082bec18f",
+      "3d38618040321f4e60cd0bd107d4c34cfdc17c80cf9d1daf74dd6d0a9254fc3c",
+      "2352424a822db484299bb54c97d5cc0d245160fea9a6bc9934f1e08cd4376885",
+      "9aeb80ed4c08be512de849b28e16f0fe81ccf046ec8559c335a63ec991a7d0e6"
+    ],
+    "fp_sha": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+    "data_hashes": [
+      [
+        "1024",
+        "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+        "d16465b385c037c1b17be73a4d62ff5f2a0a25edc552478fe414f4b373ffa83e"
+      ]
+    ],
+    "weights_tensor_sha256": "6b1cdda5810e3f5164c0441697749c572cef0da76ba397a700da602de7f6a517",
+    "metrics": {
+      "top1": 67.052,
+      "top5": 88.88,
+      "loss": 1.3125056755924225
+    },
+    "quant_result": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261113_130900_lsvit_mr_relu_seed3407_42a305a3eb20/method_result.json",
+    "quant_origin": "historical_matching_weights_data_recipe",
+    "calibration_hashes": [
+      [
+        "128",
+        "05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6",
+        "9fa0fafb6c8858c44b3f7ece4aa472c8a0793c7a5d1e86e24ea7edba33364330"
+      ],
+      [
+        "1024",
+        "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+        "d16465b385c037c1b17be73a4d62ff5f2a0a25edc552478fe414f4b373ffa83e"
+      ]
+    ],
+    "formal_code_sha256": "527b6ca1cdc5ff230a62dfb95782583acde5cbb402b7862e802a627eea5c5ea4"
+  },
+  "joint": {
+    "screen": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/mr_interaction/seed3407_joint_fb1f5e6544b1/mr_screen.json",
+    "means": {
+      "fp_nmse": 0.019955120382984453,
+      "fc1_w3a3_nmse": 0.5284885002926937,
+      "fc2_w3a3_nmse": 0.16634454832418505,
+      "joint_w3a3_nmse": 0.6618198700234595,
+      "positive_interaction_nmse": 0.031263587812865104,
+      "harmful_token_fraction": 0.3643486939509306,
+      "mean_interaction_weight": 1.0136884348041517
+    },
+    "fp_teacher_kl": 0.07267311215400696,
+    "seconds": 661.2816319540143,
+    "steps": [
+      2000,
+      3000,
+      4000,
+      3000,
+      4000,
+      3000,
+      4000,
+      3000,
+      2000,
+      2000,
+      4000,
+      2000
+    ],
+    "shared_starts": [
+      "9fff70660ef33610d9311fd41913c808970bd3db293aa9eb05d255b63fa2069c",
+      "04acf1efe0f523b915ce7f229f03dc2ff0a71bcdf547997acfec0d8457a5156f",
+      "001d754ebf5bad90eab144182e81a22424b011b3451e1c5be1d7ef643e38708f",
+      "3cd5ebf67b9277421d93af05e77573f1536e99e0a0145f61d73a8508499b4f3c",
+      "6b41cb50c12329c2652fc61663f5d5921b90ffab63a860fe03dd84c583458d99",
+      "720e377f44adbf0d5e124299090679fcf94baab1db7cb9b225173359df23a24e",
+      "215651cfa48bb2642c38a4239d49c5ae683e0b217cf5474e13745a999aadf5a3",
+      "6e05fc8fd87ee470c602f3ab3e4bf662a7b4bd2bb1d7eedf0d64a49368f2eea1",
+      "abcac651d1d72f2b7c32a970e08c1cb6bfbfaab7c707c69e2094685082bec18f",
+      "3d38618040321f4e60cd0bd107d4c34cfdc17c80cf9d1daf74dd6d0a9254fc3c",
+      "2352424a822db484299bb54c97d5cc0d245160fea9a6bc9934f1e08cd4376885",
+      "9aeb80ed4c08be512de849b28e16f0fe81ccf046ec8559c335a63ec991a7d0e6"
+    ],
+    "fp_sha": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+    "data_hashes": [
+      [
+        "1024",
+        "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+        "d16465b385c037c1b17be73a4d62ff5f2a0a25edc552478fe414f4b373ffa83e"
+      ]
+    ],
+    "weights_tensor_sha256": "357561ad4476482b4597df56b08b2895861d0a24c051f6b71417b027b9e6755e",
+    "metrics": {
+      "top1": 66.822,
+      "top5": 88.784,
+      "loss": 1.3135633966493607
+    },
+    "quant_result": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261118_172727_mr_interaction_joint_seed3407_b5e344eac3cd/method_result.json",
+    "quant_origin": "current_run",
+    "calibration_hashes": [
+      [
+        "128",
+        "05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6",
+        "9fa0fafb6c8858c44b3f7ece4aa472c8a0793c7a5d1e86e24ea7edba33364330"
+      ],
+      [
+        "1024",
+        "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+        "d16465b385c037c1b17be73a4d62ff5f2a0a25edc552478fe414f4b373ffa83e"
+      ]
+    ],
+    "formal_code_sha256": "af494a61ff7cb0edf3ff38721af5aa853ac414174f98662b71499e80299e76d6",
+    "matched_screen": true,
+    "joint_error_change_pct": -6.719395480623625,
+    "top1_delta_vs_baseline_pp": -0.23000000000000398
+  },
+  "interaction": {
+    "screen": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/lsvit_controls/mr_interaction/seed3407_interaction_6ce9ed5bfc77/mr_screen.json",
+    "means": {
+      "fp_nmse": 0.020021259108777462,
+      "fc1_w3a3_nmse": 0.5274988555589978,
+      "fc2_w3a3_nmse": 0.16638210298013614,
+      "joint_w3a3_nmse": 0.6609223676010538,
+      "positive_interaction_nmse": 0.031322587470520726,
+      "harmful_token_fraction": 0.3637273953045685,
+      "mean_interaction_weight": 1.013659360848506
+    },
+    "fp_teacher_kl": 0.07283517718315125,
+    "seconds": 416.3091255798936,
+    "steps": [
+      2000,
+      3000,
+      4000,
+      3000,
+      4000,
+      3000,
+      4000,
+      3000,
+      2000,
+      2000,
+      4000,
+      2000
+    ],
+    "shared_starts": [
+      "9fff70660ef33610d9311fd41913c808970bd3db293aa9eb05d255b63fa2069c",
+      "04acf1efe0f523b915ce7f229f03dc2ff0a71bcdf547997acfec0d8457a5156f",
+      "001d754ebf5bad90eab144182e81a22424b011b3451e1c5be1d7ef643e38708f",
+      "3cd5ebf67b9277421d93af05e77573f1536e99e0a0145f61d73a8508499b4f3c",
+      "6b41cb50c12329c2652fc61663f5d5921b90ffab63a860fe03dd84c583458d99",
+      "720e377f44adbf0d5e124299090679fcf94baab1db7cb9b225173359df23a24e",
+      "215651cfa48bb2642c38a4239d49c5ae683e0b217cf5474e13745a999aadf5a3",
+      "6e05fc8fd87ee470c602f3ab3e4bf662a7b4bd2bb1d7eedf0d64a49368f2eea1",
+      "abcac651d1d72f2b7c32a970e08c1cb6bfbfaab7c707c69e2094685082bec18f",
+      "3d38618040321f4e60cd0bd107d4c34cfdc17c80cf9d1daf74dd6d0a9254fc3c",
+      "2352424a822db484299bb54c97d5cc0d245160fea9a6bc9934f1e08cd4376885",
+      "9aeb80ed4c08be512de849b28e16f0fe81ccf046ec8559c335a63ec991a7d0e6"
+    ],
+    "fp_sha": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+    "data_hashes": [
+      [
+        "1024",
+        "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+        "d16465b385c037c1b17be73a4d62ff5f2a0a25edc552478fe414f4b373ffa83e"
+      ]
+    ],
+    "weights_tensor_sha256": "253e43752f33baaab9f96588cc1a4462da929712c507e55dfe1526b4c172c1ba",
+    "metrics": {
+      "top1": 66.752,
+      "top5": 88.704,
+      "loss": 1.3184132696723938
+    },
+    "quant_result": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261118_172738_mr_interaction_interaction_seed3407_e6721774f85d/method_result.json",
+    "quant_origin": "current_run",
+    "calibration_hashes": [
+      [
+        "128",
+        "05cf028aa8c3b391709537da84c7e2cebc0ba6f9e1142a56805643dbafd582a6",
+        "9fa0fafb6c8858c44b3f7ece4aa472c8a0793c7a5d1e86e24ea7edba33364330"
+      ],
+      [
+        "1024",
+        "51d8b2274e046eb460e155b239c620c4144fe707d2992c70c3ea361eb109315b",
+        "d16465b385c037c1b17be73a4d62ff5f2a0a25edc552478fe414f4b373ffa83e"
+      ]
+    ],
+    "formal_code_sha256": "af494a61ff7cb0edf3ff38721af5aa853ac414174f98662b71499e80299e76d6",
+    "matched_screen": true,
+    "joint_error_change_pct": -6.845894505980244,
+    "top1_delta_vs_baseline_pp": -0.30000000000001137,
+    "top1_delta_vs_joint_pp": -0.07000000000000739
+  }
+}
