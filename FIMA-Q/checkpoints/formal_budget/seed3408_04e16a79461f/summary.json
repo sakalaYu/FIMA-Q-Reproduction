@@ -1,0 +1,277 @@
+{
+  "arms": {
+    "uniform": {
+      "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261126_190032_formalbudget_uniform_seed3408_04e16a79461f/formal_budget_result.json",
+      "top1": 65.834,
+      "delta_vs_uniform_pp": 0.0,
+      "transformer_updates": 120000,
+      "reconstruction_seconds": 5638.092514559627,
+      "blocks": {
+        "blocks.0": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.11017783569813566,
+          "probe_seconds": 2.028274342417717
+        },
+        "blocks.1": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.20726737979800383,
+          "probe_seconds": 1.9755771160125732
+        },
+        "blocks.2": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.2503211551503195,
+          "probe_seconds": 1.9404636397957802
+        },
+        "blocks.3": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.2959026147725903,
+          "probe_seconds": 1.6183785498142242
+        },
+        "blocks.4": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.36547608786090274,
+          "probe_seconds": 1.7846164852380753
+        },
+        "blocks.5": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.5259748525683986,
+          "probe_seconds": 1.9116159230470657
+        },
+        "blocks.6": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.8210422611792214,
+          "probe_seconds": 1.9212308675050735
+        },
+        "blocks.7": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.8224151584033091,
+          "probe_seconds": 2.1538756489753723
+        },
+        "blocks.8": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.7842817844340331,
+          "probe_seconds": 1.9863335639238358
+        },
+        "blocks.9": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.709959754329995,
+          "probe_seconds": 1.8436938226222992
+        },
+        "blocks.10": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.6232840937237989,
+          "probe_seconds": 1.82814172655344
+        },
+        "blocks.11": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.6158858724743461,
+          "probe_seconds": 2.155605733394623
+        }
+      }
+    },
+    "residual": {
+      "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261126_204644_formalbudget_residual_seed3408_04e16a79461f/formal_budget_result.json",
+      "top1": 66.224,
+      "delta_vs_uniform_pp": 0.39000000000000057,
+      "transformer_updates": 120000,
+      "reconstruction_seconds": 6306.812137134373,
+      "blocks": {
+        "blocks.0": {
+          "steps": 7000,
+          "probe_step": 1000,
+          "hard_nmse": 0.11020929888003597,
+          "probe_seconds": 1.9413845837116241
+        },
+        "blocks.1": {
+          "steps": 7000,
+          "probe_step": 1000,
+          "hard_nmse": 0.21079287937957708,
+          "probe_seconds": 2.094607897102833
+        },
+        "blocks.2": {
+          "steps": 7000,
+          "probe_step": 1000,
+          "hard_nmse": 0.25728713664809183,
+          "probe_seconds": 1.6629213392734528
+        },
+        "blocks.3": {
+          "steps": 7000,
+          "probe_step": 1000,
+          "hard_nmse": 0.302318929770258,
+          "probe_seconds": 2.133634850382805
+        },
+        "blocks.4": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.3708671553778998,
+          "probe_seconds": 2.078919857740402
+        },
+        "blocks.5": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.5238611204869322,
+          "probe_seconds": 1.8770965188741684
+        },
+        "blocks.6": {
+          "steps": 13000,
+          "probe_step": 1000,
+          "hard_nmse": 0.8047179354662161,
+          "probe_seconds": 2.1679705381393433
+        },
+        "blocks.7": {
+          "steps": 13000,
+          "probe_step": 1000,
+          "hard_nmse": 0.8146467805649021,
+          "probe_seconds": 2.2043145075440407
+        },
+        "blocks.8": {
+          "steps": 13000,
+          "probe_step": 1000,
+          "hard_nmse": 0.7772254165218079,
+          "probe_seconds": 2.254426032304764
+        },
+        "blocks.9": {
+          "steps": 13000,
+          "probe_step": 1000,
+          "hard_nmse": 0.7039301031260077,
+          "probe_seconds": 2.328245557844639
+        },
+        "blocks.10": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.6212232558001148,
+          "probe_seconds": 2.1679507791996
+        },
+        "blocks.11": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.6168665476337734,
+          "probe_seconds": 2.2555548176169395
+        }
+      }
+    },
+    "shuffled": {
+      "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261126_204739_formalbudget_shuffled_seed3408_04e16a79461f/formal_budget_result.json",
+      "top1": 65.962,
+      "delta_vs_uniform_pp": 0.1280000000000001,
+      "transformer_updates": 120000,
+      "reconstruction_seconds": 6140.104319170117,
+      "blocks": {
+        "blocks.0": {
+          "steps": 7000,
+          "probe_step": 1000,
+          "hard_nmse": 0.11020929888003597,
+          "probe_seconds": 2.262615166604519
+        },
+        "blocks.1": {
+          "steps": 13000,
+          "probe_step": 1000,
+          "hard_nmse": 0.21068864742934534,
+          "probe_seconds": 2.0172256156802177
+        },
+        "blocks.2": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.2530594471751861,
+          "probe_seconds": 1.904156669974327
+        },
+        "blocks.3": {
+          "steps": 7000,
+          "probe_step": 1000,
+          "hard_nmse": 0.29659519299577747,
+          "probe_seconds": 2.0768280923366547
+        },
+        "blocks.4": {
+          "steps": 13000,
+          "probe_step": 1000,
+          "hard_nmse": 0.3638530354198069,
+          "probe_seconds": 2.0413588732481003
+        },
+        "blocks.5": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.5026892430437606,
+          "probe_seconds": 2.092887595295906
+        },
+        "blocks.6": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.7824493292284669,
+          "probe_seconds": 2.0700406953692436
+        },
+        "blocks.7": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.7764871942976647,
+          "probe_seconds": 2.1734421104192734
+        },
+        "blocks.8": {
+          "steps": 13000,
+          "probe_step": 1000,
+          "hard_nmse": 0.7524429243695329,
+          "probe_seconds": 2.1315433755517006
+        },
+        "blocks.9": {
+          "steps": 13000,
+          "probe_step": 1000,
+          "hard_nmse": 0.6844207420262086,
+          "probe_seconds": 2.388187862932682
+        },
+        "blocks.10": {
+          "steps": 7000,
+          "probe_step": 1000,
+          "hard_nmse": 0.6120545806613258,
+          "probe_seconds": 1.6361159458756447
+        },
+        "blocks.11": {
+          "steps": 7000,
+          "probe_step": 1000,
+          "hard_nmse": 0.6079588661075183,
+          "probe_seconds": 2.049914613366127
+        }
+      }
+    }
+  },
+  "complete": true,
+  "residual_vs_shuffled_pp": 0.26200000000000045,
+  "uniform_calibrated_sha256": "29d2635ac5841124d53d7a83af1597b32039bb0126d3ea084443387656c3ed47",
+  "identity": {
+    "seed": 3408,
+    "dataset": "/root/autodl-tmp/FIMA-Q-Reproduction/imagenet_fimaq",
+    "fp_checkpoint": null,
+    "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+    "mr_weights_sha256": "575fe9b21bc14229455e84bf38e35136b68d8c3f440ed2fa80c75c85317e6313",
+    "calibration_hashes": [
+      [
+        "128",
+        "15db8a3d8c5cd54ee531b7dc5f16d625984989f59cb52f9f64449c018db560da",
+        "717544d885dc5a60613fcf804ce93b1ffbc1baa16f72e0a22160e3125528bc38"
+      ],
+      [
+        "1024",
+        "e4e3f878bb1a4544baa55cd13440283a5518294f7dc88d18a31200d5de0c9a04",
+        "a549d62a2762d7f187ba50e270d7e1750936699a5d43a1ce2162a60afaf6a6bb"
+      ]
+    ],
+    "code_sha256": "1cc4f034da64514298b33f4b8e49e58f4dfa37ef5fceb72c4a1edfc13fca1386",
+    "runner_sha256": "5c71334e3edab2763ff46dc56d211a426e49b74ba627b7e3cca1c88d4fe3f7da",
+    "versions": {
+      "torch": "2.2.2+cu121",
+      "torchvision": "0.17.2+cu121",
+      "timm": "0.9.2",
+      "numpy": "1.26.4"
+    }
+  }
+}
