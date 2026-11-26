@@ -15,6 +15,7 @@ import random
 import json
 import math
 import hashlib
+from pathlib import Path
 
 import utils.datasets as mydatasets
 from utils.calibrator import QuantCalibrator
@@ -168,6 +169,7 @@ def get_args_parser():
     parser.add_argument('--ls-mr-steps', type=int, default=3000)
     parser.add_argument('--ls-mr-budget', choices=('uniform', 'residual', 'shuffled', 'gain-uniform', 'gain'),
                         default='uniform')
+    parser.add_argument('--formal-budget-plan', help='Locked DPLR step assignment from run_formal_budget.py')
     parser.add_argument('--fp-checkpoint', help='Path to the floating-point model weights')
     parser.add_argument('--expected-fp-model-sha256', help='Require this floating-point tensor fingerprint')
     parser.add_argument('--adaptation-steps', type=int, default=500)
@@ -245,6 +247,7 @@ def load_model(model, args, device, mode='calibrate', strict=False):
 
 def main(args):
     pair_snapshot = None
+    formal_budget = None
     if args.ls_pair_dir or args.ls_mr != 'none':
         from utils.lsvit_pair import calibration_hashes, read_snapshot, save_snapshot
         os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
@@ -285,6 +288,12 @@ def main(args):
     cfg.recon_iters = args.recon_iters if hasattr(args, 'recon_iters') else getattr(cfg, 'recon_iters', 20000)
     if args.method_adaptation == 'lsvit':
         cfg.optim_metric = 'lsvit'
+    if args.formal_budget_plan:
+        from utils.formal_budget import validate_plan
+        formal_plan = json.loads(Path(args.formal_budget_plan).read_text(encoding='utf-8'))
+        validate_plan(formal_plan, seed=args.seed, steps=cfg.recon_iters, k=cfg.k)
+        if (cfg.optim_metric, cfg.dis_mode, cfg.optim_mode, cfg.drop_prob) != ('fisher_dplr', 'q', 'qdrop', 0.5):
+            raise ValueError('Formal budget requires DPLR with q refresh and QDrop 0.5')
     for name, value in vars(cfg).items():
         logging.info(f"{name}: {value}")
         
@@ -382,6 +391,14 @@ def main(args):
         if args.ls_mr == 'relu':
             mr_weights_sha = load_mlp_reconstruction(model, args.ls_mr_dir, args.seed, args.ls_mr_steps,
                                                     model_sha, mr_data_hashes, budget=args.ls_mr_budget)
+        if args.formal_budget_plan:
+            from utils.formal_budget import fresh_probe_batches
+            formal_hashes = calibration_hashes(os.path.join(root_path, 'output.log'))
+            if (formal_hashes != formal_plan['calibration_hashes'] or mr_weights_sha != formal_plan['mr_weights_sha256']
+                    or model_sha != formal_plan['fp_model_sha256']):
+                raise RuntimeError('Formal budget calibration or model fingerprint differs from the reference')
+            batches, formal_probe = fresh_probe_batches(g, Path(data_path).resolve(), args.seed, formal_hashes)
+            formal_budget = dict(seed=args.seed, budgets=formal_plan['budgets'], probe_batches=batches)
         seed_all(args.seed)
     
     logging.info('Building validation dataloader ...')
@@ -424,6 +441,13 @@ def main(args):
                 )
 
     if args.optimize:
+        if formal_budget:
+            from utils.lsvit_pair import fingerprint
+            calibrated_sha = fingerprint(model.state_dict())
+            if (formal_plan['variant'] != 'uniform' and
+                    (calibrated_sha != formal_plan['uniform_calibrated_sha256']
+                     or formal_probe['tensor_sha256'] != formal_plan['uniform_probe_sha256'])):
+                raise RuntimeError('Calibrated quantizers or probe images differ from the uniform run')
         logging.info('Building calibrator ...')
         if pair_snapshot or mr_optim_loader is not None:
             # Start both augmentation and reconstruction from the same RNG state.
@@ -473,13 +497,14 @@ def main(args):
             p1=cfg.p1, p2=cfg.p2, iters=cfg.recon_iters,
             robust_beta=cfg.robust_beta, robust_temperature=cfg.robust_temperature,
             qk_joint_options=qk_options, attention_relation_options=relation_options,
-            probe_kd_options=probe_options, endpoint_options=endpoint_options, ls_mix_options=ls_mix_options)
+            probe_kd_options=probe_options, endpoint_options=endpoint_options, ls_mix_options=ls_mix_options,
+            formal_budget=formal_budget)
         reconstruction_started = time.perf_counter()
         block_reconstructor.reconstruct_model(quant_act=True, mode=cfg.optim_mode, drop_prob=cfg.drop_prob, keep_gpu=cfg.keep_gpu)
         if device.type == 'cuda':
             torch.cuda.synchronize(device)
-        logging.info('Block reconstruction elapsed seconds: {:.3f}'.format(
-            time.perf_counter() - reconstruction_started))
+        reconstruction_seconds = time.perf_counter() - reconstruction_started
+        logging.info('Block reconstruction elapsed seconds: {:.3f}'.format(reconstruction_seconds))
         logging.info("{} - {} guided block reconstruction finished.".format(get_cur_time(), cfg.optim_metric))
         if qk_options:
             endpoint_result['qk_blocks'] = block_reconstructor.qk_joint_results
@@ -589,6 +614,16 @@ def main(args):
         os.path.join(root_path, 'output.log'),
         os.path.join(logs_dir, os.path.basename(root_path) + '.log')
     )
+    if formal_budget:
+        from utils.lsvit_pair import write_json
+        rows = block_reconstructor.formal_budget_results
+        if {name: row['steps'] for name, row in rows.items()} != formal_plan['budgets']:
+            raise RuntimeError('Formal budget results do not account for all planned Transformer updates')
+        write_json(Path(root_path) / 'formal_budget_result.json', dict(
+            status='complete', plan=formal_plan, cfg=vars(cfg), probe=formal_probe, blocks=rows,
+            final=endpoint_result['final'], checkpoint=endpoint_result['baseline_checkpoint'],
+            calibrated_sha256=calibrated_sha,
+            reconstruction_seconds=reconstruction_seconds))
     if args.endpoint_task != 'none':
         endpoint_result['status'] = 'smoke_complete' if args.skip_final_validation else 'complete'
         endpoint_result['run_id'] = os.path.basename(root_path)
