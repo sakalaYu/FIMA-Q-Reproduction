@@ -88,7 +88,7 @@ class BlockReconstructor(QuantCalibrator):
                  dis_mode='q', p1=1., p2=1., iters=20000,
                  robust_beta=0.5, robust_temperature=0.5, qk_joint_options=None,
                  attention_relation_options=None, probe_kd_options=None, endpoint_options=None,
-                 ls_mix_options=None):
+                 ls_mix_options=None, formal_budget=None):
         super().__init__(model, calib_loader)
         self.batch_size = optim_batch_size
         self.metric = metric
@@ -107,6 +107,8 @@ class BlockReconstructor(QuantCalibrator):
         self.endpoint_results = []
         self.ls_mix_options = ls_mix_options
         self.ls_mix_results = []
+        self.formal_budget = formal_budget
+        self.formal_budget_results = {}
         if qk_joint_options and attention_relation_options:
             raise ValueError('Run attention relations separately from QK pre-calibration')
         if attention_relation_options and metric != 'fisher_dplr':
@@ -436,7 +438,17 @@ class BlockReconstructor(QuantCalibrator):
             self.new_fisher_ro(block, device)
         endpoint = self.endpoint_options if name.startswith('blocks.') else None
         ls_mix = self.ls_mix_options if name.startswith('blocks.') and loss_func.rec_loss == 'lsvit' else None
+        budget_probe = self.formal_budget and name in self.formal_budget['budgets']
+        if budget_probe:
+            from utils.formal_budget import PILOT_STEPS, hard_probe_nmse
         for it in range(iters):
+            if budget_probe and it == PILOT_STEPS:
+                started = time.perf_counter()
+                score = hard_probe_nmse(self, block, self.formal_budget['probe_batches'], device)
+                self.formal_budget_results[name] = dict(steps=iters, probe_step=it, hard_nmse=score,
+                    probe_seconds=time.perf_counter() - started)
+                logging.info('Formal budget probe %s: hard NMSE %.8g at step %d; block budget %d',
+                             name, score, it, iters)
             if ls_mix and it == iters // 2:
                 from utils.lsvit_adapter import probe_ls_mix
                 pair_dir = ls_mix.get('pair_dir') if name == 'blocks.0' else None
@@ -587,8 +599,15 @@ class BlockReconstructor(QuantCalibrator):
                 self.qk_joint_results.append(calibrate_qk_block(
                     self, name, block, device, self.qk_joint_options))
             logging.info('adaround training for {} ...'.format(name))
-            self.reconstruct_single_block(name, block, device, iters=self.iters,
-                                          quant_act=quant_act, mode=mode, drop_prob=drop_prob)
+            if self.formal_budget:
+                from utils.hard_scale_repair import isolated_rng
+                steps = self.formal_budget['budgets'].get(name, self.iters)
+                with isolated_rng(device, self.formal_budget['seed'] + 31000 + idx):
+                    self.reconstruct_single_block(name, block, device, iters=steps,
+                                                  quant_act=quant_act, mode=mode, drop_prob=drop_prob)
+            else:
+                self.reconstruct_single_block(name, block, device, iters=self.iters,
+                                              quant_act=quant_act, mode=mode, drop_prob=drop_prob)
             if self.qk_joint_options and name.startswith('blocks.') and hasattr(block, 'attn'):
                 from utils.qk_joint import post_round_teacher_kl
                 result = self.qk_joint_results[-1]

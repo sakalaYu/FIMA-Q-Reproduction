@@ -5,6 +5,14 @@ def validate_lsvit_control(args):
     control = args.lsvit_control
     pair = getattr(args, 'ls_pair_dir', None)
     mr = getattr(args, 'ls_mr', 'none')
+    formal_budget = getattr(args, 'formal_budget_plan', None)
+    if formal_budget and (pair or mr != 'relu' or args.method_adaptation != 'none' or not args.optimize
+                          or args.load_calibrate_checkpoint or args.load_optimize_checkpoint
+                          or args.ls_mr_steps != 3000 or args.ls_mr_budget != 'uniform'
+                          or args.qwt or args.endpoint_task != 'none' or args.endpoint_mode != 'none'
+                          or args.probe_kd != 'none' or args.attention_relation != 'none'
+                          or args.activation_codebook != 'none'):
+        raise ValueError('Formal budget requires fresh DPLR reconstruction with saved uniform ReLU MR')
     if getattr(args, 'ls_mr_budget', 'uniform') != 'uniform' and (
             mr not in ('screen', 'relu') or args.ls_mr_steps != 3000):
         raise ValueError('Staged allocation requires a 36,000-step ViT-S MR screen or ReLU run')
@@ -16,8 +24,8 @@ def validate_lsvit_control(args):
                 or args.qk_joint_variant != 'none' or args.ls_mr_steps < 1
                 or bool(args.ls_mr_dir) != needs_directory or args.optimize == screen
                 or args.skip_final_validation != screen or (screen and args.method_adaptation != 'none')
-                or (not screen and (args.method_adaptation != 'lsvit' or control != 'fixed'))):
-            raise ValueError('MR requires fresh ViT-S with full Hadamard and fixed LS for quantization')
+                or (not screen and not formal_budget and (args.method_adaptation != 'lsvit' or control != 'fixed'))):
+            raise ValueError('MR requires fresh ViT-S with full Hadamard and a supported reconstruction protocol')
     if pair:
         prepare = (args.method_adaptation == 'none' and args.calibrate and not args.optimize
                    and not args.load_optimize_checkpoint and not args.load_calibrate_checkpoint)
