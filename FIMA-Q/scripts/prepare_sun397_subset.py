@@ -4,9 +4,10 @@ import argparse
 from bisect import bisect_left
 import hashlib
 import json
+import os
 from pathlib import Path
 import random
-import re
+import subprocess
 import sys
 from tempfile import NamedTemporaryFile
 
@@ -14,18 +15,25 @@ from tempfile import NamedTemporaryFile
 REPO = 'tanganke/sun397'
 REVISION = '9c4afd6'
 TRAIN_ROWS = 19850
+TRAIN_SHARDS = 18
 COUNT = 1024 + 128
 SAMPLE_SEED = 3408
-SHARD_PATTERN = re.compile(r'data/train-(\d+)-of-(\d+)\.parquet')
 
 
-def get_shards(paths):
-    files = sorted(path for path in paths if SHARD_PATTERN.fullmatch(path))
-    matches = [SHARD_PATTERN.fullmatch(path) for path in files]
-    if (not matches or any(int(m[2]) != len(matches) for m in matches)
-            or [int(m[1]) for m in matches] != list(range(len(matches)))):
-        raise ValueError('Missing or inconsistent SUN397 train shards')
-    return files
+def download_shard(filename, scratch):
+    path = scratch / filename
+    if path.is_file():
+        return path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    partial = path.with_suffix('.parquet.part')
+    endpoint = os.environ.get('HF_ENDPOINT', 'https://huggingface.co').rstrip('/')
+    url = f'{endpoint}/datasets/{REPO}/resolve/{REVISION}/{filename}'
+    subprocess.run([
+        'curl', '-4', '--fail', '--location', '--retry', '2', '--retry-delay', '2',
+        '--connect-timeout', '15', '--continue-at', '-', '--output', str(partial), url,
+    ], check=True)
+    partial.replace(path)
+    return path
 
 
 def atomic_write(path, data):
@@ -86,15 +94,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, default=Path.home() / 'autodl-tmp/SUN397_train_subset')
     parser.add_argument('--tools-dir', type=Path, help='Optional separate directory containing PyArrow')
+    parser.add_argument('--local-shards', type=Path, help='Read parquet files from the data/ subdirectory')
     args = parser.parse_args()
     if args.tools_dir:
         sys.path.insert(0, str(args.tools_dir.expanduser().resolve()))
-    try:
-        from huggingface_hub import HfApi, hf_hub_download
-        import pyarrow.parquet
-    except ImportError as error:
-        parser.error(f'Install PyArrow in your tools directory and use the fimaq environment: {error}')
-
     destination = args.output.expanduser().resolve()
     progress = destination / 'sun397_subset.json'
     identity = subset_id()
@@ -109,22 +112,40 @@ def main():
             return
     elif destination.exists() and any(destination.iterdir()):
         parser.error(f'Use an empty output directory: {destination}')
-    destination.mkdir(parents=True, exist_ok=True)
-    save_json(progress, state)
-    api = HfApi()
-    files = get_shards(api.list_repo_files(REPO, repo_type='dataset', revision=REVISION))
+    try:
+        import pyarrow.parquet
+    except ImportError as error:
+        parser.error(f'Install PyArrow in your tools directory and use the fimaq environment: {error}')
+
+    # The split layout is fixed at REVISION. No repository listing is needed.
+    files = [f'data/train-{i:05d}-of-{TRAIN_SHARDS:05d}.parquet' for i in range(TRAIN_SHARDS)]
     done = state['shards']
     if [item['file'] for item in done] != files[:len(done)]:
         raise ValueError('Saved shard list differs from the pinned SUN397 revision')
+    local = args.local_shards.expanduser().resolve() if args.local_shards else None
+    if local is not None:
+        for filename in files[len(done):]:
+            if not (local / filename).is_file():
+                parser.error(f'Missing local shard: {local / filename}')
+    destination.mkdir(parents=True, exist_ok=True)
+    save_json(progress, state)
     offset = done[-1]['stop_row'] if done else 0
     scratch = destination / '.downloads'
     for i, filename in enumerate(files[len(done):], start=len(done) + 1):
-        print(f'Downloading train shard {i}/{len(files)}: {filename}', flush=True)
-        path = Path(hf_hub_download(REPO, filename, repo_type='dataset', revision=REVISION, local_dir=scratch))
+        action = 'Reading local' if local is not None else 'Downloading'
+        print(f'{action} train shard {i}/{len(files)}: {filename}', flush=True)
+        try:
+            path = local / filename if local is not None else download_shard(filename, scratch)
+        except FileNotFoundError:
+            parser.exit(1, 'curl was not found. Install curl or supply --local-shards.\n')
+        except subprocess.CalledProcessError as error:
+            parser.exit(1, f'Could not download {filename} (curl exit {error.returncode}). '
+                        'Check the connection and rerun the same command to resume.\n')
         offset, images = extract_shard(path, destination, offset, identity['rows'])
         done.append(dict(file=filename, stop_row=offset, images=images))
         save_json(progress, state)
-        path.unlink()  # Discard our temporary shard after its selected images and manifest are saved.
+        if local is None:
+            path.unlink()  # Discard the temporary download after saving the images and manifest.
         print(f'Saved {sum(len(item["images"]) for item in done)}/{COUNT} images', flush=True)
     if offset != TRAIN_ROWS:
         raise RuntimeError(f'Expected {TRAIN_ROWS} SUN397 train rows; found {offset}')
