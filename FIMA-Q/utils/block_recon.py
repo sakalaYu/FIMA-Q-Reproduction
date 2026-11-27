@@ -88,7 +88,8 @@ class BlockReconstructor(QuantCalibrator):
                  dis_mode='q', p1=1., p2=1., iters=20000,
                  robust_beta=0.5, robust_temperature=0.5, qk_joint_options=None,
                  attention_relation_options=None, probe_kd_options=None, endpoint_options=None,
-                 ls_mix_options=None, formal_budget=None):
+                 ls_mix_options=None, formal_budget=None,
+                 token_weight_mode='none', token_weight_cls_scale=16.0):
         super().__init__(model, calib_loader)
         self.batch_size = optim_batch_size
         self.metric = metric
@@ -109,6 +110,9 @@ class BlockReconstructor(QuantCalibrator):
         self.ls_mix_results = []
         self.formal_budget = formal_budget
         self.formal_budget_results = {}
+        self.token_weight_mode = token_weight_mode
+        self.token_weight_cls_scale = token_weight_cls_scale
+        self.token_weight_results = {}
         if qk_joint_options and attention_relation_options:
             raise ValueError('Run attention relations separately from QK pre-calibration')
         if attention_relation_options and metric != 'fisher_dplr':
@@ -286,7 +290,7 @@ class BlockReconstructor(QuantCalibrator):
             self.set_block_mode(_block, 'raw')
         torch.cuda.empty_cache()
 
-    def new_fisher_ro(self, block, device):
+    def new_fisher_ro(self, block, device, token_scores=False):
         print('updating fisher information matrix ...')
         hooks = []
         hooks.append(block.register_forward_hook(self.outp_forward_hook))
@@ -306,6 +310,9 @@ class BlockReconstructor(QuantCalibrator):
             loss.backward()
             torch.cuda.empty_cache()
         raw_grad = torch.cat(block.tmp_grad, dim=0)
+        # The cached Fisher backward already has one gradient per image and token.
+        patch_scores = (raw_grad[:, 1:].norm(dim=-1).mean(dim=0)
+                        if token_scores else None)
         raw_grad = raw_grad.reshape(raw_grad.shape[0], -1).abs()
         raw_grad = raw_grad.mean(dim=0).unsqueeze(0) # (1, N)
         q_out = torch.cat(block.tmp_out, dim=0).to(block.raw_out.device)
@@ -332,6 +339,7 @@ class BlockReconstructor(QuantCalibrator):
         # block.inverse_B = torch.eye(block.raw_grad.shape[0]).to(device)
         del raw_grad, delta_out
         torch.cuda.empty_cache()
+        return patch_scores
 
     def new_forward_secant(self, block, device, training_drop_prob):
         """Refresh signed directions and KL anchors without backward.
@@ -429,6 +437,7 @@ class BlockReconstructor(QuantCalibrator):
         w_optimizer = torch.optim.Adam(w_params)
         a_optimizer = torch.optim.Adam(a_params, lr=lr) if len(a_params) != 0 else None
         a_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(a_optimizer, T_max=iters, eta_min=0.) if len(a_params) != 0 else None
+        token_mode = self.token_weight_mode if name.startswith('blocks.') else 'none'
         loss_func = LossFunction(block, round_loss='relaxation', weight=weight, max_count=iters, 
                                  rec_loss=self.metric if 'head' not in name else 'kl_div',
                                  b_range=b_range, decay_start=0, warmup=warmup, p1=self.p1, p2=self.p2,
@@ -441,7 +450,8 @@ class BlockReconstructor(QuantCalibrator):
         budget_probe = self.formal_budget and name in self.formal_budget['budgets']
         if budget_probe:
             from utils.formal_budget import PILOT_STEPS, hard_probe_nmse
-        for it in range(iters):
+        smoke = self.formal_budget and self.formal_budget.get('token_smoke_steps')
+        for it in range(smoke or iters):
             if budget_probe and it == PILOT_STEPS:
                 started = time.perf_counter()
                 score = hard_probe_nmse(self, block, self.formal_budget['probe_batches'], device)
@@ -494,7 +504,21 @@ class BlockReconstructor(QuantCalibrator):
             elif loss_func.rec_loss in ["fisher_lr", "fisher_diag", "fisher_dplr", "robust_fisher"] :
                 if self.dis_mode in ['q']:
                     if it % i_change == 0 and (it > 0 or self.metric != 'robust_fisher'):
-                        self.new_fisher_ro(block, device)
+                        patch_scores = self.new_fisher_ro(
+                            block, device, token_scores=(it == 0 and token_mode == 'gradient'))
+                        if it == 0 and token_mode != 'none':
+                            from utils.token_weight import matched_token_weights
+                            if cur_out.ndim != 3 or cur_out.size(1) < 2:
+                                raise ValueError('Token weighting requires CLS and patch token outputs')
+                            weights, source = matched_token_weights(
+                                cur_out.size(1), self.token_weight_cls_scale, device, patch_scores)
+                            loss_func.token_scale = weights.sqrt().view(1, -1, 1)
+                            self.token_weight_results[name] = dict(
+                                source=source, tokens=weights.numel(), cls=float(weights[0]),
+                                patch_sum=float(weights[1:].sum()), patch_min=float(weights[1:].min()),
+                                patch_max=float(weights[1:].max()), patch_std=float(weights[1:].std(unbiased=False)))
+                            logging.info('Token weighting %s: %s',
+                                         name, self.token_weight_results[name])
                         loss_func.update_fisher = True
                 elif self.dis_mode in ['qf']:
                     if it in range(self.k) and (it > 0 or self.metric != 'robust_fisher'):
@@ -535,6 +559,8 @@ class BlockReconstructor(QuantCalibrator):
                     err = err + relation.loss(idx, loss_func.last_rec_loss, coefficient, it + 1)
                 if probe is not None:
                     err = err + probe.loss(out_quant[:, 0], idx, it + 1, iters)
+                if smoke and not bool(torch.isfinite(err)):
+                    raise RuntimeError(f'Non-finite reconstruction loss in smoke test: {name}, step {it + 1}')
                 err.backward()
             w_optimizer.step()
             if quant_act:
@@ -617,6 +643,8 @@ class BlockReconstructor(QuantCalibrator):
                 logging.info('QK post-round result: %s', json.dumps(result, sort_keys=True))
             self.quanted_blocks.append(name)
             logging.info('finished reconstructing {}.'.format(name))
+            if self.formal_budget and self.formal_budget.get('token_smoke_steps') and name == 'blocks.0':
+                return
         for name, module in self.model.named_modules():
             if hasattr(module, 'mode'):
                 module.mode = 'quant_forward'
@@ -649,6 +677,7 @@ class LossFunction:
         self.round_loss = round_loss
         self.weight = weight
         self.rec_loss = rec_loss
+        self.token_scale = None
         self.loss_start = max_count * warmup
         self.p1 = p1
         self.p2 = p2
@@ -716,7 +745,10 @@ class LossFunction:
             else:
                 rec_loss = 2 * ((1 - self.ls_mix_weight) * diagonal + self.ls_mix_weight * rank_one)
         elif self.rec_loss == 'fisher_dplr':
-            cha = (pred - tgt).abs().reshape(pred.shape[0], -1)
+            error = (pred - tgt).abs()
+            if self.token_scale is not None:
+                error = error * self.token_scale
+            cha = error.reshape(pred.shape[0], -1)
             A = cha.unsqueeze(1) @ grad.abs().transpose(0, 1)
             loss_1 = (A @ self.block.inverse_B @ A.transpose(1, 2)).mean()
             loss_2 = (cha.pow(2) * grad.abs().mean(dim=0)).mean()

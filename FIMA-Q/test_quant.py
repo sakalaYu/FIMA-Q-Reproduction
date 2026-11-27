@@ -170,6 +170,10 @@ def get_args_parser():
     parser.add_argument('--ls-mr-budget', choices=('uniform', 'residual', 'shuffled', 'gain-uniform', 'gain'),
                         default='uniform')
     parser.add_argument('--formal-budget-plan', help='Locked DPLR step assignment from run_formal_budget.py')
+    parser.add_argument('--token-weight', choices=('none', 'cls', 'gradient'), default='none',
+                        help='Matched CLS or Fisher patch weighting for the DPLR token experiment')
+    parser.add_argument('--token-weight-cls-scale', type=float, default=16.0,
+                        help='Quadratic CLS weight relative to the average patch weight')
     parser.add_argument('--fp-checkpoint', help='Path to the floating-point model weights')
     parser.add_argument('--expected-fp-model-sha256', help='Require this floating-point tensor fingerprint')
     parser.add_argument('--adaptation-steps', type=int, default=500)
@@ -288,12 +292,22 @@ def main(args):
     cfg.recon_iters = args.recon_iters if hasattr(args, 'recon_iters') else getattr(cfg, 'recon_iters', 20000)
     if args.method_adaptation == 'lsvit':
         cfg.optim_metric = 'lsvit'
+    token_smoke = False
     if args.formal_budget_plan:
         from utils.formal_budget import validate_plan
         formal_plan = json.loads(Path(args.formal_budget_plan).read_text(encoding='utf-8'))
         validate_plan(formal_plan, seed=args.seed, steps=cfg.recon_iters, k=cfg.k)
         if (cfg.optim_metric, cfg.dis_mode, cfg.optim_mode, cfg.drop_prob) != ('fisher_dplr', 'q', 'qdrop', 0.5):
             raise ValueError('Formal budget requires DPLR with q refresh and QDrop 0.5')
+        if 'token_weight' in formal_plan or args.token_weight != 'none':
+            from utils.token_weight import PROTOCOL
+            spec = formal_plan.get('token_weight', {})
+            token_smoke = spec.get('smoke')
+            if (args.token_weight == 'none' or type(token_smoke) is not bool
+                    or spec != dict(mode=args.token_weight, cls_scale=args.token_weight_cls_scale,
+                                    protocol=PROTOCOL, smoke=token_smoke)
+                    or formal_plan['variant'] != 'uniform' or formal_plan.get('sun397_dir')):
+                raise ValueError('Token weighting requires its matching uniform ImageNet DPLR plan')
     for name, value in vars(cfg).items():
         logging.info(f"{name}: {value}")
         
@@ -417,6 +431,9 @@ def main(args):
                   and formal_plan['uniform_formal_calibration'] != formal_calibration):
                 raise RuntimeError('SUN397 calibration differs from the uniform arm')
             formal_budget = dict(seed=args.seed, budgets=formal_plan['budgets'], probe_batches=batches)
+            if token_smoke:
+                from utils.token_weight import SMOKE_STEPS
+                formal_budget['token_smoke_steps'] = SMOKE_STEPS
         seed_all(args.seed)
     
     logging.info('Building validation dataloader ...')
@@ -462,7 +479,7 @@ def main(args):
         if formal_budget:
             from utils.lsvit_pair import fingerprint
             calibrated_sha = fingerprint(model.state_dict())
-            if (formal_plan['variant'] != 'uniform' and
+            if ('uniform_calibrated_sha256' in formal_plan and
                     (calibrated_sha != formal_plan['uniform_calibrated_sha256']
                      or formal_probe['tensor_sha256'] != formal_plan['uniform_probe_sha256'])):
                 raise RuntimeError('Calibrated quantizers or probe images differ from the uniform run')
@@ -516,13 +533,25 @@ def main(args):
             robust_beta=cfg.robust_beta, robust_temperature=cfg.robust_temperature,
             qk_joint_options=qk_options, attention_relation_options=relation_options,
             probe_kd_options=probe_options, endpoint_options=endpoint_options, ls_mix_options=ls_mix_options,
-            formal_budget=formal_budget)
+            formal_budget=formal_budget,
+            token_weight_mode=args.token_weight, token_weight_cls_scale=args.token_weight_cls_scale)
         reconstruction_started = time.perf_counter()
         block_reconstructor.reconstruct_model(quant_act=True, mode=cfg.optim_mode, drop_prob=cfg.drop_prob, keep_gpu=cfg.keep_gpu)
         if device.type == 'cuda':
             torch.cuda.synchronize(device)
         reconstruction_seconds = time.perf_counter() - reconstruction_started
         logging.info('Block reconstruction elapsed seconds: {:.3f}'.format(reconstruction_seconds))
+        if token_smoke:
+            from utils.lsvit_pair import write_json
+            rows = block_reconstructor.token_weight_results
+            if set(rows) != {'blocks.0'}:
+                raise RuntimeError('The smoke test did not exercise the first ViT block')
+            write_json(Path(root_path) / 'token_smoke_result.json', dict(
+                status='complete', plan=formal_plan, cfg=vars(cfg), probe=formal_probe,
+                calibrated_sha256=calibrated_sha, token_weight_blocks=rows,
+                reconstruction_seconds=reconstruction_seconds))
+            logging.info('Token smoke passed for %s', args.token_weight)
+            return
         logging.info("{} - {} guided block reconstruction finished.".format(get_cur_time(), cfg.optim_metric))
         if qk_options:
             endpoint_result['qk_blocks'] = block_reconstructor.qk_joint_results
@@ -643,6 +672,8 @@ def main(args):
             final=endpoint_result['final'], checkpoint=endpoint_result['baseline_checkpoint'],
             calibrated_sha256=calibrated_sha,
             **({'formal_calibration': formal_calibration} if formal_calibration is not None else {}),
+            **({'token_weight_blocks': block_reconstructor.token_weight_results}
+               if args.token_weight != 'none' else {}),
             reconstruction_seconds=reconstruction_seconds))
     if args.endpoint_task != 'none':
         endpoint_result['status'] = 'smoke_complete' if args.skip_final_validation else 'complete'
@@ -705,6 +736,12 @@ if __name__ == "__main__":
             parser.error('Probe KD holdout must be smaller than optim-size')
     if args.headwise_mode != 'all' and not args.headwise_hadamard:
         parser.error('--headwise-mode qk/vo requires --headwise-hadamard')
+    if args.token_weight != 'none':
+        if (args.model != 'vit_small' or args.ls_mr != 'relu' or not args.formal_budget_plan
+                or not args.optimize or not args.calibrate):
+            parser.error('Token weighting uses the locked ViT-S ReLU MR calibration and DPLR plan')
+        if not math.isfinite(args.token_weight_cls_scale) or args.token_weight_cls_scale < 1:
+            parser.error('--token-weight-cls-scale must be finite and at least one')
     if args.qk_joint_variant != 'none':
         if not args.headwise_hadamard or args.headwise_mode != 'all' or not args.optimize:
             parser.error('QK joint A/B/C requires --headwise-hadamard --headwise-mode all --optimize')

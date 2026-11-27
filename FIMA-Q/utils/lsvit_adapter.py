@@ -59,13 +59,16 @@ def estimate_lsvit(reconstructor, block, device):
     block.ls_diagonal, block.ls_root = finish_statistics(*accumulated)
 
 
-def ls_terms_per_image(prediction, target, diagonal, root):
-    error = (prediction - target).abs().flatten(1)
+def ls_terms_per_image(prediction, target, diagonal, root, token_weight=None):
+    error = (prediction - target).abs()
+    if token_weight is not None:
+        error = error * token_weight
+    error = error.flatten(1)
     return (error.square() * diagonal).sum(1), (error * root).sum(1).square()
 
 
-def ls_terms(prediction, target, diagonal, root):
-    diag, rank_one = ls_terms_per_image(prediction, target, diagonal, root)
+def ls_terms(prediction, target, diagonal, root, token_weight=None):
+    diag, rank_one = ls_terms_per_image(prediction, target, diagonal, root, token_weight)
     return diag.mean(), rank_one.mean()
 
 
