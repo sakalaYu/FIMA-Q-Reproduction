@@ -1,0 +1,138 @@
+2026-11-27 15:21:11 - start the process.
+Experiment directory: /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q-token/checkpoints/quant_result/20261127_152111_tokenweight_gradient_smoke_seed3408_292c1b5650c1
+Namespace(model='vit_small', config='./configs/3bit/best.py', dataset='/root/autodl-tmp/FIMA-Q-Reproduction/imagenet_fimaq', optim_size=1024, val_batch_size=64, num_workers=8, device='cuda', calibrate=True, load_calibrate_checkpoint=None, test_calibrate_checkpoint=False, optimize=True, load_optimize_checkpoint=None, test_optimize_checkpoint=False, print_freq=10, seed=3408, skip_final_validation=False, headwise_hadamard=True, headwise_mode='all', qk_joint_variant='none', qk_joint_protocol='v2_integer_zp', qk_joint_steps=300, qk_joint_batch_size=8, qk_joint_holdout=128, qk_joint_lr=0.003, qk_joint_eval_every=50, qk_joint_rotation_rank=0, qk_joint_min_relative_kl=0.0, qk_joint_reconstruction_loss='auto', attention_relation='none', relation_protocol='relation_v1', relation_weight=0.1, relation_queries=16, relation_start=0.2, relation_full=0.6, probe_kd='none', probe_kd_protocol='semantic_probe_v1', probe_kd_weight=0.05, probe_kd_temperature=2.0, probe_kd_ridge=0.1, probe_kd_holdout=128, probe_kd_code_sha='unrecorded', endpoint_task='none', endpoint_code_sha='unrecorded', endpoint_mode='none', endpoint_steps=2000, endpoint_lr=0.001, endpoint_bound=1.2, endpoint_holdout=128, endpoint_batch_size=8, endpoint_eval_every=200, qwt=False, qwt_samples=512, qwt_batch_size=8, qwt_ridge=0.0, qwt_branch_dtype='fp16', qwt_solver_threads=4, activation_codebook='none', method_adaptation='none', lsvit_control='c', ls_pair_dir=None, ls_mr='relu', ls_mr_dir='/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q-token/checkpoints/lsvit_controls/mr/seed3408_0391d2092ad4', ls_mr_steps=3000, ls_mr_budget='uniform', formal_budget_plan='/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q-token/checkpoints/token_weight/seed3408_292c1b5650c1/gradient_smoke.json', token_weight='gradient', token_weight_cls_scale=16.0, fp_checkpoint=None, expected_fp_model_sha256='a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c', adaptation_steps=500, optim_mode='qdrop', drop_prob=0.5, p1=1.0, p2=1.0, dis_mode='q', calib_size=128, calib_batch_size=32, optim_batch_size=32, recon_iters=10000, k=5, optim_metric='fisher_dplr')
+Successfully imported Config class!
+optim_size: 1024
+calib_size: 128
+optim_batch_size: 32
+calib_batch_size: 32
+w_bit: 3
+a_bit: 3
+qconv_a_bit: 8
+qhead_a_bit: 3
+calib_metric: mse
+matmul_head_channel_wise: True
+token_channel_wise: True
+eq_n: 128
+search_round: 3
+keep_gpu: True
+optim_metric: fisher_dplr
+temp: 20
+k: 5
+p1: 1.0
+p2: 1.0
+dis_mode: q
+optim_mode: qdrop
+drop_prob: 0.5
+robust_beta: 0.5
+robust_temperature: 0.5
+recon_iters: 10000
+Python random seeded: 3408
+Building model ...
+No checkpoint found at './checkpoints/vit_raw/vit_small_patch16_224.bin'
+Loading pretrained weights from Hugging Face hub (timm/vit_small_patch16_224.augreg_in21k_ft_in1k)
+[timm/vit_small_patch16_224.augreg_in21k_ft_in1k] Safe alternative available for 'pytorch_model.bin' (as 'model.safetensors'). Loading weights using safetensors.
+Endpoint FP model SHA256: a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c
+Applied head-wise Hadamard rotation: {'mode': 'all', 'blocks': 12, 'heads': 72, 'head_dims': [64], 'max_logit_abs_error': 2.9206275939941406e-06}
+Calibration cache: count=128 sample_sha256=15db8a3d8c5cd54ee531b7dc5f16d625984989f59cb52f9f64449c018db560da tensor_sha256=717544d885dc5a60613fcf804ce93b1ffbc1baa16f72e0a22160e3125528bc38
+Calibration cache: count=1024 sample_sha256=e4e3f878bb1a4544baa55cd13440283a5518294f7dc88d18a31200d5de0c9a04 tensor_sha256=a549d62a2762d7f187ba50e270d7e1750936699a5d43a1ce2162a60afaf6a6bb
+Building validation dataloader ...
+Wraping quantiztion modules (reparam: True) ...
+2026-11-27 15:22:16 - start mse guided calibration
+2026-11-27 15:30:29 - mse guided calibration finished.
+Saving checkpoint to /root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q-token/checkpoints/quant_result/20261127_152111_tokenweight_gradient_smoke_seed3408_292c1b5650c1/vit_small_w3_a3_calibsize_128_mse.pth
+Validating after calibration ...
+Test: [0/782]	Time 1.367 (1.367)	Loss 3.5816 (3.5816)	Prec@1 39.062 (39.062)	Prec@5 62.500 (62.500)
+Test: [10/782]	Time 0.129 (0.250)	Loss 5.0002 (4.5849)	Prec@1 9.375 (16.619)	Prec@5 18.750 (33.381)
+Test: [20/782]	Time 0.124 (0.190)	Loss 3.7709 (4.6912)	Prec@1 28.125 (15.551)	Prec@5 43.750 (31.548)
+Test: [30/782]	Time 0.133 (0.170)	Loss 4.4386 (4.5869)	Prec@1 20.312 (15.927)	Prec@5 29.688 (33.367)
+Test: [40/782]	Time 0.120 (0.160)	Loss 5.1504 (4.6029)	Prec@1 10.938 (15.015)	Prec@5 28.125 (33.613)
+Test: [50/782]	Time 0.121 (0.152)	Loss 3.1654 (4.5059)	Prec@1 15.625 (15.564)	Prec@5 60.938 (35.417)
+Test: [60/782]	Time 0.125 (0.148)	Loss 3.8991 (4.4788)	Prec@1 26.562 (15.830)	Prec@5 45.312 (36.142)
+Test: [70/782]	Time 0.123 (0.145)	Loss 4.1934 (4.5993)	Prec@1 21.875 (15.185)	Prec@5 43.750 (34.397)
+Test: [80/782]	Time 0.129 (0.142)	Loss 5.9484 (4.5695)	Prec@1 4.688 (15.664)	Prec@5 10.938 (34.934)
+Test: [90/782]	Time 0.118 (0.141)	Loss 3.2184 (4.5299)	Prec@1 31.250 (16.003)	Prec@5 56.250 (35.766)
+Test: [100/782]	Time 0.126 (0.139)	Loss 4.0049 (4.5802)	Prec@1 23.438 (15.331)	Prec@5 48.438 (34.684)
+Test: [110/782]	Time 0.129 (0.139)	Loss 4.2903 (4.5369)	Prec@1 17.188 (15.935)	Prec@5 40.625 (35.740)
+Test: [120/782]	Time 0.127 (0.137)	Loss 5.1983 (4.5444)	Prec@1 4.688 (15.974)	Prec@5 14.062 (35.046)
+Test: [130/782]	Time 0.125 (0.136)	Loss 6.7823 (4.6444)	Prec@1 0.000 (15.112)	Prec@5 3.125 (33.647)
+Test: [140/782]	Time 0.127 (0.136)	Loss 6.2385 (4.7510)	Prec@1 0.000 (14.284)	Prec@5 4.688 (31.981)
+Test: [150/782]	Time 0.129 (0.136)	Loss 6.4392 (4.8414)	Prec@1 1.562 (13.535)	Prec@5 7.812 (30.453)
+Test: [160/782]	Time 0.123 (0.135)	Loss 6.7870 (4.9353)	Prec@1 0.000 (12.946)	Prec@5 3.125 (29.193)
+Test: [170/782]	Time 0.133 (0.135)	Loss 4.9024 (5.0054)	Prec@1 7.812 (12.399)	Prec@5 26.562 (28.107)
+Test: [180/782]	Time 0.146 (0.135)	Loss 5.5327 (5.0567)	Prec@1 1.562 (12.017)	Prec@5 14.062 (27.365)
+Test: [190/782]	Time 0.128 (0.134)	Loss 6.4816 (5.1186)	Prec@1 0.000 (11.527)	Prec@5 4.688 (26.325)
+Test: [200/782]	Time 0.119 (0.134)	Loss 6.7109 (5.1496)	Prec@1 0.000 (11.264)	Prec@5 3.125 (25.832)
+Test: [210/782]	Time 0.118 (0.133)	Loss 4.8003 (5.1847)	Prec@1 21.875 (10.923)	Prec@5 32.812 (25.178)
+Test: [220/782]	Time 0.140 (0.133)	Loss 5.3294 (5.1739)	Prec@1 0.000 (10.853)	Prec@5 15.625 (25.318)
+Test: [230/782]	Time 0.119 (0.133)	Loss 5.3468 (5.1371)	Prec@1 4.688 (11.255)	Prec@5 15.625 (26.042)
+Test: [240/782]	Time 0.122 (0.133)	Loss 5.5863 (5.1304)	Prec@1 7.812 (11.346)	Prec@5 14.062 (25.992)
+Test: [250/782]	Time 0.119 (0.132)	Loss 4.5334 (5.1140)	Prec@1 9.375 (11.355)	Prec@5 31.250 (26.121)
+Test: [260/782]	Time 0.141 (0.132)	Loss 4.4458 (5.0851)	Prec@1 14.062 (11.740)	Prec@5 37.500 (26.592)
+Test: [270/782]	Time 0.119 (0.132)	Loss 5.5039 (5.1003)	Prec@1 1.562 (11.589)	Prec@5 17.188 (26.315)
+Test: [280/782]	Time 0.125 (0.132)	Loss 5.7189 (5.1232)	Prec@1 4.688 (11.360)	Prec@5 7.812 (25.901)
+Test: [290/782]	Time 0.118 (0.131)	Loss 5.4177 (5.1223)	Prec@1 7.812 (11.421)	Prec@5 15.625 (25.913)
+Test: [300/782]	Time 0.128 (0.131)	Loss 6.2217 (5.1364)	Prec@1 3.125 (11.249)	Prec@5 7.812 (25.623)
+Test: [310/782]	Time 0.121 (0.131)	Loss 4.2600 (5.1182)	Prec@1 10.938 (11.344)	Prec@5 31.250 (25.889)
+Test: [320/782]	Time 0.125 (0.131)	Loss 6.0221 (5.1250)	Prec@1 3.125 (11.327)	Prec@5 7.812 (25.871)
+Test: [330/782]	Time 0.121 (0.131)	Loss 6.9718 (5.1651)	Prec@1 3.125 (11.117)	Prec@5 7.812 (25.444)
+Test: [340/782]	Time 0.143 (0.131)	Loss 5.5724 (5.1917)	Prec@1 1.562 (11.052)	Prec@5 14.062 (25.238)
+Test: [350/782]	Time 0.118 (0.130)	Loss 6.2450 (5.2037)	Prec@1 4.688 (11.000)	Prec@5 10.938 (25.111)
+Test: [360/782]	Time 0.120 (0.130)	Loss 4.3705 (5.2055)	Prec@1 10.938 (10.929)	Prec@5 40.625 (25.160)
+Test: [370/782]	Time 0.144 (0.130)	Loss 6.5760 (5.2257)	Prec@1 1.562 (10.807)	Prec@5 7.812 (24.878)
+Test: [380/782]	Time 0.123 (0.130)	Loss 6.1417 (5.2261)	Prec@1 6.250 (10.909)	Prec@5 15.625 (24.914)
+Test: [390/782]	Time 0.126 (0.130)	Loss 6.1119 (5.2445)	Prec@1 6.250 (10.806)	Prec@5 21.875 (24.708)
+Test: [400/782]	Time 0.121 (0.130)	Loss 8.0462 (5.2542)	Prec@1 3.125 (10.782)	Prec@5 3.125 (24.638)
+Test: [410/782]	Time 0.123 (0.130)	Loss 4.0054 (5.2671)	Prec@1 23.438 (10.785)	Prec@5 54.688 (24.589)
+Test: [420/782]	Time 0.134 (0.130)	Loss 4.3438 (5.2731)	Prec@1 12.500 (10.696)	Prec@5 43.750 (24.518)
+Test: [430/782]	Time 0.120 (0.130)	Loss 6.6358 (5.2935)	Prec@1 0.000 (10.597)	Prec@5 0.000 (24.315)
+Test: [440/782]	Time 0.129 (0.130)	Loss 5.2629 (5.2972)	Prec@1 6.250 (10.619)	Prec@5 20.312 (24.362)
+Test: [450/782]	Time 0.118 (0.130)	Loss 4.8849 (5.2989)	Prec@1 25.000 (10.681)	Prec@5 35.938 (24.449)
+Test: [460/782]	Time 0.135 (0.129)	Loss 6.7474 (5.3090)	Prec@1 1.562 (10.697)	Prec@5 6.250 (24.441)
+Test: [470/782]	Time 0.120 (0.129)	Loss 7.6473 (5.3300)	Prec@1 3.125 (10.616)	Prec@5 6.250 (24.191)
+Test: [480/782]	Time 0.117 (0.129)	Loss 5.7169 (5.3355)	Prec@1 14.062 (10.619)	Prec@5 18.750 (24.100)
+Test: [490/782]	Time 0.118 (0.129)	Loss 5.5300 (5.3519)	Prec@1 0.000 (10.527)	Prec@5 17.188 (23.896)
+Test: [500/782]	Time 0.118 (0.129)	Loss 6.0928 (5.3589)	Prec@1 10.938 (10.482)	Prec@5 12.500 (23.846)
+Test: [510/782]	Time 0.121 (0.129)	Loss 5.7509 (5.3739)	Prec@1 3.125 (10.366)	Prec@5 10.938 (23.609)
+Test: [520/782]	Time 0.120 (0.129)	Loss 6.4468 (5.3761)	Prec@1 1.562 (10.257)	Prec@5 9.375 (23.545)
+Test: [530/782]	Time 0.120 (0.128)	Loss 5.9145 (5.3847)	Prec@1 3.125 (10.214)	Prec@5 14.062 (23.490)
+Test: [540/782]	Time 0.116 (0.128)	Loss 6.3901 (5.3972)	Prec@1 3.125 (10.213)	Prec@5 9.375 (23.365)
+Test: [550/782]	Time 0.129 (0.128)	Loss 5.9871 (5.4017)	Prec@1 4.688 (10.189)	Prec@5 10.938 (23.347)
+Test: [560/782]	Time 0.135 (0.128)	Loss 4.7448 (5.4042)	Prec@1 9.375 (10.185)	Prec@5 25.000 (23.265)
+Test: [570/782]	Time 0.136 (0.128)	Loss 6.9542 (5.4003)	Prec@1 1.562 (10.333)	Prec@5 7.812 (23.457)
+Test: [580/782]	Time 0.119 (0.128)	Loss 4.9636 (5.4140)	Prec@1 10.938 (10.238)	Prec@5 34.375 (23.284)
+Test: [590/782]	Time 0.123 (0.128)	Loss 4.5183 (5.4227)	Prec@1 25.000 (10.200)	Prec@5 31.250 (23.155)
+Test: [600/782]	Time 0.134 (0.128)	Loss 7.0665 (5.4351)	Prec@1 0.000 (10.134)	Prec@5 1.562 (23.003)
+Test: [610/782]	Time 0.130 (0.128)	Loss 4.7975 (5.4324)	Prec@1 12.500 (10.216)	Prec@5 20.312 (23.072)
+Test: [620/782]	Time 0.125 (0.128)	Loss 5.2365 (5.4397)	Prec@1 20.312 (10.238)	Prec@5 39.062 (23.063)
+Test: [630/782]	Time 0.125 (0.128)	Loss 5.2988 (5.4343)	Prec@1 15.625 (10.321)	Prec@5 25.000 (23.227)
+Test: [640/782]	Time 0.126 (0.128)	Loss 5.3366 (5.4365)	Prec@1 12.500 (10.321)	Prec@5 28.125 (23.301)
+Test: [650/782]	Time 0.119 (0.128)	Loss 2.7721 (5.4461)	Prec@1 42.188 (10.345)	Prec@5 67.188 (23.269)
+Test: [660/782]	Time 0.110 (0.128)	Loss 6.6674 (5.4583)	Prec@1 1.562 (10.214)	Prec@5 6.250 (23.083)
+Test: [670/782]	Time 0.119 (0.128)	Loss 4.5684 (5.4551)	Prec@1 12.500 (10.251)	Prec@5 31.250 (23.118)
+Test: [680/782]	Time 0.124 (0.128)	Loss 4.3747 (5.4582)	Prec@1 34.375 (10.208)	Prec@5 53.125 (23.107)
+Test: [690/782]	Time 0.140 (0.128)	Loss 3.6587 (5.4571)	Prec@1 34.375 (10.259)	Prec@5 59.375 (23.189)
+Test: [700/782]	Time 0.079 (0.127)	Loss 5.8693 (5.4644)	Prec@1 7.812 (10.249)	Prec@5 15.625 (23.128)
+Test: [710/782]	Time 0.084 (0.127)	Loss 6.2760 (5.4646)	Prec@1 6.250 (10.291)	Prec@5 15.625 (23.167)
+Test: [720/782]	Time 0.106 (0.126)	Loss 4.8621 (5.4596)	Prec@1 7.812 (10.342)	Prec@5 25.000 (23.253)
+Test: [730/782]	Time 0.100 (0.126)	Loss 6.4751 (5.4702)	Prec@1 4.688 (10.281)	Prec@5 7.812 (23.089)
+Test: [740/782]	Time 0.076 (0.125)	Loss 2.6422 (5.4549)	Prec@1 43.750 (10.427)	Prec@5 79.688 (23.296)
+Test: [750/782]	Time 0.122 (0.125)	Loss 7.5072 (5.4491)	Prec@1 0.000 (10.492)	Prec@5 0.000 (23.346)
+Test: [760/782]	Time 0.094 (0.125)	Loss 2.0195 (5.4477)	Prec@1 65.625 (10.582)	Prec@5 85.938 (23.429)
+Test: [770/782]	Time 0.091 (0.125)	Loss 4.6548 (5.4336)	Prec@1 21.875 (10.700)	Prec@5 23.438 (23.644)
+Test: [780/782]	Time 0.126 (0.124)	Loss 6.0304 (5.4194)	Prec@1 3.125 (10.809)	Prec@5 15.625 (23.854)
+ * Prec@1 10.806 Prec@5 23.846 Loss 5.420 Time 97.348
+Building calibrator ...
+2026-11-27 15:32:06 - start fisher_dplr guided block reconstruction
+reconstructing patch_embed ...
+initializing raw input and raw output ...
+adaround training for patch_embed ...
+finished reconstructing patch_embed.
+reconstructing blocks.0 ...
+initializing raw input and raw output ...
+initializing quanted input ...
+adaround training for blocks.0 ...
+Token weighting blocks.0: {'source': 'fisher_patch', 'tokens': 197, 'cls': 14.867924690246582, 'patch_sum': 182.132080078125, 'patch_min': 0.8654677867889404, 'patch_max': 1.0792025327682495, 'patch_std': 0.03750194236636162}
+finished reconstructing blocks.0.
+Block reconstruction elapsed seconds: 21.718
+Token smoke passed for gradient

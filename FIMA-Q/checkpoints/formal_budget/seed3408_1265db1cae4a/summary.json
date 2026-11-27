@@ -1,0 +1,199 @@
+{
+  "arms": {
+    "uniform": {
+      "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q-sun397/checkpoints/quant_result/20261127_134956_formalbudget_uniform_seed3408_1265db1cae4a/formal_budget_result.json",
+      "top1": 54.094,
+      "delta_vs_uniform_pp": 0.0,
+      "transformer_updates": 120000,
+      "reconstruction_seconds": 4992.704473301768,
+      "blocks": {
+        "blocks.0": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.10713180840840195,
+          "probe_seconds": 0.681084118783474
+        },
+        "blocks.1": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.1997422418296667,
+          "probe_seconds": 0.6412410587072372
+        },
+        "blocks.2": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.24758377355467062,
+          "probe_seconds": 0.655653789639473
+        },
+        "blocks.3": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.2877150458307256,
+          "probe_seconds": 0.6849471554160118
+        },
+        "blocks.4": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.36014548971014926,
+          "probe_seconds": 0.7141139581799507
+        },
+        "blocks.5": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.5310478725073738,
+          "probe_seconds": 0.7492707371711731
+        },
+        "blocks.6": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.8702380558490846,
+          "probe_seconds": 0.8035809248685837
+        },
+        "blocks.7": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.8630814823564132,
+          "probe_seconds": 0.7851442918181419
+        },
+        "blocks.8": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.8155039679400163,
+          "probe_seconds": 0.878310464322567
+        },
+        "blocks.9": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.7419771098142034,
+          "probe_seconds": 0.8216950371861458
+        },
+        "blocks.10": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.6474283276564515,
+          "probe_seconds": 0.8537440747022629
+        },
+        "blocks.11": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.597408597890412,
+          "probe_seconds": 0.9112158119678497
+        }
+      }
+    },
+    "residual": {
+      "path": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q-sun397/checkpoints/quant_result/20261127_154825_formalbudget_residual_seed3408_1265db1cae4a/formal_budget_result.json",
+      "top1": 53.12,
+      "delta_vs_uniform_pp": -0.9740000000000038,
+      "transformer_updates": 120000,
+      "reconstruction_seconds": 5490.395995892584,
+      "blocks": {
+        "blocks.0": {
+          "steps": 7000,
+          "probe_step": 1000,
+          "hard_nmse": 0.10727524482754583,
+          "probe_seconds": 0.6465836092829704
+        },
+        "blocks.1": {
+          "steps": 7000,
+          "probe_step": 1000,
+          "hard_nmse": 0.20305402735282216,
+          "probe_seconds": 0.6665526330471039
+        },
+        "blocks.2": {
+          "steps": 7000,
+          "probe_step": 1000,
+          "hard_nmse": 0.25304115898654866,
+          "probe_seconds": 0.6893150359392166
+        },
+        "blocks.3": {
+          "steps": 7000,
+          "probe_step": 1000,
+          "hard_nmse": 0.2953909969122826,
+          "probe_seconds": 0.7107148170471191
+        },
+        "blocks.4": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.36831702672612077,
+          "probe_seconds": 0.88069187104702
+        },
+        "blocks.5": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.5494643477961638,
+          "probe_seconds": 0.8831035792827606
+        },
+        "blocks.6": {
+          "steps": 13000,
+          "probe_step": 1000,
+          "hard_nmse": 0.907037617741339,
+          "probe_seconds": 0.7731086015701294
+        },
+        "blocks.7": {
+          "steps": 13000,
+          "probe_step": 1000,
+          "hard_nmse": 0.8897920963630542,
+          "probe_seconds": 0.8195086866617203
+        },
+        "blocks.8": {
+          "steps": 13000,
+          "probe_step": 1000,
+          "hard_nmse": 0.8323378655438995,
+          "probe_seconds": 0.8302569538354874
+        },
+        "blocks.9": {
+          "steps": 13000,
+          "probe_step": 1000,
+          "hard_nmse": 0.7521203144201439,
+          "probe_seconds": 0.966194786131382
+        },
+        "blocks.10": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.6575437788064097,
+          "probe_seconds": 1.0034140944480896
+        },
+        "blocks.11": {
+          "steps": 10000,
+          "probe_step": 1000,
+          "hard_nmse": 0.6063088929004496,
+          "probe_seconds": 0.9607843533158302
+        }
+      }
+    }
+  },
+  "complete": false,
+  "residual_vs_shuffled_pp": null,
+  "residual_vs_depth_pp": null,
+  "identity": {
+    "seed": 3408,
+    "dataset": "/root/autodl-tmp/FIMA-Q-Reproduction/imagenet_fimaq",
+    "fp_checkpoint": null,
+    "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+    "mr_weights_sha256": "575fe9b21bc14229455e84bf38e35136b68d8c3f440ed2fa80c75c85317e6313",
+    "calibration_hashes": [
+      [
+        "128",
+        "15db8a3d8c5cd54ee531b7dc5f16d625984989f59cb52f9f64449c018db560da",
+        "717544d885dc5a60613fcf804ce93b1ffbc1baa16f72e0a22160e3125528bc38"
+      ],
+      [
+        "1024",
+        "e4e3f878bb1a4544baa55cd13440283a5518294f7dc88d18a31200d5de0c9a04",
+        "a549d62a2762d7f187ba50e270d7e1750936699a5d43a1ce2162a60afaf6a6bb"
+      ]
+    ],
+    "code_sha256": "4459b8cbaeeb71ec0c1434d6a4aa57934ca0309cc2cd390881ee28268dc865a1",
+    "runner_sha256": "b6a7664c3e7c931b1f7b9fbdd24aebf94b0d29038499dfab86998dc3576309fe",
+    "versions": {
+      "torch": "2.2.2+cu121",
+      "torchvision": "0.17.2+cu121",
+      "timm": "0.9.2",
+      "numpy": "1.26.4"
+    },
+    "sun397_dir": "/root/autodl-tmp/SUN397_train_subset"
+  },
+  "reused_history": null,
+  "uniform_calibrated_sha256": "c856a39e31e9998603c24e584bfab51a78918abb3bc6fab46326e2873780bd42"
+}

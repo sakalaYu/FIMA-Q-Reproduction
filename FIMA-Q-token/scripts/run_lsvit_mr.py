@@ -1,0 +1,317 @@
+"""Screen MLP reconstruction and compare GELU/ReLU W3A3 with fixed Hadamard + LS."""
+
+import argparse
+import hashlib
+import json
+import math
+import os
+from pathlib import Path
+import shlex
+import subprocess
+
+import run_lsvit_controls as controls
+
+
+BUDGETS = ('uniform', 'residual', 'shuffled')
+GAIN_BUDGETS = ('gain-uniform', 'gain')
+
+
+def get_parser():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--variant', required=True,
+                        choices=('screen', 'gelu', 'relu', 'summary', 'budget-summary', 'gain-summary'))
+    parser.add_argument('--dataset', default='../imagenet_fimaq')
+    parser.add_argument('--fp-checkpoint', type=Path)
+    parser.add_argument('--seed', type=int, default=3407)
+    parser.add_argument('--mr-steps', type=int, default=3000)
+    parser.add_argument('--budget', choices=BUDGETS + GAIN_BUDGETS, default='uniform')
+    parser.add_argument('--reference-budget-summary', type=Path,
+                        help='Use a completed uniform/residual pair when comparing a new shuffled result')
+    parser.add_argument('--num-workers', type=int, default=8)
+    parser.add_argument('--gpu', default='0')
+    parser.add_argument('--gpu-slots', type=int, choices=(1, 2, 3), default=2)
+    parser.add_argument('--resume', action='store_true')
+    parser.add_argument('--dry-run', action='store_true')
+    parser.set_defaults(pair_id=None)
+    return parser
+
+
+def short_digest(value):
+    return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()[:12]
+
+
+def command(args, variant, directory):
+    cmd = controls.command('fixed', args)
+    cmd += ['--ls-mr', variant, '--ls-mr-steps', str(args.mr_steps)]
+    if variant in ('screen', 'relu'):
+        cmd += ['--ls-mr-dir', str(directory), '--ls-mr-budget', args.budget]
+    if variant == 'screen':
+        for option in ('--method-adaptation', '--lsvit-control'):
+            index = cmd.index(option)
+            del cmd[index:index + 2]
+        cmd.remove('--optimize')
+        cmd.append('--skip-final-validation')
+    return cmd
+
+
+def read_screen(directory, args):
+    try:
+        result = json.loads((directory / 'mr_screen.json').read_text(encoding='utf-8'))
+        blocks = result['blocks']
+        if args.budget in ('uniform', 'gain-uniform'):
+            expected_steps = [args.mr_steps] * 12
+        elif args.budget == 'gain':
+            expected_steps = [2500] * 4 + [3000] * 4 + [3500] * 4
+        else:
+            expected_steps = [2000] * 4 + [3000] * 4 + [4000] * 4
+        if args.budget in GAIN_BUDGETS:
+            if (not result['pilot_sha256'] or (result['early_step'], result['pilot_step'], result['cosine_steps'])
+                    != (2000, 2500, 3500) or result['probe_images'] != (32 if args.budget == 'gain' else 0)):
+                return None
+            if args.budget == 'gain':
+                scores = [b['teacher_kl_gain'] for b in blocks]
+                if not all(math.isfinite(s) for s in scores):
+                    return None
+                order = sorted(range(12), key=lambda i: (scores[i], i))
+                if [blocks[i]['steps'] for i in order] != expected_steps:
+                    return None
+        if (result['status'] == 'complete' and result['seed'] == args.seed and result['steps'] == args.mr_steps
+                and [b['block'] for b in blocks] == [f'blocks.{i}' for i in range(12)]
+                and sorted(b['steps'] for b in blocks) == expected_steps
+                and result['budget'] == args.budget and result['total_mr_steps'] == sum(expected_steps)):
+            return result
+    except (OSError, ValueError, KeyError):
+        pass
+    return None
+
+
+def print_screen(report, directory):
+    print(f'FP teacher agreement: {100 * report["fp_top1_agreement"]:.2f}%', flush=True)
+    print(f'Mean A3 NMSE: GELU={report["mean_gelu_a3_nmse"]:.6g}, '
+          f'ReLU={report["mean_relu_a3_nmse"]:.6g}', flush=True)
+    print(f'MR steps: {[block["steps"] for block in report["blocks"]]}, total={report["total_mr_steps"]}; '
+          f'elapsed={report["elapsed_seconds"]:.1f}s', flush=True)
+    print(f'[SCREEN COMPLETE] {directory / "mr_screen.json"}', flush=True)
+
+
+def branch_launch(args, variant, directory, base, screen):
+    cmd = command(args, variant, directory)
+    recorded = cmd[1:]
+    recorded[recorded.index('--dataset') + 1] = str(controls.qk.base.dataset_path(args.dataset))
+    payload = dict(base, command=recorded, mr_variant=variant)
+    payload['mr_weights_sha256'] = screen['checkpoint_sha256'] if variant == 'relu' and screen else None
+    name = f'lsvit_mr_{variant}_seed{args.seed}_{short_digest(payload)}'
+    return cmd, payload, name
+
+
+def find_result(payload, name):
+    results = (controls.ROOT / 'checkpoints/quant_result').glob(f'*_{name}/method_result.json')
+    for path in sorted(results, reverse=True):
+        try:
+            result = json.loads(path.read_text(encoding='utf-8'))
+            if (controls.valid_result(result, payload) and result.get('mr_variant') == payload['mr_variant']
+                    and result.get('mr_weights_sha256') == payload['mr_weights_sha256']):
+                return path, result
+        except (OSError, ValueError):
+            continue
+    return None
+
+
+def summarize(args, directory, base, screen):
+    rows = []
+    for variant in ('gelu', 'relu'):
+        _, payload, name = branch_launch(args, variant, directory, base, screen)
+        found = find_result(payload, name)
+        if found is None:
+            print(f'{variant}: no matching complete result', flush=True)
+            continue
+        path, result = found
+        rows.append(dict(variant=variant, path=str(path), metrics=result['after'],
+                         fp_model_sha256=result['fp_model_sha256'], calibration_hashes=result['calibration_hashes']))
+        print(f'{variant}: Top-1 {result["after"]["top1"]:.3f}%', flush=True)
+    matched = (len(rows) == 2 and rows[0]['fp_model_sha256'] == rows[1]['fp_model_sha256']
+               and rows[0]['calibration_hashes'] == rows[1]['calibration_hashes'])
+    delta = rows[1]['metrics']['top1'] - rows[0]['metrics']['top1'] if matched else None
+    print(f'FP and calibration fingerprints matched: {matched}', flush=True)
+    if matched:
+        print(f'ReLU MR minus GELU Top-1: {delta:+.3f} pp', flush=True)
+    if not args.dry_run:
+        directory.mkdir(parents=True, exist_ok=True)
+        target = directory / 'mr_summary.json'
+        temporary = target.with_suffix(f'.{os.getpid()}.tmp')
+        temporary.write_text(json.dumps(dict(rows=rows, hashes_matched=matched, top1_delta_pp=delta),
+                                        indent=2), encoding='utf-8')
+        temporary.replace(target)
+        print(f'Summary: {target}', flush=True)
+
+
+def screen_directory(args, base):
+    tag = short_digest([base, args.mr_steps, args.budget])
+    return controls.ROOT / 'checkpoints/lsvit_controls/mr' / f'seed{args.seed}_{args.budget}_{tag}'
+
+
+def budget_record(args, directory, screen, path, result):
+    launch = result['launch']
+    if (screen is None or result['args'].get('ls_mr_budget') != args.budget
+            or result['args'].get('seed') != args.seed or result.get('mr_variant') != 'relu'
+            or result.get('mr_weights_sha256') != screen['checkpoint_sha256']
+            or launch.get('mr_weights_sha256') != screen['checkpoint_sha256']
+            or result['fp_model_sha256'] != screen['fp_model_sha256']
+            or result['calibration_hashes'][1:] != screen['data_hashes']):
+        raise ValueError(f'{path}: MR screen and completed result do not match')
+    recipe = launch['command'].copy()
+    for option in ('--ls-mr-budget', '--ls-mr-dir', '--fp-checkpoint'):
+        if option in recipe:
+            index = recipe.index(option)
+            del recipe[index:index + 2]
+    blocks = screen['blocks']
+    row = dict(budget=args.budget, path=str(path), screen=str(directory / 'mr_screen.json'), metrics=result['after'],
+               total_mr_steps=screen['total_mr_steps'], mr_seconds=screen['elapsed_seconds'],
+               steps_by_block={b['block']: b['steps'] for b in blocks}, code_sha256=launch['code_sha256'],
+               fp_model_sha256=result['fp_model_sha256'], calibration_hashes=result['calibration_hashes'])
+    if args.budget == 'shuffled':
+        row['residual_rank_steps_by_block'] = {b['block']: b['residual_rank_steps'] for b in blocks}
+    signature = (recipe, result['cfg'], launch['dependency_versions'], row['fp_model_sha256'],
+                 row['calibration_hashes'], row['total_mr_steps'])
+    return row, signature
+
+
+def reference_records(args):
+    summary = json.loads(args.reference_budget_summary.read_text(encoding='utf-8'))
+    if not summary.get('matched') or [row['budget'] for row in summary['rows']] != ['uniform', 'residual']:
+        raise ValueError('Reference summary must contain a matched uniform/residual pair')
+    records = {}
+    for row in summary['rows']:
+        budget = row['budget']
+        budget_args = argparse.Namespace(**dict(vars(args), budget=budget))
+        path = controls.ROOT / 'checkpoints/quant_result' / Path(row['path']).parent.name / 'method_result.json'
+        result = json.loads(path.read_text(encoding='utf-8'))
+        launch = result['launch']
+        if launch.get('control') != 'fixed' or not controls.valid_result(result, launch):
+            raise ValueError(f'{path}: reference is not a completed fixed-Hadamard LS run')
+        command = launch['command']
+        directory = args.reference_budget_summary.parent.parent / Path(command[command.index('--ls-mr-dir') + 1]).name
+        screen = read_screen(directory, budget_args)
+        records[budget] = budget_record(budget_args, directory, screen, path, result)
+        if records[budget][0]['metrics'] != row['metrics']:
+            raise ValueError(f'{path}: reference metrics differ from the saved summary')
+    return records
+
+
+def summarize_budgets(args, base, gain=False):
+    records = reference_records(args) if args.reference_budget_summary else {}
+    budgets = GAIN_BUDGETS if gain else BUDGETS
+    target = None
+    for budget in budgets:
+        if budget in records:
+            continue
+        budget_args = argparse.Namespace(**dict(vars(args), budget=budget))
+        directory = screen_directory(budget_args, base)
+        screen = read_screen(directory, budget_args)
+        _, payload, name = branch_launch(budget_args, 'relu', directory, base, screen)
+        found = find_result(payload, name) if screen else None
+        if found is None:
+            print(f'{budget}: no matching complete ReLU result', flush=True)
+            continue
+        records[budget] = budget_record(budget_args, directory, screen, *found)
+        if gain:
+            row, signature = records[budget]
+            row['pilot_sha256'] = screen['pilot_sha256']
+            row['mean_relu_a3_nmse'] = screen['mean_relu_a3_nmse']
+            row['probe_images'] = screen['probe_images']
+            records[budget] = (row, signature + (row['pilot_sha256'],))
+        target = directory / ('mr_gain_summary.json' if gain else 'mr_budget_summary.json')
+    for row, _ in records.values():
+        print(f'{row["budget"]}: Top-1 {row["metrics"]["top1"]:.3f}%', flush=True)
+    required = budgets if args.reference_budget_summary else budgets[:2]
+    if any(budget not in records for budget in required):
+        print('Budget comparison is incomplete', flush=True)
+        return
+    uniform, signature = records[budgets[0]]
+    if any(other != signature for _, other in records.values()):
+        raise ValueError('Budget runs differ in recipe, dependencies, FP, calibration, MR steps or shared pilot')
+    adaptive = records[budgets[1]][0]
+    delta = adaptive['metrics']['top1'] - uniform['metrics']['top1']
+    summary = dict(rows=[row for row, _ in records.values()], matched=True, top1_delta_pp=delta)
+    print(f'{"Gain" if gain else "Residual"} minus uniform Top-1: {delta:+.3f} pp', flush=True)
+    if 'shuffled' in records:
+        shuffled = records['shuffled'][0]
+        if shuffled['residual_rank_steps_by_block'] != adaptive['steps_by_block']:
+            raise ValueError('Shuffled and residual MR disagree on the residual-ranked budgets')
+        if shuffled['steps_by_block'] == adaptive['steps_by_block']:
+            raise ValueError('Shuffled MR reproduced the residual assignment')
+        residual_minus_shuffled = adaptive['metrics']['top1'] - shuffled['metrics']['top1']
+        summary['residual_minus_shuffled_pp'] = residual_minus_shuffled
+        summary['shuffled_minus_uniform_pp'] = shuffled['metrics']['top1'] - uniform['metrics']['top1']
+        print(f'Residual minus shuffled Top-1: {residual_minus_shuffled:+.3f} pp', flush=True)
+        print(f'Shuffled minus uniform Top-1: {summary["shuffled_minus_uniform_pp"]:+.3f} pp', flush=True)
+    if not args.dry_run:
+        temporary = target.with_suffix(f'.{os.getpid()}.tmp')
+        temporary.write_text(json.dumps(summary, indent=2), encoding='utf-8')
+        temporary.replace(target)
+        print(f'Summary: {target}', flush=True)
+
+
+def main():
+    parser = get_parser()
+    args = parser.parse_args()
+    if args.mr_steps < 1 or args.num_workers < 0:
+        parser.error('mr-steps must be positive and num-workers must be nonnegative')
+    if (args.budget != 'uniform' or args.variant in ('budget-summary', 'gain-summary')) and args.mr_steps != 3000:
+        parser.error('The budget comparison requires --mr-steps 3000')
+    if args.budget != 'uniform' and args.variant in ('gelu', 'summary'):
+        parser.error('Use a staged budget with screen or relu, and budget-summary for comparison')
+    if args.reference_budget_summary and args.variant != 'budget-summary':
+        parser.error('--reference-budget-summary requires --variant budget-summary')
+    base = controls.identity('fixed', args)
+    base['mr_runner_sha256'] = hashlib.sha256(Path(__file__).read_text(encoding='utf-8').encode()).hexdigest()
+    if args.variant in ('budget-summary', 'gain-summary'):
+        try:
+            summarize_budgets(args, base, gain=args.variant == 'gain-summary')
+        except (OSError, ValueError, KeyError) as error:
+            parser.error(str(error))
+        return
+    directory = screen_directory(args, base)
+    screen = read_screen(directory, args)
+    if args.variant == 'summary':
+        summarize(args, directory, base, screen)
+        return
+    cmd, payload, name = branch_launch(args, args.variant, directory, base, screen)
+    if args.dry_run:
+        print(shlex.join(cmd), flush=True)
+        return
+    weight = controls.fp_checkpoint(args)
+    if weight is not None and not weight.is_file():
+        parser.error(f'FP checkpoint does not exist: {weight}')
+    dataset = controls.qk.base.dataset_path(args.dataset)
+    if not all((dataset / split).is_dir() for split in ('train', 'val')):
+        parser.error(f'Missing train/val under {dataset}')
+    if args.variant == 'relu' and (screen is None or not (directory / 'relu_mlp.pth').is_file()):
+        parser.error('Run --variant screen with the same seed and mr-steps first')
+    with controls.qk.base.job_lock(name):
+        if args.variant == 'screen':
+            screen = read_screen(directory, args)
+            if screen and (directory / 'relu_mlp.pth').is_file():
+                print_screen(screen, directory)
+                return
+        elif args.resume and find_result(payload, name):
+            print(f'[WINDOW COMPLETE] Verified existing {args.variant} result', flush=True)
+            return
+        with controls.qk.base.gpu_lock(args.gpu, args.gpu_slots) as uuid:
+            env = dict(os.environ, CUDA_VISIBLE_DEVICES=uuid, CUBLAS_WORKSPACE_CONFIG=':4096:8',
+                       FIMAQ_RUN_NAME=name, FIMAQ_CAPTURE_CALIBRATION_HASH='1',
+                       FIMAQ_METHOD_LAUNCH=json.dumps(payload))
+            subprocess.run(cmd, cwd=controls.ROOT, env=env, check=True)
+        if args.variant == 'screen':
+            screen = read_screen(directory, args)
+            if screen is None or not (directory / 'relu_mlp.pth').is_file():
+                raise RuntimeError('MLP screening returned without a completed report and weights')
+            print_screen(screen, directory)
+        else:
+            if find_result(payload, name) is None:
+                raise RuntimeError('Quantization returned without a matching complete result')
+            print(f'[WINDOW COMPLETE] {args.variant}', flush=True)
+
+
+if __name__ == '__main__':
+    main()
