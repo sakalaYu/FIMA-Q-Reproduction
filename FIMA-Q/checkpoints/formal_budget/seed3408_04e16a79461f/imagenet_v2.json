@@ -1,0 +1,65 @@
+{
+  "dataset": "ImageNet-V2 Matched Frequency",
+  "images": 10000,
+  "dataset_path": "/root/autodl-tmp/imagenetv2-matched-frequency-format-val",
+  "manifest_sha256": "1252d3728ef3b0debe777adfabc89e18c7c0ff13d86ac0954918df6eb9025662",
+  "metrics": {
+    "uniform": {
+      "top1": 53.84,
+      "top5": 78.54,
+      "loss": 2.0132202362060547,
+      "source_result": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261126_190032_formalbudget_uniform_seed3408_04e16a79461f/formal_budget_result.json",
+      "checkpoint_sha256": "8a6b2a1e25661731f56cf0bd96a512dd8812487f6a2cb73f6a9cd4801513094f"
+    },
+    "residual": {
+      "top1": 54.11,
+      "top5": 78.72,
+      "loss": 2.0247215324401857,
+      "source_result": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261126_204644_formalbudget_residual_seed3408_04e16a79461f/formal_budget_result.json",
+      "checkpoint_sha256": "98f203ac8821c4e8f4a27d80df1ae9e521ea2de88d2044ca8899e0f762ae71d0"
+    },
+    "shuffled": {
+      "top1": 53.44,
+      "top5": 78.45,
+      "loss": 2.0351530303955077,
+      "source_result": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261126_204739_formalbudget_shuffled_seed3408_04e16a79461f/formal_budget_result.json",
+      "checkpoint_sha256": "790572f750901e5984fef7cf947f9da37e92290b9a06c358c9871ef23a360062"
+    },
+    "depth": {
+      "top1": 53.31,
+      "top5": 78.53,
+      "loss": 2.0172346019744873,
+      "source_result": "/root/autodl-tmp/FIMA-Q-Reproduction/FIMA-Q/checkpoints/quant_result/20261127_111330_formalbudget_depth_seed3408_06b8f6b9839f/formal_budget_result.json",
+      "checkpoint_sha256": "33b62e9d8a90729fc115560a3b38aabe40aff0ca8686cdc69d9df8f0077277f0"
+    }
+  },
+  "residual_minus": {
+    "uniform": {
+      "delta_pp": 0.27,
+      "wins": 718,
+      "losses": 691,
+      "paired_image_bootstrap95_pp": [
+        -0.47,
+        1.02
+      ]
+    },
+    "shuffled": {
+      "delta_pp": 0.67,
+      "wins": 720,
+      "losses": 653,
+      "paired_image_bootstrap95_pp": [
+        -0.07,
+        1.4
+      ]
+    },
+    "depth": {
+      "delta_pp": 0.8,
+      "wins": 612,
+      "losses": 532,
+      "paired_image_bootstrap95_pp": [
+        0.14,
+        1.48
+      ]
+    }
+  }
+}

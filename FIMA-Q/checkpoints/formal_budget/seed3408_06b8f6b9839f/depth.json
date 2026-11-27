@@ -1,0 +1,59 @@
+{
+  "seed": 3408,
+  "dataset": "/root/autodl-tmp/FIMA-Q-Reproduction/imagenet_fimaq",
+  "fp_checkpoint": null,
+  "fp_model_sha256": "a78205f203d9299dd770d74b9f4273895a7d2a22260593bdbe7908e4e513463c",
+  "mr_weights_sha256": "575fe9b21bc14229455e84bf38e35136b68d8c3f440ed2fa80c75c85317e6313",
+  "calibration_hashes": [
+    [
+      "128",
+      "15db8a3d8c5cd54ee531b7dc5f16d625984989f59cb52f9f64449c018db560da",
+      "717544d885dc5a60613fcf804ce93b1ffbc1baa16f72e0a22160e3125528bc38"
+    ],
+    [
+      "1024",
+      "e4e3f878bb1a4544baa55cd13440283a5518294f7dc88d18a31200d5de0c9a04",
+      "a549d62a2762d7f187ba50e270d7e1750936699a5d43a1ce2162a60afaf6a6bb"
+    ]
+  ],
+  "code_sha256": "4459b8cbaeeb71ec0c1434d6a4aa57934ca0309cc2cd390881ee28268dc865a1",
+  "runner_sha256": "b6a7664c3e7c931b1f7b9fbdd24aebf94b0d29038499dfab86998dc3576309fe",
+  "versions": {
+    "torch": "2.2.2+cu121",
+    "torchvision": "0.17.2+cu121",
+    "timm": "0.9.2",
+    "numpy": "1.26.4"
+  },
+  "history": "seed3408_04e16a79461f",
+  "variant": "depth",
+  "uniform_pilot_nmse": {
+    "blocks.0": 0.11017783569813566,
+    "blocks.1": 0.20726737979800383,
+    "blocks.2": 0.2503211551503195,
+    "blocks.3": 0.2959026147725903,
+    "blocks.4": 0.36547608786090274,
+    "blocks.5": 0.5259748525683986,
+    "blocks.6": 0.8210422611792214,
+    "blocks.7": 0.8224151584033091,
+    "blocks.8": 0.7842817844340331,
+    "blocks.9": 0.709959754329995,
+    "blocks.10": 0.6232840937237989,
+    "blocks.11": 0.6158858724743461
+  },
+  "uniform_calibrated_sha256": "29d2635ac5841124d53d7a83af1597b32039bb0126d3ea084443387656c3ed47",
+  "uniform_probe_sha256": "461517f219c32c4dc79a8d7372828ac81e608033f5a8f8c1c18d54145b3128b2",
+  "budgets": {
+    "blocks.0": 7000,
+    "blocks.1": 7000,
+    "blocks.2": 7000,
+    "blocks.3": 7000,
+    "blocks.4": 10000,
+    "blocks.5": 10000,
+    "blocks.6": 10000,
+    "blocks.7": 10000,
+    "blocks.8": 13000,
+    "blocks.9": 13000,
+    "blocks.10": 13000,
+    "blocks.11": 13000
+  }
+}
