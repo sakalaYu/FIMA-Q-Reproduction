@@ -369,16 +369,29 @@ def main(args):
     data_path = args.dataset
     g = mydatasets.ViTImageNetLoaderGenerator(data_path, args.val_batch_size, args.num_workers, kwargs={"model":model})
     mr_calib_loader = mr_optim_loader = mr_weights_sha = None
+    formal_calibration = None
     if args.ls_mr != 'none':
         from utils.lsvit_mr import load_mlp_reconstruction, screen_mlp_reconstruction
         if (cfg.w_bit, cfg.a_bit, cfg.calib_size, cfg.optim_size) != (3, 3, 128, 1024):
             raise ValueError('MR experiments use W3A3 and 128/1024 calibration images')
-        if args.ls_mr != 'screen':
+        sun_root = formal_plan.get('sun397_dir') if args.formal_budget_plan else None
+        if sun_root:
+            from utils.formal_budget import sun397_loaders
             seed_all(args.seed)
-            mr_calib_loader = g.calib_loader(num=cfg.calib_size, batch_size=cfg.calib_batch_size, seed=args.seed)
-        seed_all(args.seed)
-        mr_optim_loader = g.calib_loader(num=cfg.optim_size, batch_size=cfg.optim_batch_size, seed=args.seed)
-        mr_data_hashes = calibration_hashes(os.path.join(root_path, 'output.log'))[-1:]
+            mr_calib_loader, mr_optim_loader, batches, formal_probe, formal_calibration = sun397_loaders(
+                sun_root, g, args.seed, cfg)
+            # Reuse the already trained MR weights and verify their original ImageNet provenance.
+            mr_data_hashes = formal_plan['calibration_hashes'][1:]
+            logging.info('SUN397 calibration: %d images, tensor SHA256 %s; disjoint probe SHA256 %s',
+                         len(formal_calibration['paths']), formal_calibration['tensor_sha256'],
+                         formal_probe['tensor_sha256'])
+        else:
+            if args.ls_mr != 'screen':
+                seed_all(args.seed)
+                mr_calib_loader = g.calib_loader(num=cfg.calib_size, batch_size=cfg.calib_batch_size, seed=args.seed)
+            seed_all(args.seed)
+            mr_optim_loader = g.calib_loader(num=cfg.optim_size, batch_size=cfg.optim_batch_size, seed=args.seed)
+            mr_data_hashes = calibration_hashes(os.path.join(root_path, 'output.log'))[-1:]
         if [row[0] for row in mr_data_hashes] != ['1024']:
             raise RuntimeError('MR requires a fingerprint of the 1024 reconstruction images')
         if args.ls_mr == 'screen':
@@ -393,11 +406,16 @@ def main(args):
                                                     model_sha, mr_data_hashes, budget=args.ls_mr_budget)
         if args.formal_budget_plan:
             from utils.formal_budget import fresh_probe_batches
-            formal_hashes = calibration_hashes(os.path.join(root_path, 'output.log'))
-            if (formal_hashes != formal_plan['calibration_hashes'] or mr_weights_sha != formal_plan['mr_weights_sha256']
-                    or model_sha != formal_plan['fp_model_sha256']):
+            if mr_weights_sha != formal_plan['mr_weights_sha256'] or model_sha != formal_plan['fp_model_sha256']:
                 raise RuntimeError('Formal budget calibration or model fingerprint differs from the reference')
-            batches, formal_probe = fresh_probe_batches(g, Path(data_path).resolve(), args.seed, formal_hashes)
+            if not sun_root:
+                formal_hashes = calibration_hashes(os.path.join(root_path, 'output.log'))
+                if formal_hashes != formal_plan['calibration_hashes']:
+                    raise RuntimeError('ImageNet calibration hashes differ from the reference')
+                batches, formal_probe = fresh_probe_batches(g, Path(data_path).resolve(), args.seed, formal_hashes)
+            elif (formal_plan['variant'] != 'uniform'
+                  and formal_plan['uniform_formal_calibration'] != formal_calibration):
+                raise RuntimeError('SUN397 calibration differs from the uniform arm')
             formal_budget = dict(seed=args.seed, budgets=formal_plan['budgets'], probe_batches=batches)
         seed_all(args.seed)
     
@@ -527,8 +545,9 @@ def main(args):
         calib_loader = g.calib_loader(num=cfg.optim_size, batch_size=cfg.optim_batch_size, seed=args.seed)
         model = load_model(model, args, device, mode='optimize')
     if (args.optimize or args.test_optimize_checkpoint) and not args.skip_final_validation:
-        logging.info('Validating on calibration set after block reconstruction ...')
-        val_loss, val_prec1, val_prec5 = validate(calib_loader, model, criterion, print_freq=args.print_freq, device=device)
+        if formal_calibration is None:
+            logging.info('Validating on calibration set after block reconstruction ...')
+            val_loss, val_prec1, val_prec5 = validate(calib_loader, model, criterion, print_freq=args.print_freq, device=device)
         logging.info('Validating on test set after block reconstruction ...')
         val_loss, val_prec1, val_prec5 = validate(val_loader, model, criterion, print_freq=args.print_freq, device=device)
         endpoint_result['final'] = dict(top1=float(val_prec1), top5=float(val_prec5), loss=float(val_loss))
@@ -623,6 +642,7 @@ def main(args):
             status='complete', plan=formal_plan, cfg=vars(cfg), probe=formal_probe, blocks=rows,
             final=endpoint_result['final'], checkpoint=endpoint_result['baseline_checkpoint'],
             calibrated_sha256=calibrated_sha,
+            **({'formal_calibration': formal_calibration} if formal_calibration is not None else {}),
             reconstruction_seconds=reconstruction_seconds))
     if args.endpoint_task != 'none':
         endpoint_result['status'] = 'smoke_complete' if args.skip_final_validation else 'complete'

@@ -20,6 +20,7 @@ from utils.formal_budget import BLOCKS, NOMINAL_STEPS, PILOT_STEPS, VARIANTS, ma
 
 SEED = 3408
 REFERENCE = ROOT / 'checkpoints/quant_result/20261111_194420_lsvit_mr_relu_seed3408_a4008f61fe80/method_result.json'
+IMAGENET_HISTORY = ROOT / 'checkpoints/formal_budget/seed3408_04e16a79461f/summary.json'
 
 
 def read_json(path):
@@ -60,6 +61,8 @@ def build_plan(variant, common, uniform=None):
         plan.update(uniform_pilot_nmse={b: uniform['blocks'][b]['hard_nmse'] for b in BLOCKS},
                     uniform_calibrated_sha256=uniform['calibrated_sha256'],
                     uniform_probe_sha256=uniform['probe']['tensor_sha256'])
+        if common.get('sun397_dir'):
+            plan['uniform_formal_calibration'] = uniform['formal_calibration']
     plan['budgets'] = make_schedule(variant, plan.get('uniform_pilot_nmse'), SEED)
     return plan
 
@@ -83,18 +86,42 @@ def completed(tag, plan):
     return dict(result, path=str(path))
 
 
-def summarize(folder, tag, common):
+def imagenet_history():
+    summary = read_json(IMAGENET_HISTORY)
+    common = summary['identity']
+    tag = IMAGENET_HISTORY.parent.name.split('_', 1)[1]
     uniform = completed(tag, build_plan('uniform', common))
+    if uniform is None or not summary['complete']:
+        raise ValueError('The published local ImageNet reference must contain all three original arms')
+    results = {'uniform': uniform}
+    for name in ('residual', 'shuffled'):
+        result = completed(tag, build_plan(name, common, uniform))
+        if result is None:
+            raise ValueError(f'Missing historical {name} result JSON')
+        check_match(result, uniform)
+        results[name] = result
+    if any(result['final']['top1'] != summary['arms'][name]['top1'] for name, result in results.items()):
+        raise ValueError('Historical result scores differ from their summary')
+    return results
+
+
+def check_match(result, uniform):
+    if (result['cfg'] != uniform['cfg'] or result['probe'] != uniform['probe']
+            or result['calibrated_sha256'] != uniform['calibrated_sha256']
+            or result.get('formal_calibration') != uniform.get('formal_calibration')):
+        raise RuntimeError('Budget arms do not match calibration or probe fingerprints')
+
+
+def summarize(folder, tag, common, history=None):
+    uniform = history['uniform'] if history else completed(tag, build_plan('uniform', common))
     if uniform is None:
         print('No completed uniform arm yet', flush=True)
         return
-    results = {'uniform': uniform}
-    for variant in VARIANTS[1:]:
+    results = dict(history) if history else {'uniform': uniform}
+    for variant in (('depth',) if history else VARIANTS[1:]):
         result = completed(tag, build_plan(variant, common, uniform))
         if result is not None:
-            if (result['cfg'] != uniform['cfg'] or result['probe'] != uniform['probe']
-                    or result['calibrated_sha256'] != uniform['calibrated_sha256']):
-                raise RuntimeError(f'{variant} does not match uniform calibration or probe fingerprints')
+            check_match(result, uniform)
             results[variant] = result
     rows = {}
     for name, result in results.items():
@@ -109,9 +136,17 @@ def summarize(folder, tag, common):
                       if 'residual' in rows and 'shuffled' in rows else None)
     if residual_delta is not None:
         print(f'Residual minus shuffled: {residual_delta:+.3f} pp', flush=True)
+    depth_delta = (rows['residual']['top1'] - rows['depth']['top1']
+                   if 'residual' in rows and 'depth' in rows else None)
+    if depth_delta is not None:
+        print(f'Residual minus depth: {depth_delta:+.3f} pp', flush=True)
     target = folder / 'summary.json'
-    write_json(target, dict(arms=rows, complete=len(rows) == 3, residual_vs_shuffled_pp=residual_delta,
-                            uniform_calibrated_sha256=uniform['calibrated_sha256'], identity=common))
+    folder.mkdir(parents=True, exist_ok=True)
+    required = {'uniform', 'residual', 'depth'} if common.get('sun397_dir') else set(VARIANTS)
+    write_json(target, dict(arms=rows, complete=required <= rows.keys(), residual_vs_shuffled_pp=residual_delta,
+                            residual_vs_depth_pp=depth_delta, identity=common,
+                            reused_history=str(IMAGENET_HISTORY) if history else None,
+                            uniform_calibrated_sha256=uniform['calibrated_sha256']))
     print(f'Summary: {target}', flush=True)
 
 
@@ -119,6 +154,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--variant', choices=(*VARIANTS, 'summary'), required=True)
     parser.add_argument('--dataset', default='../imagenet_fimaq')
+    parser.add_argument('--sun397-dir', type=Path, help='Extracted SUN397 image tree for formal calibration only')
     parser.add_argument('--fp-checkpoint', type=Path)
     parser.add_argument('--gpu', default='0')
     parser.add_argument('--gpu-slots', type=int, choices=(1, 2, 3), default=1)
@@ -142,6 +178,11 @@ def main():
                   fp_model_sha256=reference['fp_model_sha256'], mr_weights_sha256=reference['mr_weights_sha256'],
                   calibration_hashes=reference['calibration_hashes'], code_sha256=controls.code_fingerprint(),
                   runner_sha256=digest(Path(__file__)), versions=versions)
+    if args.sun397_dir is not None:
+        common['sun397_dir'] = str(dataset_path(args.sun397_dir))
+    reuse_history = args.sun397_dir is None and args.variant in ('depth', 'summary')
+    if reuse_history:
+        common['history'] = IMAGENET_HISTORY.parent.name
     tag = hashlib.sha256(json.dumps(common, sort_keys=True).encode()).hexdigest()[:12]
     folder = ROOT / 'checkpoints/formal_budget' / f'seed{SEED}_{tag}'
     plan_file = folder / f'{args.variant}.json'
@@ -150,18 +191,26 @@ def main():
         if args.variant != 'summary':
             print(shlex.join(make_command(reference, data, mr_dir, fp, plan_file)))
         return
+    history = imagenet_history() if reuse_history else None
+    if history:
+        original = history['uniform']['plan']
+        if any(common[key] != original[key] for key in ('dataset', 'versions', 'seed', 'fp_model_sha256',
+                                                       'mr_weights_sha256', 'calibration_hashes')):
+            parser.error('Historical depth comparison needs the original ImageNet path and dependency versions')
     if args.variant == 'summary':
-        summarize(folder, tag, common)
+        summarize(folder, tag, common, history)
         return
-    if not all((data / part).is_dir() for part in ('train', 'val')):
-        parser.error(f'Missing ImageNet train/val under {data}')
+    if not (data / 'val').is_dir() or (not args.sun397_dir and not (data / 'train').is_dir()):
+        parser.error(f'Missing the required ImageNet split(s) under {data}')
+    if args.sun397_dir and not Path(common['sun397_dir']).is_dir():
+        parser.error(f'SUN397 image directory missing: {common["sun397_dir"]}')
     if not weights.is_file() or not (mr_dir / 'mr_screen.json').is_file():
         parser.error(f'Restore the original uniform MR weights and report in {mr_dir}')
     if digest(weights) != common['mr_weights_sha256']:
         parser.error(f'Original MR checkpoint hash does not match: {weights}')
     if fp is not None and not fp.is_file():
         parser.error(f'Floating-point checkpoint missing: {fp}')
-    uniform = completed(tag, build_plan('uniform', common))
+    uniform = history['uniform'] if history else completed(tag, build_plan('uniform', common))
     if args.variant != 'uniform' and uniform is None:
         parser.error('Run the uniform DPLR baseline first to obtain all 12 hard-path pilot scores')
     plan = build_plan(args.variant, common, uniform)
@@ -178,7 +227,7 @@ def main():
             if completed(tag, plan) is None:
                 raise RuntimeError('Process exited without a completed budget result')
     with job_lock(f'formalbudget_summary_{tag}'):
-        summarize(folder, tag, common)
+        summarize(folder, tag, common, history)
 
 
 if __name__ == '__main__':

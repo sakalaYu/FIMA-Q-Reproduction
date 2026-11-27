@@ -11,12 +11,14 @@ NOMINAL_STEPS = 10000
 PILOT_STEPS = 1000
 PROBE_COUNT = 128
 TIERS = (7000,) * 4 + (10000,) * 4 + (13000,) * 4
-VARIANTS = ('uniform', 'residual', 'shuffled')
+VARIANTS = ('uniform', 'residual', 'shuffled', 'depth')
 
 
 def make_schedule(variant, scores=None, seed=3408):
     if variant == 'uniform':
         return dict.fromkeys(BLOCKS, NOMINAL_STEPS)
+    if variant == 'depth':
+        return dict(zip(BLOCKS, TIERS))
     if variant not in VARIANTS or not isinstance(scores, dict) or set(scores) != set(BLOCKS):
         raise ValueError('A nonuniform plan requires all 12 uniform-run pilot scores')
     if any(not math.isfinite(v) or v < 0 for v in scores.values()):
@@ -66,6 +68,47 @@ def fresh_probe_batches(generator, data_root, seed, original_hashes):
         names.append(name)
     batches = [torch.stack(images[i:i + 8]) for i in range(0, len(images), 8)]
     return batches, dict(indices=indices, paths=names, tensor_sha256=digest.hexdigest())
+
+
+def sun397_loaders(root, generator, seed, cfg):
+    """Sample unlabeled SUN397 with a separate deterministic hard-probe split."""
+    import numpy as np
+    import torch
+    from torchvision.datasets.folder import default_loader, IMG_EXTENSIONS
+    from utils.datasets import CacheDataset
+
+    root = Path(root)
+    files = sorted(path for path in root.rglob('*') if path.is_file() and path.suffix.lower() in IMG_EXTENSIONS)
+    if len(files) < cfg.optim_size + PROBE_COUNT:
+        raise ValueError(f'Expected at least {cfg.optim_size + PROBE_COUNT} SUN397 images under {root}')
+    ids = np.random.RandomState(seed).permutation(len(files))[:cfg.optim_size + PROBE_COUNT].tolist()
+    train, probe = [], []
+    train_names, probe_names = [], []
+    train_hash, probe_hash = hashlib.sha256(), hashlib.sha256()
+    for j, index in enumerate(ids):
+        path = files[index]
+        name = path.relative_to(root).as_posix()
+        is_probe = j >= cfg.optim_size
+        transform = generator.val_transform if is_probe else generator.train_transform
+        tensor = transform(default_loader(str(path))).contiguous()
+        digest = probe_hash if is_probe else train_hash
+        digest.update(name.encode() + b'\0')
+        digest.update(tensor.numpy().tobytes())
+        if is_probe:
+            probe_names.append(name)
+            probe.append(tensor)
+        else:
+            train_names.append(name)
+            train.append((tensor, 0))  # Labels are placeholders and never used for SUN calibration.
+    initial = torch.utils.data.DataLoader(CacheDataset(train[:cfg.calib_size]), batch_size=cfg.calib_batch_size,
+                                         **generator.train_loader_kwargs)
+    optim = torch.utils.data.DataLoader(CacheDataset(train), batch_size=cfg.optim_batch_size,
+                                       **generator.train_loader_kwargs)
+    batches = [torch.stack(probe[i:i + 8]) for i in range(0, len(probe), 8)]
+    probe_meta = dict(paths=probe_names, tensor_sha256=probe_hash.hexdigest())
+    train_meta = dict(source='sun397', paths=train_names, initial_calibration_count=cfg.calib_size,
+                      tensor_sha256=train_hash.hexdigest())
+    return initial, optim, batches, probe_meta, train_meta
 
 
 def hard_probe_nmse(reconstructor, block, images, device):
